@@ -1,6 +1,12 @@
 #include <Windows.h>
 #include <cstdint>
+#include <string>
 #include <format>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <cassert>
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
 
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
@@ -98,6 +104,60 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wc.hInstance, // インスタンスハンドル
 		nullptr // オプション
 	);
+
+	// DXGIファクトリーの生成
+	IDXGIFactory7* dxgiFactory = nullptr;
+
+	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+	assert(SUCCEEDED(hr));
+
+	// 使用するアダプター(GPU)用の変数
+	IDXGIAdapter4* useAdapter = nullptr;
+
+	for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
+		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) !=
+		DXGI_ERROR_NOT_FOUND; ++i) {
+		// アダプターの情報を取得する
+		DXGI_ADAPTER_DESC3 adapterDesc{};
+		hr = useAdapter->GetDesc3(&adapterDesc);
+		assert(SUCCEEDED(hr));
+
+		// ソフトウェアアダプタでなければ採用
+		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
+			// 採用したアダプタの内容をログに出力
+			Log(ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			break;
+		}
+		// ソフトウェアアダプタの場合は見なかったことにする
+		useAdapter = nullptr;
+	}
+	// 適切なアダプタが見つからなかったので起動できない
+	assert(useAdapter != nullptr);
+
+	/*--D3D12Deviceの生成--*/
+	ID3D12Device* device = nullptr;
+	// 機能レベルと文字出力用の文字列
+	D3D_FEATURE_LEVEL featureLevels[] = {
+		D3D_FEATURE_LEVEL_12_2, D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0
+	};
+	const char* featureLevelStrings[] = { "12.2", "12.1", "12.0" };
+
+	// 高い順に生成できるか試していく
+	for (size_t i = 0; i < _countof(featureLevels); ++i) {
+		// 採用したアダプタでデバイスを生成
+		hr = D3D12CreateDevice(useAdapter, featureLevels[i], IID_PPV_ARGS(&device));
+
+		// 指定された機能レベルでデバイスが生成できたかを確認
+		if (SUCCEEDED(hr)) {
+			// 生成できたのでログを使ってループを抜ける
+			Log(std::format("FeatureLevel:{}\n", featureLevelStrings[i]));
+			break;
+		}
+	}
+	// デバイスの生成がうまくいかなかったので起動できない
+	assert(device != nullptr);
+	// 初期化完了ログ
+	Log("Complete Create D3D12Device!!!\n");
 
 	MSG msg{};
 
