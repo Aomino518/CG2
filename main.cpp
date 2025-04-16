@@ -7,6 +7,9 @@
 #include <cassert>
 #include <dbghelp.h>
 #include <strsafe.h>
+#include <filesystem>
+#include <fstream>
+#include <chrono>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "Dbghelp.lib")
@@ -33,7 +36,8 @@ static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-void Log(const std::string& message) {
+void Log(std::ostream& os, const std::string& message) {
+	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
 }
 
@@ -83,6 +87,22 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SetUnhandledExceptionFilter(ExportDump);
+
+	// ログのディレクトリを用意
+	std::filesystem::create_directory("logs");
+	// 現在時刻を取得　(UTC時刻)
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	// ログファイルの名前にコンマ何秒はいらないので、削って秒にする
+	std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>
+	nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+	// 日本時間 (PCの設定時間)　に変換
+	std::chrono::zoned_time localTime{ std::chrono::current_zone(), nowSeconds };
+	// formatを使って年月日_時分秒の文字列に変換
+	std::string dateString = std::format("{:%Y%m%d_%H%M%S}", localTime);
+	// 時刻を使ってファイル名を決定
+	std::string logFilePath = std::string("logs/") + dateString + ".log";
+	// ファイルを使って書き込み準備
+	std::ofstream logStream(logFilePath);
 
 	// 出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
@@ -151,7 +171,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// ソフトウェアアダプタでなければ採用
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// 採用したアダプタの内容をログに出力
-			Log(ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Log(logStream, ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		// ソフトウェアアダプタの場合は見なかったことにする
@@ -176,14 +196,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 指定された機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			// 生成できたのでログを使ってループを抜ける
-			Log(std::format("FeatureLevel:{}\n", featureLevelStrings[i]));
+			Log(logStream, std::format("FeatureLevel:{}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
 	// 初期化完了ログ
-	Log("Complete Create D3D12Device!!!\n");
+	Log(logStream, "Complete Create D3D12Device!!!\n");
 
 	/*--コマンドキューを作成する--*/
 	ID3D12CommandQueue* commandQueue = nullptr;
