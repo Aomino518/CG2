@@ -52,6 +52,16 @@ Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 
 /// <summary>
+/// 透視投影行列の作成関数
+/// </summary>
+/// <param name="fovY">画角Y</param>
+/// <param name="aspectRatio">アスペクト比</param>
+/// <param name="nearClip">近平面への距離</param>
+/// <param name="farClip">遠平面への距離</param>
+/// <returns>透視投影行列</returns>
+Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
+
+/// <summary>
 /// 3次元アフィン変換行列
 /// </summary>
 /// <param name="scale">拡縮行列</param>
@@ -60,5 +70,17 @@ Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 /// <returns></returns>
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
+/// <summary>
+/// 逆行列
+/// </summary>
+/// <param name="matrix"></param>
+/// <returns></returns>
+Matrix4x4 Inverse(const Matrix4x4& matrix);
+
 // 単位行列の作成
 Matrix4x4 MakeIdentity4x4();
+
+float Determinant3x3(
+	float a11, float a12, float a13,
+	float a21, float a22, float a23,
+	float a31, float a32, float a33);

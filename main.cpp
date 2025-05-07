@@ -681,6 +681,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			*wvpData = worldMatrix;
 
+			Matrix4x4 worldMatrrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			// WVPMatrixを作る
+			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+			*wvpData = worldViewProjectionMatrix;
+
 			// wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
@@ -733,7 +741,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	commandList->Release();
 	commandAllocator->Release();
 	commandQueue->Release();
-	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
 
@@ -747,6 +754,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
 	materialResource->Release();
+	wvpResource->Release();
+	device->Release();
 
 #ifdef _DEBUG
 	debugController->Release();
