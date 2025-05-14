@@ -294,6 +294,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wc.hInstance, // インスタンスハンドル
 		nullptr // オプション
 	);
+	// ウィンドウを表示する
+	ShowWindow(hwnd, SW_SHOW);
+
 
 #ifdef _DEBUG
 	ID3D12Debug1* debugController = nullptr;
@@ -681,8 +684,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			// ウィンドウを表示する
-			ShowWindow(hwnd, SW_SHOW);
 
 			// これから書き込むバックバッファのインデックス取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -706,6 +707,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
+
 
 			materialData->x = triangleColor[0];
 			materialData->y = triangleColor[1];
