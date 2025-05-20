@@ -671,7 +671,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// 初期色 (RGBA)
-	float triangleColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	// SRTの情報
+	Vector3 position = Vector3(0.0f, 0.0f, 0.0f);
+	Vector3 rotation = Vector3(0.0f, 0.0f, 0.0f);
+	Vector3 scale = Vector3(1.0f, 1.0f, 1.0f);
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
@@ -702,12 +706,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
 
+
+			ImGui::Begin("Triangle Debug");
+
 			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
             ImGui::ColorEdit4("Color", triangleColor);
+
+			// 位置(T)
+			ImGui::DragFloat3("Translate", (float*)&position, 0.01f);
+
+			// 回転(R)
+			ImGui::DragFloat3("Rotation", (float*)&rotation, 0.01f);
+
+			// 大きさ(S)
+			ImGui::DragFloat3("Scale", (float*)&scale, 0.01f);
+
+			ImGui::End();
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
+			transform.translate = position;
+			transform.rotate = rotation;
+			transform.scale = scale;
 
 			materialData->x = triangleColor[0];
 			materialData->y = triangleColor[1];
