@@ -978,6 +978,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
 	materialResource->Release();
+	textureResource->Release();
 	wvpResource->Release();
 	device->Release();
 
