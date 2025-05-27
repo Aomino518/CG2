@@ -890,6 +890,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 初期色 (RGBA)
 	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float translateSprite[3] = { 0.0f, 0.0f, 0.0f };
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
@@ -921,6 +922,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->ResourceBarrier(1, &barrier);
 
 			transform.rotate.y += 0.03f;
+
+			transformSprite.translate.x = translateSprite[0];
+			transformSprite.translate.y = translateSprite[1];
+			transformSprite.translate.z = translateSprite[2];
 
 			materialData->x = triangleColor[0];
 			materialData->y = triangleColor[1];
@@ -989,6 +994,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 			ImGui::ColorEdit4("Color", triangleColor);
+
+			ImGui::SliderFloat3("translateSprite", (float*)&translateSprite, 0.0f, 1000.0f, "%.3f");
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
