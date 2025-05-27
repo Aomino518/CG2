@@ -248,3 +248,30 @@ float Determinant3x3(
 		a12 * (a21 * a33 - a23 * a31) +
 		a13 * (a21 * a32 - a22 * a31);
 }
+
+// 正射影行列の作成関数
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
+	Matrix4x4 orthoMatrix;
+
+	orthoMatrix.m[0][0] = 2.0f / (right - left);
+	orthoMatrix.m[0][1] = 0.0f;
+	orthoMatrix.m[0][2] = 0.0f;
+	orthoMatrix.m[0][3] = 0.0f;
+
+	orthoMatrix.m[1][0] = 0.0f;
+	orthoMatrix.m[1][1] = 2.0f / (top - bottom);
+	orthoMatrix.m[1][2] = 0.0f;
+	orthoMatrix.m[1][3] = 0.0f;
+
+	orthoMatrix.m[2][0] = 0.0f;
+	orthoMatrix.m[2][1] = 0.0f;
+	orthoMatrix.m[2][2] = 1.0f / (farClip - nearClip);
+	orthoMatrix.m[2][3] = 0.0f;
+
+	orthoMatrix.m[3][0] = (left + right) / (left - right);
+	orthoMatrix.m[3][1] = (top + bottom) / (bottom - top);
+	orthoMatrix.m[3][2] = nearClip / (nearClip - farClip);
+	orthoMatrix.m[3][3] = 1.0f;
+
+	return orthoMatrix;
+}

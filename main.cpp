@@ -712,6 +712,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 単位行列を書き込んでおく
 	*wvpData = MakeIdentity4x4();
 
+	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	// データを書き込む
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	// 書き込むためのアドレスを取得
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	// 単位行列を書きこんでおく
+	*transformationMatrixDataSprite = MakeIdentity4x4();
+
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -778,6 +787,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
+	// 三角形用頂点リソース
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 
 	// 頂点バッファビューを作成する
@@ -788,6 +798,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
 	// 1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	// Sprite用の頂点リソース
+	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	// リソースの先頭のアドレスから使う
+	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点あたりのサイズ
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
@@ -813,6 +834,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexData[5].position = { 0.5f, -0.5f, -0.5f, 1.0f };
 	vertexData[5].texcoord = { 1.0f, 1.0f };
 
+	VertexData* vertexDataSprite = nullptr;
+	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	// 1枚目の三角形
+	vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
+	vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
+	vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
+	// 2枚目の三角形
+	vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
+	vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
+	vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
+
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
 	// クライアント領域のサイズと一緒にして画面全体に表示
@@ -836,6 +874,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -5.0f} };
+	Transform transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	// ImGuiの初期化
 	IMGUI_CHECKVERSION();
@@ -880,12 +919,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			// TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
-
-			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-            ImGui::ColorEdit4("Color", triangleColor);
-
-			// ImGuiの内部コマンドを生成する
-			ImGui::Render();
 
 			transform.rotate.y += 0.03f;
 
@@ -938,6 +971,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
 			commandList->DrawInstanced(6, 1, 0, 0);
+
+			// Spriteの描画。変更が必要なものだけを変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
+
+			// Sprite用のWorldViewProjectionMatrixを作る
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+
+			// 描画 (DrawCall)。3頂点で一つのインスタンス
+			commandList->DrawInstanced(6, 1, 0, 0);
+
+			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
+			ImGui::ColorEdit4("Color", triangleColor);
+
+			// ImGuiの内部コマンドを生成する
+			ImGui::Render();
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
@@ -1001,6 +1055,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxgiFactory->Release();
 
 	vertexResource->Release();
+	vertexResourceSprite->Release();
+	transformationMatrixResourceSprite->Release();
 	graphicsPipelineState->Release();
 	signatureBlob->Release();
 	if (errorBlob) {
@@ -1013,6 +1069,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureResource->Release();
 	depthStencilResource->Release();
 	wvpResource->Release();
+	transformationMatrixResourceSprite->Release();
 	device->Release();
 
 #ifdef _DEBUG

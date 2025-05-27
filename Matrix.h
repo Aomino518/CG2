@@ -84,3 +84,13 @@ float Determinant3x3(
 	float a11, float a12, float a13,
 	float a21, float a22, float a23,
 	float a31, float a32, float a33);
+
+/// <summary>
+/// 正射影行列の作成関数
+/// </summary>
+/// <param name="left">左上のX座標</param>
+/// <param name="top">左上のY座標</param>
+/// <param name="right">右下のX座標</param>
+/// <param name="bottom">右下のY座標</param>
+/// <returns>正射影行列</returns>
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
