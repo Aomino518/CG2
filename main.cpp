@@ -19,6 +19,8 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
+#define _USE_MATH_DEFINES 
+#include <math.h>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
@@ -812,6 +814,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
 	// 1頂点あたりのサイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+	// 頂点リソースにデータを書き込む
+	VertexData* vertexData = nullptr;
+	const uint32_t kSubdivision = 16; // 16分割
+	const float kLonEvery = 2.0f * float(M_PI) / float(kSubdivision); // 経度
+	const float kLatEvery = float(M_PI) / float(kSubdivision); // 緯度
+	// 緯度の方向に分割 -π/2 ~ π/2
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex;
+		// 経度の方向に分割 0 ~ 2π
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			uint32_t start = (latIndex * kSubdivision * lonIndex) * 6;
+			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
+			
+			// 頂点にデータを入力する。基準値はa
+			vertexData[start].position.x = cos(lat) * cos(lon);
+			vertexData[start].position.y = sin(lat);
+			vertexData[start].position.z = cos(lat) * sin(lon);
+			vertexData[start].position.w = 1.0f;
+			vertexData[start].texcoord.x = lon / 2.0f * float(M_PI);
+			vertexData[start].texcoord.y = (lat + float(M_PI) / 2);
+		}
+	}
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
