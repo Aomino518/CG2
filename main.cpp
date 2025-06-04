@@ -792,15 +792,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
+	const uint32_t kSubdivision = 16; // 16分割
+
 	// 三角形用頂点リソース
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kSubdivision * kSubdivision * 6);
 
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	// リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * kSubdivision * kSubdivision * 6;
 	// 1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -817,50 +819,74 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
-	const uint32_t kSubdivision = 16; // 16分割
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	const float kLonEvery = 2.0f * float(M_PI) / float(kSubdivision); // 経度
 	const float kLatEvery = float(M_PI) / float(kSubdivision); // 緯度
 	// 緯度の方向に分割 -π/2 ~ π/2
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
 		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex;
+		float lat2 = lat + kLatEvery;
 		// 経度の方向に分割 0 ~ 2π
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision * lonIndex) * 6;
+			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
+			float lon2 = lon + kLonEvery;
 			
 			// 頂点にデータを入力する。基準値はa
-			vertexData[start].position.x = cos(lat) * cos(lon);
-			vertexData[start].position.y = sin(lat);
-			vertexData[start].position.z = cos(lat) * sin(lon);
-			vertexData[start].position.w = 1.0f;
-			vertexData[start].texcoord.x = lon / 2.0f * float(M_PI);
-			vertexData[start].texcoord.y = (lat + float(M_PI) / 2);
+			vertexData[start].position = {
+				cos(lat) * cos(lon),
+				sin(lat),
+				cos(lat) * sin(lon),
+				1.0f
+			};
+
+			vertexData[start].texcoord = {
+				lon / (2.0f * float(M_PI)),
+				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
+			};
+
+			vertexData[start + 1].position = {
+				cos(lat2) * cos(lon),
+				sin(lat2),
+				cos(lat2) * sin(lon),
+				1.0f
+			};
+
+			vertexData[start + 1].texcoord = {
+				lon / (2.0f * float(M_PI)),
+				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
+			};
+
+			vertexData[start + 2].position = {
+				cos(lat) * cos(lon2),
+				sin(lat),
+				cos(lat) * sin(lon2),
+				1.0f
+			};
+
+			vertexData[start + 2].texcoord = {
+				lon2 / (2.0f * float(M_PI)),
+				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
+			};
+
+			vertexData[start + 3] = vertexData[start + 2];
+
+			vertexData[start + 4] = vertexData[start + 1];
+
+			vertexData[start + 5].position = {
+				cos(lat2) * cos(lon2),
+				sin(lat2),
+				cos(lat2) * sin(lon2),
+				1.0f
+			};
+
+			vertexData[start + 5].texcoord = {
+				lon2 / (2.0f * float(M_PI)),
+				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
+			};
 		}
 	}
-
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexData = nullptr;
-	// 書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	// 左下
-	vertexData[0].position = { -0.5f, -0.5f, 0.0f, 1.0f };
-	vertexData[0].texcoord = { 0.0f, 1.0f };
-	// 上
-	vertexData[1].position = { 0.0f, 0.5f, 0.0f, 1.0f };
-	vertexData[1].texcoord = { 0.5f, 0.0f };
-	// 右下
-	vertexData[2].position = { 0.5f, -0.5f, 0.0f, 1.0f };
-	vertexData[2].texcoord = { 1.0f, 1.0f };
-
-	// 左下2
-	vertexData[3].position = { -0.5f, -0.5f, 0.5f, 1.0f };
-	vertexData[3].texcoord = { 0.0f, 1.0f };
-	// 上2
-	vertexData[4].position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	vertexData[4].texcoord = { 0.5f, 0.0f };
-	// 右下2
-	vertexData[5].position = { 0.5f, -0.5f, -0.5f, 1.0f };
-	vertexData[5].texcoord = { 1.0f, 1.0f };
 
 	VertexData* vertexDataSprite = nullptr;
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
@@ -1003,7 +1029,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
-			commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->DrawInstanced(1536, 1, 0, 0);
 
 			// Spriteの描画。変更が必要なものだけを変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
