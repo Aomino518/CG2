@@ -29,6 +29,23 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+struct Vector4 {
+	float x, y, z, w;
+};
+
+struct Vector2 {
+	float x, y;
+};
+
+struct Material {
+	Vector4 color;
+};
+
+struct VertexData {
+	Vector4 position;
+	Vector2 texcoord;
+};
+
 struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
@@ -330,22 +347,74 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 	return resource;
 }
 
-struct Vector4 {
-	float x, y, z, w;
-};
+void WriteSphereVertices(const uint32_t subdivision, VertexData* vertexData) {
+	const float kLonEvery = 2.0f * float(M_PI) / float(subdivision); // 経度
+	const float kLatEvery = float(M_PI) / float(subdivision); // 緯度
+	// 緯度の方向に分割 -π/2 ~ π/2
+	for (uint32_t latIndex = 0; latIndex < subdivision; ++latIndex) {
+		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex;
+		float lat2 = lat + kLatEvery;
+		// 経度の方向に分割 0 ~ 2π
+		for (uint32_t lonIndex = 0; lonIndex < subdivision; ++lonIndex) {
+			uint32_t start = (latIndex * subdivision + lonIndex) * 6;
+			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
+			float lon2 = lon + kLonEvery;
 
-struct Vector2 {
-	float x, y;
-};
+			// 頂点にデータを入力する。基準値はa
+			vertexData[start].position = {
+				cos(lat) * cos(lon),
+				sin(lat),
+				cos(lat) * sin(lon),
+				1.0f
+			};
 
-struct Material {
-	Vector4 color;
-};
+			vertexData[start].texcoord = {
+				lon / (2.0f * float(M_PI)),
+				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
+			};
 
-struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-};
+			vertexData[start + 1].position = {
+				cos(lat2) * cos(lon),
+				sin(lat2),
+				cos(lat2) * sin(lon),
+				1.0f
+			};
+
+			vertexData[start + 1].texcoord = {
+				lon / (2.0f * float(M_PI)),
+				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
+			};
+
+			vertexData[start + 2].position = {
+				cos(lat) * cos(lon2),
+				sin(lat),
+				cos(lat) * sin(lon2),
+				1.0f
+			};
+
+			vertexData[start + 2].texcoord = {
+				lon2 / (2.0f * float(M_PI)),
+				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
+			};
+
+			vertexData[start + 3] = vertexData[start + 2];
+
+			vertexData[start + 4] = vertexData[start + 1];
+
+			vertexData[start + 5].position = {
+				cos(lat2) * cos(lon2),
+				sin(lat2),
+				cos(lat2) * sin(lon2),
+				1.0f
+			};
+
+			vertexData[start + 5].texcoord = {
+				lon2 / (2.0f * float(M_PI)),
+				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
+			};
+		}
+	}
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -821,72 +890,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	const float kLonEvery = 2.0f * float(M_PI) / float(kSubdivision); // 経度
-	const float kLatEvery = float(M_PI) / float(kSubdivision); // 緯度
-	// 緯度の方向に分割 -π/2 ~ π/2
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex;
-		float lat2 = lat + kLatEvery;
-		// 経度の方向に分割 0 ~ 2π
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
-			float lon2 = lon + kLonEvery;
-			
-			// 頂点にデータを入力する。基準値はa
-			vertexData[start].position = {
-				cos(lat) * cos(lon),
-				sin(lat),
-				cos(lat) * sin(lon),
-				1.0f
-			};
-
-			vertexData[start].texcoord = {
-				lon / (2.0f * float(M_PI)),
-				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
-			};
-
-			vertexData[start + 1].position = {
-				cos(lat2) * cos(lon),
-				sin(lat2),
-				cos(lat2) * sin(lon),
-				1.0f
-			};
-
-			vertexData[start + 1].texcoord = {
-				lon / (2.0f * float(M_PI)),
-				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
-			};
-
-			vertexData[start + 2].position = {
-				cos(lat) * cos(lon2),
-				sin(lat),
-				cos(lat) * sin(lon2),
-				1.0f
-			};
-
-			vertexData[start + 2].texcoord = {
-				lon2 / (2.0f * float(M_PI)),
-				1.0f - (lat + float(M_PI) / 2) / float(M_PI)
-			};
-
-			vertexData[start + 3] = vertexData[start + 2];
-
-			vertexData[start + 4] = vertexData[start + 1];
-
-			vertexData[start + 5].position = {
-				cos(lat2) * cos(lon2),
-				sin(lat2),
-				cos(lat2) * sin(lon2),
-				1.0f
-			};
-
-			vertexData[start + 5].texcoord = {
-				lon2 / (2.0f * float(M_PI)),
-				1.0f - (lat2 + float(M_PI) / 2) / float(M_PI)
-			};
-		}
-	}
+	WriteSphereVertices(kSubdivision, vertexData);
 
 	VertexData* vertexDataSprite = nullptr;
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
@@ -927,7 +931,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-	Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -5.0f} };
+	Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
 	Transform transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	// ImGuiの初期化
@@ -1028,7 +1032,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-			// 描画 (DrawCall)。3頂点で一つのインスタンス
+			// 描画 (DrawCall)。
 			commandList->DrawInstanced(1536, 1, 0, 0);
 
 			// Spriteの描画。変更が必要なものだけを変更する
