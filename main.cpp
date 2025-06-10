@@ -890,6 +890,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	// 球のvertexDataを書き込む
 	WriteSphereVertices(kSubdivision, vertexData);
 
 	VertexData* vertexDataSprite = nullptr;
