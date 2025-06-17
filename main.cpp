@@ -360,7 +360,7 @@ void WriteSphereVertices(const uint32_t subdivision, VertexData* vertexData) {
 			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
 			float lon2 = lon + kLonEvery;
 
-			// 頂点にデータを入力する。基準値はa
+			// 頂点にデータを入力する。
 			vertexData[start].position = {
 				cos(lat) * cos(lon),
 				sin(lat),
