@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct Matrix4x4 {
 	float m[4][4];
@@ -94,3 +95,7 @@ float Determinant3x3(
 /// <param name="bottom">右下のY座標</param>
 /// <returns>正射影行列</returns>
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+
+float Length(const Vector3& vector);
+
+Vector3 Normalize(const Vector3& normal);

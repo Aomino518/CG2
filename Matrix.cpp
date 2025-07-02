@@ -275,3 +275,16 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 
 	return orthoMatrix;
 }
+
+float Length(const Vector3& vector) {
+	return std::sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+}
+
+Vector3 Normalize(const Vector3& normal)
+{
+	float len = Length(normal);
+	if (len == 0.0f) {
+		return { 0.0f, 0.0f, 0.0f };
+	}
+	return { normal.x / len, normal.y / len, normal.z / len };
+}
