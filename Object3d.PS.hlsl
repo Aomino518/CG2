@@ -4,6 +4,7 @@ struct Material
 {
     float4 color;
     int enableLightig;
+    float3x3 uvTransform;
 };
 
 struct DirectionalLight

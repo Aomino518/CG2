@@ -40,6 +40,7 @@ struct Vector2 {
 struct Material {
 	Vector4 color;
 	int32_t enableLighting;
+	Matrix3x3 uvTransform;
 };
 
 struct VertexData {
@@ -364,72 +365,33 @@ void WriteSphereVertices(const uint32_t subdivision, VertexData* vertexData) {
 	const float kLonEvery = 2.0f * float(M_PI) / float(subdivision); // 経度
 	const float kLatEvery = float(M_PI) / float(subdivision); // 緯度
 	// 緯度の方向に分割 -π/2 ~ π/2
-	for (uint32_t latIndex = 0; latIndex < subdivision; ++latIndex) {
+	for (uint32_t latIndex = 0; latIndex <= subdivision; ++latIndex) {
 		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex;
-		float latNext = lat + kLatEvery;
+		
 		// 経度の方向に分割 0 ~ 2π
-		for (uint32_t lonIndex = 0; lonIndex < subdivision; ++lonIndex) {
-			uint32_t start = (latIndex * subdivision + lonIndex) * 6;
+		for (uint32_t lonIndex = 0; lonIndex <= subdivision; ++lonIndex) {
 			float lon = lonIndex * kLonEvery; // 現在の経度kLonEvery
-			float lonNext = lon + kLonEvery;
-
-			Vector4 aPos = {
+		
+			Vector4 pos = {
 				cos(lat) * cos(lon),
 				sin(lat),
 				cos(lat) * sin(lon),
 				1.0f
 			};
 
-			Vector4 bPos = {
-				cos(latNext) * cos(lon),
-				sin(latNext),
-				cos(latNext) * sin(lon),
-				1.0f
-			};
-
-			Vector4 cPos = {
-				cos(lat) * cos(lonNext),
-				sin(lat),
-				cos(lat) * sin(lonNext),
-				1.0f
-			};
-
-			Vector4 dPos = {
-				cos(latNext) * cos(lonNext),
-				sin(latNext),
-				cos(latNext) * sin(lonNext),
-				1.0f
-			};
-
 			// UV座標
-			Vector2 aUv = {
+			Vector2 uv = {
 				lon / (2.0f * float(M_PI)),
 				1.0f - (lat + float(M_PI) / 2.0f) / float(M_PI)
 			};
 
-			Vector2 bUv = {
-				lon / (2.0f * float(M_PI)),
-				1.0f - (latNext + float(M_PI) / 2.0f) / float(M_PI)
+			uint32_t index = latIndex * (subdivision + 1) + lonIndex;
+			vertexData[index] = {
+				pos,
+				uv,
+				Normalize(Vector3(pos.x, pos.y, pos.z))
 			};
 
-			Vector2 cUv = {
-				lonNext / (2.0f * float(M_PI)),
-				1.0f - (lat + float(M_PI) / 2.0f) / float(M_PI)
-			};
-
-			Vector2 dUv = {
-				lonNext / (2.0f * float(M_PI)),
-				1.0f - (latNext + float(M_PI) / 2.0f) / float(M_PI)
-			};
-
-			vertexData[start + 0] = { aPos, aUv, Normalize(Vector3{ aPos.x, aPos.y, aPos.z}) };
-			vertexData[start + 1] = { bPos, bUv, Normalize(Vector3{ bPos.x, bPos.y, bPos.z}) };
-			vertexData[start + 2] = { cPos, cUv, Normalize(Vector3{ cPos.x, cPos.y, cPos.z}) };
-
-			vertexData[start + 3] = vertexData[start + 2];
-			vertexData[start + 4] = vertexData[start + 1];
-			vertexData[start + 5] = { dPos, dUv, Normalize(Vector3{ dPos.x, dPos.y, dPos.z}) };
-			
 		}
 	}
 }
@@ -874,8 +836,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	transformationMatrixDataSprite->World = MakeIdentity4x4();
 	transformationMatrixDataSprite->WVP = MakeIdentity4x4();
 
+	const uint32_t kSubdivision = 16; // 16分割
+
+	uint32_t vertexNum = (kSubdivision + 1) * (kSubdivision + 1);
+	uint32_t indexNum = kSubdivision * kSubdivision * 6;
+
 	/*--Index用リソース作成--*/
 	ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
+	ID3D12Resource* indexResourceModel = CreateBufferResource(device, sizeof(uint32_t) * indexNum);
 
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
@@ -947,10 +915,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
-	const uint32_t kSubdivision = 16; // 16分割
-
-	uint32_t vertexNum = kSubdivision * kSubdivision * 6;
-
 	// 三角形用頂点リソース
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * vertexNum);
 
@@ -964,6 +928,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 	/*--IndexBufferViewの作成--*/
+	/*--Sprite用--*/
 	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
 	// リソースの先頭のアドレスから使う
 	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
@@ -982,6 +947,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
 	// 1頂点あたりのサイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+	/*--Model用--*/
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewModel{};
+	// リソースの先頭のアドレスから使う
+	indexBufferViewModel.BufferLocation = indexResourceModel->GetGPUVirtualAddress();
+	indexBufferViewModel.SizeInBytes = sizeof(uint32_t) * indexNum;
+	indexBufferViewModel.Format = DXGI_FORMAT_R32_UINT;
+
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
@@ -1012,6 +985,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[3] = 1;
 	indexDataSprite[4] = 3;
 	indexDataSprite[5] = 2;
+
+	uint32_t index = 0;
+	uint32_t* indexDataModel = nullptr;
+	indexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&indexDataModel));
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			uint32_t ld = lonIndex + latIndex * (kSubdivision + 1);
+			uint32_t lt = lonIndex + (latIndex + 1) * (kSubdivision + 1);
+			uint32_t rd = (lonIndex + 1) + latIndex * (kSubdivision + 1);
+			uint32_t rt = (lonIndex + 1) + (latIndex + 1) * (kSubdivision + 1);
+
+			indexDataModel[index++] = rt;
+			indexDataModel[index++] = ld;
+			indexDataModel[index++] = lt;
+
+			indexDataModel[index++] = rd;
+			indexDataModel[index++] = ld;
+			indexDataModel[index++] = rt;
+		}
+	}
 
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
@@ -1153,6 +1146,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootSignature(rootSignature);
 			commandList->SetPipelineState(graphicsPipelineState); // PSOを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+			commandList->IASetIndexBuffer(&indexBufferViewModel);
 			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する。
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -1167,7 +1161,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 
 			// 描画 (DrawCall)。
-			commandList->DrawInstanced(vertexNum, 1, 0, 0);
+			commandList->DrawIndexedInstanced(indexNum, 1, 0, 0, 0);
 
 			// Spriteの描画。変更が必要なものだけを変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
@@ -1259,6 +1253,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureResource->Release();
 	textureResource2->Release();
 	indexResourceSprite->Release();
+	indexResourceModel->Release();
 	directionalLightResource->Release();
 	depthStencilResource->Release();
 	intermediasteResource->Release();
