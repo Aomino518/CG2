@@ -39,8 +39,9 @@ struct Vector2 {
 
 struct Material {
 	Vector4 color;
-	int32_t enableLighting;
-	Matrix3x3 uvTransform;
+	bool enableLighting;
+	float padding[3];
+	Matrix4x4 uvTransform;
 };
 
 struct VertexData {
@@ -797,6 +798,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	materialData->color = Vector4(1, 1, 1, 1);
+	materialData->uvTransform = MakeIdentity4x4();
 	materialData->enableLighting = true;
 
 	/*--スプライト用のリソース設定--*/
@@ -806,6 +808,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	// SpriteはLightingしないのでfalseを設定する
 	materialDataSprite->color = Vector4(1, 1, 1, 1);
+	materialDataSprite->uvTransform = MakeIdentity4x4();
 	materialDataSprite->enableLighting = false;
 
 	// 平行光源用のリソース
@@ -1031,6 +1034,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
 	Transform transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
+	Transform uvTransformSprite = {
+		{1.0f, 1.0f, 1.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+	};
+
 	// ImGuiの初期化
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1044,6 +1053,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 	// 初期色 (RGBA)
+	float modelColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float translateSprite[3] = { 0.0f, 0.0f, 0.0f };
 
@@ -1066,18 +1076,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			/*-- 更新処理 --*/
 
-			transform.rotate.y += 0.03f;
-
 			transformSprite.translate.x = translateSprite[0];
 			transformSprite.translate.y = translateSprite[1];
 			transformSprite.translate.z = translateSprite[2];
+
+			materialData->color.x = modelColor[0];
+			materialData->color.y = modelColor[1];
+			materialData->color.z = modelColor[2];
+			materialData->color.w = modelColor[3];
 
 			materialDataSprite->color.x = triangleColor[0];
 			materialDataSprite->color.y = triangleColor[1];
 			materialDataSprite->color.z = triangleColor[2];
 			materialDataSprite->color.w = triangleColor[3];
 
-
+			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+			materialDataSprite->uvTransform = uvTransformMatrix;
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
@@ -1098,11 +1114,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 
 			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-			ImGui::ColorEdit4("Color", triangleColor);
+			ImGui::DragFloat3("cameraTanslate", (float*)&cameraTransform.translate, 0.01f, -10.0f, 10.0f);
+			ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
+			ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
+			ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
+			ImGui::ColorEdit4("modelColor", modelColor);
+			ImGui::Checkbox("enableLighting", &materialData->enableLighting);
 
+			ImGui::ColorEdit4("spriteColor", triangleColor);
 			ImGui::SliderFloat3("translateSprite", (float*)&translateSprite, 0.0f, 1000.0f, "%.3f");
-
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+			ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
