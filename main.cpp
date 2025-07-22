@@ -1104,7 +1104,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpData->World = worldMatrix;
 			wvpData->WVP = worldViewProjectionMatrix;
 
-
 			// Sprite用のWorldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
@@ -1118,6 +1117,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
 			ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
 			ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
+			ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
+			ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
+			ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
 			ImGui::ColorEdit4("modelColor", modelColor);
 			ImGui::Checkbox("enableLighting", &materialData->enableLighting);
 
