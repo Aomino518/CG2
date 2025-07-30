@@ -490,11 +490,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
 				position.x *= -1.0f;
-				//position.z *= -1.0f;
 				texcoord.y = 1.0f - texcoord.y;
-
 				normal.x *= -1.0f;
-				normal.z *= -1.0f;
 				//VertexData vertex = { position, texcoord, normal };
 				//modelData.vertices.push_back(vertex);
 				triangle[faceVertex] = {position, texcoord, normal};
@@ -864,7 +861,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* intermediasteResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
 	// モデル読み込み
-	ModelData modelData = LoadObjFile("resources", "plane.obj");
+	ModelData modelData = LoadObjFile("resources", "axis.obj");
 	// 2枚目のTextureを読んで転送する
 	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
