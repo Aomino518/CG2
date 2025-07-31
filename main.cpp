@@ -24,12 +24,16 @@
 #include "externals/DirectXTex/d3dx12.h"
 #define _USE_MATH_DEFINES 
 #include <math.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "dxcompiler.lib")
 #pragma comment(lib, "xaudio2.lib")
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -789,6 +793,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HRESULT result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 
+	//========================================
+	// DirectInputの初期化
+	//========================================
+	IDirectInput8* directInput = nullptr;
+	result = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	assert(SUCCEDED(result));
+
+	// キーボードデバイスの生成
+	IDirectInputDevice8* keyboard = nullptr;
+	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	assert(SUCCEDED(result));
+
+	// 入力データ形式のセット
+	result = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
+	assert(SUCCEDED(result));
+
+	// 排他制御レベルのセット
+	result = keyboard->SetCooperativeLevel(
+		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	assert(SUCCEDED(result));
+
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
 	// 初期化完了ログ
@@ -1329,9 +1354,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
+			// キーボード情報の取得開始
+			keyboard->Acquire();
+			// 全キーの入力状態を取得する
+			BYTE key[256] = {};
+			keyboard->GetDeviceState(sizeof(key), key);
 
 			/*-- 更新処理 --*/
-			SoundPlayWave(xAudio2.Get(), soundData1);
+			if (key[DIK_SPACE]) {
+				SoundPlayWave(xAudio2.Get(), soundData1);
+			}
 
 			transformSprite.translate.x = translateSprite[0];
 			transformSprite.translate.y = translateSprite[1];
