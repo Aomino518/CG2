@@ -5,6 +5,7 @@ struct Material
     float4 color;
     int enableLightig;
     float4x4 uvTransform;
+    int lightingMode;
 };
 
 struct DirectionalLight
@@ -29,11 +30,25 @@ PixelShaderOutput main(VertexShaderOutput input)
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
     PixelShaderOutput output;
+    
+    float NdotL = dot(normalize(input.normal), -gDiretionalLight.direction);
+    
     if (gMaterial.enableLightig != 0)
     {
-        float NdotL = dot(normalize(input.normal), -gDiretionalLight.direction);
-        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-        output.color = gMaterial.color * textureColor * gDiretionalLight.color * cos * gDiretionalLight.intensity;
+        float ligtingFactor = 1.0f;
+        
+        if (gMaterial.lightingMode == 1)
+        {
+            // Lambert
+            ligtingFactor = max(NdotL, 0.0f);
+        }
+        else if (gMaterial.lightingMode == 2)
+        {
+            // Half-Lambert
+            ligtingFactor = pow(NdotL * 0.5f + 0.5f, 2.0f);
+        }
+        
+        output.color = gMaterial.color * textureColor * gDiretionalLight.color * ligtingFactor * gDiretionalLight.intensity;
     }
     else
     {

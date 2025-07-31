@@ -50,6 +50,7 @@ struct Material {
 	bool enableLighting;
 	float padding[3];
 	Matrix4x4 uvTransform;
+	int lightingMode;
 };
 
 struct VertexData {
@@ -122,6 +123,12 @@ struct SoundData {
 	BYTE* pBuffer;
 	// バッファのサイズ
 	unsigned int budderSize;
+};
+
+enum LightingMode {
+	Lighting_None = 0,
+	Lighting_Lambert = 1,
+	Lighting_HalfLambert = 2,
 };
 
 static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
@@ -1033,7 +1040,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediasteResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
 	// モデル読み込み
-	ModelData modelData = LoadObjFile("resources", "axis.obj");
+	ModelData modelData = LoadObjFile("resources", "plane.obj");
 	// 2枚目のTextureを読んで転送する
 	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
@@ -1331,18 +1338,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-	// 初期色 (RGBA)
-	float modelColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float translateSprite[3] = { 0.0f, 0.0f, 0.0f };
-
-	float transformRotate[3] = { 0.0f, 0.0f, 0.0f };
-
 	// Textureの切り替え変数
-	bool useMonsterBall = false;
+	//bool useMonsterBall = false;
 
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
+
+	// ライティングモード
+	static int lightingMode = Lighting_HalfLambert;
+	transform.rotate.y = 3.0f;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
@@ -1361,28 +1365,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			keyboard->GetDeviceState(sizeof(key), key);
 
 			/*-- 更新処理 --*/
-			if (key[DIK_SPACE]) {
-				SoundPlayWave(xAudio2.Get(), soundData1);
+			if (lightingMode == Lighting_None) {
+				materialData->enableLighting = false;
+			}
+			else {
+				materialData->enableLighting = true;
 			}
 
-			transformSprite.translate.x = translateSprite[0];
-			transformSprite.translate.y = translateSprite[1];
-			transformSprite.translate.z = translateSprite[2];
-
-			materialData->color.x = modelColor[0];
-			materialData->color.y = modelColor[1];
-			materialData->color.z = modelColor[2];
-			materialData->color.w = modelColor[3];
-
-			materialDataSprite->color.x = triangleColor[0];
-			materialDataSprite->color.y = triangleColor[1];
-			materialDataSprite->color.z = triangleColor[2];
-			materialDataSprite->color.w = triangleColor[3];
-
-			cameraTransform.rotate.x = transformRotate[0];
-			cameraTransform.rotate.y = transformRotate[1];
-			cameraTransform.rotate.z = transformRotate[2];
-
+			materialData->lightingMode = lightingMode;
 
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
@@ -1407,22 +1397,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 
 			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-			ImGui::DragFloat3("cameraTanslate", (float*)&cameraTransform.translate, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
-			ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
-			ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
-			ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
-			ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
-			ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
-			ImGui::ColorEdit4("modelColor", modelColor);
-			ImGui::Checkbox("enableLighting", &materialData->enableLighting);
+			if (ImGui::CollapsingHeader("Camera Transform")) {
+				ImGui::DragFloat3("cameraTanslate", (float*)&cameraTransform.translate, 0.01f, -50.0f, 50.0f);
+				ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
+				ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
+				ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
+			}
 
-			ImGui::ColorEdit4("spriteColor", triangleColor);
-			ImGui::SliderFloat3("translateSprite", (float*)&translateSprite, 0.0f, 1000.0f, "%.3f");
-			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-			ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+			if (ImGui::CollapsingHeader("Model Transform")) {
+				ImGui::SliderAngle("ModelRotateX", &transform.rotate.x);
+				ImGui::SliderAngle("ModelRotateY", &transform.rotate.y);
+				ImGui::SliderAngle("ModelRotateZ", &transform.rotate.z);
+				if (ImGui::CollapsingHeader("Material")) {
+					ImGui::ColorEdit4("modelColor", (float*)&materialData->color);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Sprite Transform")) {
+				ImGui::SliderFloat3("translateSprite", (float*)&transformSprite.translate, 0.0f, 1000.0f, "%.3f");
+				ImGui::DragFloat2("UVTranslate", (float*)&uvTransformSprite.translate, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat2("UVScale", (float*)&uvTransformSprite.scale, 0.01f, -10.0f, 10.0f);
+				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+				if (ImGui::CollapsingHeader("Material")) {
+					ImGui::ColorEdit4("spriteColor", (float*)&materialDataSprite->color);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Light")) {
+				ImGui::Combo("Lighting Mode", &lightingMode, "None\0Lambert\0Half-Lambert\0");
+				ImGui::ColorEdit4("lightColor", (float*)&directionalLightData->color);
+				ImGui::DragFloat3("directionalLight", (float*)&directionalLightData->direction, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat("Intensity", (float*)&directionalLightData->intensity, 0.01f, -10.0f, 10.0f);
+			}
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
@@ -1478,7 +1484,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			// 描画 (DrawCall)。
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
@@ -1493,7 +1499,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
