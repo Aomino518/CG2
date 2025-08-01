@@ -575,7 +575,7 @@ SoundData SoudLoadWave(const char* filename) {
 		assert(0);
 	}
 	// タイプがWAVEかチェック
-	if (strncmp(riff.chunk.id, "WAVE", 4) != 0) {
+	if (strncmp(riff.type, "WAVE", 4) != 0) {
 		assert(0);
 	}
 
@@ -641,7 +641,7 @@ void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	// 波形フォーマットを元にSourceVoiceの生成
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// 再生する波形データの設定
 	XAUDIO2_BUFFER buf{};
@@ -798,21 +798,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//========================================
 	IDirectInput8* directInput = nullptr;
 	result = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// キーボードデバイスの生成
 	IDirectInputDevice8* keyboard = nullptr;
 	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// 入力データ形式のセット
 	result = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// 排他制御レベルのセット
 	result = keyboard->SetCooperativeLevel(
 		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
