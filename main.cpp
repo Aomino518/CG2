@@ -571,7 +571,7 @@ SoundData SoudLoadWave(const char* filename) {
 		assert(0);
 	}
 	// タイプがWAVEかチェック
-	if (strncmp(riff.chunk.id, "WAVE", 4) != 0) {
+	if (strncmp(riff.type, "WAVE", 4) != 0) {
 		assert(0);
 	}
 
@@ -579,7 +579,7 @@ SoundData SoudLoadWave(const char* filename) {
 	FormatChunk format = {};
 	// チャンクヘッダーの確認
 	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt", 4) != 0) {
+	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
 		assert(0);
 	}
 
@@ -591,7 +591,7 @@ SoundData SoudLoadWave(const char* filename) {
 	ChunkHeader data;
 	file.read((char*)&data, sizeof(data));
 	// JUNKチャンクを検出した場合
-	if (strncmp(data.id, "JUNK", 4) != 0) {
+	if (strncmp(data.id, "JUNK", 4) == 0) {
 		// 読み取り位置をJUNKチャンクの終わりまで進める
 		file.seekg(data.size, std::ios_base::cur);
 		// 再読み込み
@@ -637,7 +637,7 @@ void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	// 波形フォーマットを元にSourceVoiceの生成
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEDED(result));
+	assert(SUCCEEDED(result));
 
 	// 再生する波形データの設定
 	XAUDIO2_BUFFER buf{};
@@ -1319,6 +1319,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
 
+	SoundPlayWave(xAudio2.Get(), soundData1);
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
 		// Windowにメッセージが来ていたら最優先で処理させる
@@ -1331,7 +1333,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::NewFrame();
 
 			/*-- 更新処理 --*/
-			SoundPlayWave(xAudio2.Get(), soundData1);
 
 			transformSprite.translate.x = translateSprite[0];
 			transformSprite.translate.y = translateSprite[1];
