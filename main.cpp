@@ -122,7 +122,7 @@ struct SoundData {
 	// バッファの先頭アドレス
 	BYTE* pBuffer;
 	// バッファのサイズ
-	unsigned int budderSize;
+	unsigned int bufferSize;
 };
 
 enum LightingMode {
@@ -590,7 +590,7 @@ SoundData SoudLoadWave(const char* filename) {
 	FormatChunk format = {};
 	// チャンクヘッダーの確認
 	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt", 4) != 0) {
+	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
 		assert(0);
 	}
 
@@ -626,7 +626,7 @@ SoundData SoudLoadWave(const char* filename) {
 
 	soundData.wfex = format.fmt;
 	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
-	soundData.budderSize = data.size;
+	soundData.bufferSize = data.size;
 
 	return soundData;
 }
@@ -637,7 +637,7 @@ void SoundUnload(SoundData* soundData) {
 	delete[] soundData->pBuffer;
 
 	soundData->pBuffer = 0;
-	soundData->budderSize = 0;
+	soundData->bufferSize = 0;
 	soundData->wfex = {};
 }
 
@@ -653,12 +653,14 @@ void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	// 再生する波形データの設定
 	XAUDIO2_BUFFER buf{};
 	buf.pAudioData = soundData.pBuffer;
-	buf.AudioBytes = soundData.budderSize;
+	buf.AudioBytes = soundData.bufferSize;
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
 	// 波形データの再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(result));
 	result = pSourceVoice->Start();
+	assert(SUCCEEDED(result));
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -1343,10 +1345,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
+	if (FAILED(result)) {
+		OutputDebugStringA("XAudio2の初期化に失敗\n");
+		xAudio2 = nullptr;
+	}
 
 	// ライティングモード
 	static int lightingMode = Lighting_HalfLambert;
 	transform.rotate.y = 3.0f;
+
+	SoundPlayWave(xAudio2.Get(), soundData1);
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
@@ -1368,7 +1376,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			/*-- 更新処理 --*/
 			if (key[DIK_SPACE] && !preKey[DIK_SPACE]) {
-				SoundPlayWave(xAudio2.Get(), soundData1);
+				//SoundPlayWave(xAudio2.Get(), soundData1);
 			}
 
 			if (lightingMode == Lighting_None) {
