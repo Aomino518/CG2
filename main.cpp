@@ -1354,14 +1354,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
+			// 全キーの入力状態を取得する
+			static BYTE key[256] = {};
+			static BYTE preKey[256] = {};
+
+			memcpy(preKey, key, sizeof(key));
+
 			// キーボード情報の取得開始
 			keyboard->Acquire();
-			// 全キーの入力状態を取得する
-			BYTE key[256] = {};
 			keyboard->GetDeviceState(sizeof(key), key);
-
+			
 			/*-- 更新処理 --*/
-			if (key[DIK_SPACE]) {
+			if (key[DIK_SPACE] && !preKey[DIK_SPACE]) {
 				SoundPlayWave(xAudio2.Get(), soundData1);
 			}
 
