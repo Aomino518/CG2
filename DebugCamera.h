@@ -19,7 +19,9 @@ public:
 
 private:
 	// X,Y,Z軸回りのローカル回転角
-	Vector3 rotation_ = { 0, 0, 0 };
+	//Vector3 rotation_ = { 0, 0, 0 };
+	// 累積回転行列
+	Matrix4x4 matRot_;
 	// ローカル座標
 	Vector3 translation_ = { 0, 0, -50 };
 	// ビュー行列

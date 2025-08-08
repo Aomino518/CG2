@@ -1311,7 +1311,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-	Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
+	//Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
 	Transform transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	Transform uvTransformSprite = {
@@ -1345,6 +1345,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
 
+	DebugCamera debugCamera;
+	debugCamera.Initialize();
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
 		// Windowにメッセージが来ていたら最優先で処理させる
@@ -1370,6 +1373,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				SoundPlayWave(xAudio2.Get(), soundData1);
 			}
 
+			debugCamera.Update();
+
 			transformSprite.translate.x = translateSprite[0];
 			transformSprite.translate.y = translateSprite[1];
 			transformSprite.translate.z = translateSprite[2];
@@ -1384,19 +1389,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			materialDataSprite->color.z = triangleColor[2];
 			materialDataSprite->color.w = triangleColor[3];
 
-			cameraTransform.rotate.x = transformRotate[0];
-			cameraTransform.rotate.y = transformRotate[1];
-			cameraTransform.rotate.z = transformRotate[2];
-
-
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 			materialDataSprite->uvTransform = uvTransformMatrix;
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+			Matrix4x4 viewMatrix = debugCamera.GetViewMatrix();
 			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			// WVPMatrixを作る
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
@@ -1412,10 +1411,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 
 			// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-			ImGui::DragFloat3("cameraTanslate", (float*)&cameraTransform.translate, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
-			ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
-			ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
 			ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
 			ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
 			ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
@@ -1540,6 +1535,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 		}
 	}
+	keyboard->Unacquire();
+	keyboard->Release();
+	directInput->Release();
 	// XAudio2解放
 	xAudio2.Reset();
 
@@ -1555,7 +1553,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui::DestroyContext();
 
 	CloseHandle(fenceEvent);
-	
+
 	CloseWindow(hwnd);
 
 	return 0;
