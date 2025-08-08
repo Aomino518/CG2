@@ -13,6 +13,17 @@ struct Vector3 {
 	float x, y, z;
 };
 
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2);
+
+Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2);
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+
+Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2);
+
+Vector3 Multiply(const float& scalor, const Vector3& v);
+
 // <summary>
 /// X軸回転行列関数
 /// </summary>
@@ -103,3 +114,24 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 float Length(const Vector3& vector);
 
 Vector3 Normalize(const Vector3& normal);
+
+Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
+
+// オペレーター
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+
+Vector3 operator*(const Vector3& v1, const Vector3& v2);
+
+Vector3 operator*(float s, const Vector3& v);
+
+Vector3 operator*(const Vector3& v, float s);
+
+Vector3 operator/(const Vector3& v, float s);
+
+Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2);
+
+Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2);
+
+Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2);
