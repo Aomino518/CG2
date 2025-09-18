@@ -34,5 +34,13 @@ private:
 
 	POINT preMousePos_ = {};
 	bool isRightDrag_ = false;
+
+	// 追加
+	//Vector3 pivot = { 0, 0, 0 }; // 回転の中心点
+	//float distance_ = 50.0f; // pivot からの距離
+
+	//float yaw = 0.0f; // 水平回転 (Y軸)
+	//float pitch_ = 0.0f; // 縦回転 (X軸)
+
 };
 
