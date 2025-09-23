@@ -3,10 +3,7 @@
 #include <dxgidebug.h>
 #include <dbghelp.h>
 #include <strsafe.h>
-#include <filesystem>
-#include <fstream>
 #include <sstream>
-#include <chrono>
 #include <dxcapi.h>
 #include <vector>
 #include "Matrix.h"
@@ -210,7 +207,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 	return shaderBlob;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes) {
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 	// 頂点リソース用のヒープを設定
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -306,14 +303,16 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const Microsoft::WR
 }
 
 [[nodiscard]]
-Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages,
-	const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList) {
+Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(
+	Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
+	const DirectX::ScratchImage& mipImages,
+	ID3D12Device* device,
+	ID3D12GraphicsCommandList* commandList) {
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	DirectX::PrepareUpload(device.Get(), mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
+	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture.Get(), 0, UINT(subresources.size()));
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediasteResource = CreateBufferResource(device.Get(), intermediateSize);
-	UpdateSubresources(commandList.Get(), texture.Get(), intermediasteResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediasteResource = CreateBufferResource(device, intermediateSize);
+	UpdateSubresources(commandList, texture.Get(), intermediasteResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
 	// Textureへの転送後は利用できるよう、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_RTEADへResourceStateへ変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -679,9 +678,8 @@ void App::Run()
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 	SetUnhandledExceptionFilter(ExportDump);
 
-#pragma region DXGIファクトリー作成
+	// graphicsの初期化
 	graphics_.Init(hwnd_, clientWidth_, clientHeight_, true);
-#pragma endregion
 
 #pragma region XAudio2
 	//========================================
@@ -721,152 +719,7 @@ void App::Run()
 	// 初期化完了ログ
 	Logger::Write("Complete Create D3D12Device!!!");
 
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList_ = graphics_.GetCmdList();
-
-/*#ifdef _DEBUG
-	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
-	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-		// ヤバいエラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-		// エラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		// 警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-
-		// 抑制するメッセージのID
-		D3D12_MESSAGE_ID denyIds[] = {
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
-		};
-		// 抑制するレベル
-		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
-		D3D12_INFO_QUEUE_FILTER filter{};
-		filter.DenyList.NumIDs = _countof(denyIds);
-		filter.DenyList.pIDList = denyIds;
-		filter.DenyList.NumSeverities = _countof(severities);
-		filter.DenyList.pSeverityList = severities;
-		// 指定したメッセージの表示を抑制する
-		infoQueue->PushStorageFilter(&filter);
-		// 解放
-		infoQueue->Release();
-	}
-#endif*/
-
-#pragma region コマンドキュー作成
-	// コマンドキューを作成する
-	/*Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
-	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-
-	// コマンドキューの生成が上手くいかなかったので起動できない
-	assert(SUCCEEDED(hr));
-
-	// コマンドアロケータを生成する
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator = nullptr;
-	hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-
-	// コマンドアロケータの生成がうまくいかなかったので起動できない
-	assert(SUCCEEDED(hr));
-
-	// コマンドリストを生成する
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList = nullptr;
-	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
-
-	// コマンドリストの生成がうまくいかなかったので起動できない
-	assert(SUCCEEDED(hr));*/
-#pragma endregion
-
-#pragma region スワップチェーン生成
-	// スワップチェーンを生成する
-	/*Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain = nullptr;
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	swapChainDesc.Width = GetWidth();
-	swapChainDesc.Height = GetHeight();
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.SampleDesc.Count = 1;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = 2;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
-	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), GetHWND(), &swapChainDesc, nullptr, nullptr,
-		reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
-
-	assert(SUCCEEDED(hr));*/
-#pragma endregion
-
-#pragma region ディスクリプタ類
-	// DescriptorSizeを取得しておく
-	/*const uint32_t descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	const uint32_t descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	const uint32_t descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
-	// ディスクリプタヒープの生成
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-
-	// SRV用のヒープでディスクリプタの数は128。SRVはShaderないで触れるものなので、ShaderVisibleはtrue
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
-
-	// DepthStencilTextureをウィンドウのサイズで作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, GetWidth(), GetHeight());
-
-	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
-	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
-	// SwapChainからResourceを引っ張ってくる
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2] = { nullptr };
-	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
-	// うまく取得出来なければ起動できない
-	assert(SUCCEEDED(hr));
-	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
-	assert(SUCCEEDED(hr));
-
-	// RTVの設定
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
-	// DSVの設定
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = GetCPUDescriptorHandle(dsvDescriptorHeap, descriptorSizeDSV, 0);
-	// DSVHeapの先頭にDSVを作る
-	device->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvCpuHandle);
-
-	// ディスクリプタの先頭を取得する
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, descriptorSizeRTV, 0);
-	// RTVを2つ作るのでディスクリプタを2つ用意
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-
-	rtvHandles[0] = rtvStartHandle;
-	device->CreateRenderTargetView(swapChainResources[0].Get(), &rtvDesc, rtvHandles[0]);
-
-	// 2つ目のディスクリプタハンドルを得る
-	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	// 2つ目を作る
-	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);*/
-#pragma endregion
-
-#pragma region Fence作成
-	// 初期値0でFenceを作る
-	/*Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
-	uint64_t fenceValue = 0;
-	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(hr));
-
-	// FenceのSignalを待つためのイベント作成する
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent != nullptr);*/
-#pragma endregion
+	ID3D12GraphicsCommandList* cmdList_ = graphics_.GetCmdList();
 
 #pragma region dxcCompiler初期化
 	// dxcCompilerを初期化
@@ -1398,7 +1251,7 @@ void App::Run()
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList_.Get());
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList_);
 		}
 		graphics_.EndFrame();
 	}

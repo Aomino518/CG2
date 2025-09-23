@@ -122,10 +122,28 @@ void Graphics::Shutdown()
 {
 	WaitGPU();
 
-	// COMの終了処理
-	CoUninitialize();
+	for (auto& bb : backBuffers_) {
+		bb.Reset();
+	}
+	depthTex_.Reset();
+	srvHeap_.Reset();
+	dsvHeap_.Reset();
+	rtvHeap_.Reset();
+
+	cmdList_.Reset();
+	cmdAllocator_.Reset();
+	cmdQueue_.Reset();
+
+	fence_.Reset();
+	swapChain_.Reset();
+	device_.Reset();
+	adapter_.Reset();
+	factory_.Reset();
 
 	CloseHandle(fenceEvent_);
+
+	// COMの終了処理
+	CoUninitialize();
 }
 
 void Graphics::BeginFrame(const float clearColor[4])
@@ -133,7 +151,6 @@ void Graphics::BeginFrame(const float clearColor[4])
 	// これから書き込むバックバッファのインデックス取得
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	// TransitionBarrierの設定
-	D3D12_RESOURCE_BARRIER barrier{};
 	// 今回バリアはTransition
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	// Noneにしておく
@@ -158,7 +175,6 @@ void Graphics::BeginFrame(const float clearColor[4])
 void Graphics::EndFrame()
 {
 	// TransitionBarrierの設定
-	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	// TransitionBarrierを張る
@@ -214,75 +230,86 @@ void Graphics::WaitGPU()
 
 bool Graphics::CreateDevice(bool enableDebug)
 {
-	for (UINT i = 0; factory_->EnumAdapterByGpuPreference(i,
-		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter_)) !=
-		DXGI_ERROR_NOT_FOUND; ++i) {
-		// アダプターの情報を取得する
-		DXGI_ADAPTER_DESC3 adapterDesc{};
-		HRESULT hr = adapter_->GetDesc3(&adapterDesc);
-		assert(SUCCEEDED(hr));
-
-		// ソフトウェアアダプタでなければ採用
-		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
-			// 採用したアダプタの内容をログに出力
-			Logger::Write(ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
-			break;
-		}
-		// ソフトウェアアダプタの場合は見なかったことにする
-		adapter_ = nullptr;
-	}
-	assert(adapter_ != nullptr);
-
-	// 機能レベルと文字出力用の文字列
-	D3D_FEATURE_LEVEL featureLevels[] = {
-		D3D_FEATURE_LEVEL_12_2, D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0
-	};
-	const char* featureLevelStrings[] = { "12.2", "12.1", "12.0" };
-
-	// 高い順に生成できるか試していく
-	for (size_t i = 0; i < _countof(featureLevels); ++i) {
-		// 採用したアダプタでデバイスを生成
-		HRESULT hr = D3D12CreateDevice(adapter_.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
-
-		// 指定された機能レベルでデバイスが生成できたかを確認
-		if (SUCCEEDED(hr)) {
-			// 生成できたのでログを使ってループを抜ける
-			Logger::Write(std::format("FeatureLevel:{}", featureLevelStrings[i]));
-			break;
-		}
-	}
-
-	Logger::Write("Complete Create D3D12Device!!!");
-
 #ifdef _DEBUG
-	ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
-	if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-		// ヤバいエラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, enableDebug);
-		// エラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, enableDebug);
-		// 警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, enableDebug);
-
-		// 抑制するメッセージのID
-		D3D12_MESSAGE_ID denyIds[] = {
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
-		};
-		// 抑制するレベル
-		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
-		D3D12_INFO_QUEUE_FILTER filter{};
-		filter.DenyList.NumIDs = _countof(denyIds);
-		filter.DenyList.pIDList = denyIds;
-		filter.DenyList.NumSeverities = _countof(severities);
-		filter.DenyList.pSeverityList = severities;
-		// 指定したメッセージの表示を抑制する
-		infoQueue->PushStorageFilter(&filter);
-		// 解放
-		infoQueue->Release();
+	if (enableDebug) {
+		Microsoft::WRL::ComPtr<ID3D12Debug1> dbg;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dbg)))) {
+			dbg->EnableDebugLayer();
+			dbg->SetEnableGPUBasedValidation(TRUE);
+		}
 	}
 #endif
 
-	// DescriptorSizeを取得しておく
+	// アダプタ選定
+	adapter_.Reset();
+	for (UINT i = 0; factory_->EnumAdapterByGpuPreference(
+		i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter_)) != DXGI_ERROR_NOT_FOUND; ++i) {
+		DXGI_ADAPTER_DESC3 desc;
+		ZeroMemory(&desc, sizeof(desc));
+
+		if (FAILED(adapter_->GetDesc3(&desc))) {
+			adapter_.Reset();
+		} else if (desc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE) {
+			adapter_.Reset(); // ソフトウェアは不採用
+		} else {
+			Logger::Write(ConvertString(std::format(L"Use Adapter: {}\n", desc.Description)));
+			break; // 採用
+		}
+	}
+
+	if (!adapter_) {
+		Logger::Write("ERROR: No suitable hardware adapter found.");
+		return false;
+	}
+
+	// デバイス作成
+	static const D3D_FEATURE_LEVEL kLevels[] = {
+		D3D_FEATURE_LEVEL_12_2,
+		D3D_FEATURE_LEVEL_12_1,
+		D3D_FEATURE_LEVEL_12_0,
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0
+	};
+	static const char* kLevelStr[] = { "12.2", "12.1", "12.0", "11.1", "11.0" };
+	const size_t kLevelCount = sizeof(kLevels) / sizeof(kLevels[0]);
+
+	device_.Reset();
+	bool created = false;
+
+	for (size_t i = 0; i < kLevelCount; ++i) {
+		Microsoft::WRL::ComPtr<ID3D12Device> dev;
+		HRESULT hr = D3D12CreateDevice(adapter_.Get(), kLevels[i], IID_PPV_ARGS(&dev));
+		if (SUCCEEDED(hr)) {
+			device_ = dev;
+			Logger::Write(std::format("D3D12CreateDevice OK (FeatureLevel: {})", kLevelStr[i]));
+			created = true;
+			break;
+		} else {
+			Logger::Write(std::format("D3D12CreateDevice NG (FeatureLevel: {}), hr=0x{:08X}",
+				kLevelStr[i], (unsigned)hr));
+		}
+	}
+
+	if (!created || !device_) {
+		Logger::Write("ERROR: D3D12CreateDevice failed on selected adapter.");
+		return false;
+	}
+
+#ifdef _DEBUG
+	// InfoQueue致命的エラーのみブレーク）
+	if (enableDebug) {
+		Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
+		if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, FALSE);
+		}
+	}
+#endif
+
+	Logger::Write("Complete Create D3D12Device!!!");
+
+	// Descriptorサイズ取得
 	descSizeRTV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	descSizeDSV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	descSizeSRV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

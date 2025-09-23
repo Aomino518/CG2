@@ -81,5 +81,6 @@ private:
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+	D3D12_RESOURCE_BARRIER barrier{};
 };
 
