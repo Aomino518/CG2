@@ -929,8 +929,14 @@ void Application::Run()
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -1202,6 +1208,7 @@ void Application::Run()
 		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+		ImGui::DragFloat("intensity", (float*)directionalLightData->intensity, 0.0f, 1.0f, "%.3");
 
 		// ImGuiの内部コマンドを生成する
 		ImGui::Render();
@@ -1247,7 +1254,7 @@ void Application::Run()
 			cmdList_->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
