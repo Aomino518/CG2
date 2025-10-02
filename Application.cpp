@@ -1103,7 +1103,6 @@ void Application::Run()
 
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
-	SoundPlayWave(xAudio2.Get(), soundData1);
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
