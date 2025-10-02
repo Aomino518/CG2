@@ -3,6 +3,7 @@
 #include "Graphics.h"
 #include <string>
 #include <cassert>
+#include "Inputs.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -39,5 +40,6 @@ private:
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	Graphics graphics_;
+	Inputs input_;
 };
 

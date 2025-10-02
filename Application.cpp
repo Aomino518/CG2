@@ -1,5 +1,6 @@
 #include "Application.h"
 #include <format>
+#include <fstream>
 #include <dxgidebug.h>
 #include <dbghelp.h>
 #include <strsafe.h>
@@ -13,14 +14,12 @@
 #include "externals/DirectXTex/d3dx12.h"
 #define _USE_MATH_DEFINES 
 #include <math.h>
-#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "dxcompiler.lib")
 #pragma comment(lib, "xaudio2.lib")
-#pragma comment(lib, "dinput8.lib")
-#pragma comment(lib, "dxguid.lib")
+
 
 #include "Logger.h"
 #include "StringUtil.h"
@@ -28,14 +27,6 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #pragma region 構造体
-struct Vector4 {
-	float x, y, z, w;
-};
-
-struct Vector2 {
-	float x, y;
-};
-
 struct Material {
 	Vector4 color;
 	bool enableLighting;
@@ -691,28 +682,8 @@ void Application::Run()
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 #pragma endregion
 
-#pragma region DirectInput初期化
-	//========================================
-	// DirectInputの初期化
-	//========================================
-	IDirectInput8* directInput = nullptr;
-	result = DirectInput8Create(GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
-	assert(SUCCEEDED(result));
-
-	// キーボードデバイスの生成
-	IDirectInputDevice8* keyboard = nullptr;
-	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(result));
-
-	// 入力データ形式のセット
-	result = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
-	assert(SUCCEEDED(result));
-
-	// 排他制御レベルのセット
-	result = keyboard->SetCooperativeLevel(
-		GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(result));
-#pragma endregion
+	//DirectInput初期化
+	input_.Init(hInstance_, hwnd_);
 
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(graphics_.GetDevice() != nullptr);
@@ -930,13 +901,13 @@ void Application::Run()
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	//blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -1132,7 +1103,7 @@ void Application::Run()
 
 	// 音声読み込み
 	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
-
+	SoundPlayWave(xAudio2.Get(), soundData1);
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
@@ -1143,19 +1114,11 @@ void Application::Run()
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
-		// 全キーの入力状態を取得する
-		static BYTE key[256] = {};
-		static BYTE preKey[256] = {};
-
-		memcpy(preKey, key, sizeof(key));
-
-		// キーボード情報の取得開始
-		keyboard->Acquire();
-		keyboard->GetDeviceState(sizeof(key), key);
+		input_.Update();
 
 		/*-- 更新処理 --*/
-		if (key[DIK_SPACE] && !preKey[DIK_SPACE]) {
-			SoundPlayWave(xAudio2.Get(), soundData1);
+ 		if (input_.IsPressed(DIK_SPACE)) {
+ 			SoundPlayWave(xAudio2.Get(), soundData1);
 		}
 
 		debugCamera.Update();
@@ -1208,7 +1171,6 @@ void Application::Run()
 		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-		ImGui::DragFloat("intensity", (float*)directionalLightData->intensity, 0.0f, 1.0f, "%.3");
 
 		// ImGuiの内部コマンドを生成する
 		ImGui::Render();
@@ -1254,7 +1216,7 @@ void Application::Run()
 			cmdList_->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
-			cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -1263,9 +1225,7 @@ void Application::Run()
 		graphics_.EndFrame();
 	}
 
-	keyboard->Unacquire();
-	keyboard->Release();
-	directInput->Release();
+	input_.Shutdown();
 	// XAudio2解放
 	xAudio2.Reset();
 
