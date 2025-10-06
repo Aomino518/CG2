@@ -1,6 +1,5 @@
 #include "Application.h"
 #include <format>
-#include <fstream>
 #include <dxgidebug.h>
 #include <dbghelp.h>
 #include <strsafe.h>
@@ -8,7 +7,6 @@
 #include <dxcapi.h>
 #include <vector>
 #include "Matrix.h"
-#include <xaudio2.h>
 #include "DebugCamera.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
@@ -18,7 +16,6 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "dxcompiler.lib")
-#pragma comment(lib, "xaudio2.lib")
 
 
 #include "Logger.h"
@@ -78,33 +75,6 @@ struct D3DResourceLeakChecker {
 	}
 };
 
-// チャンクヘッダ
-struct ChunkHeader {
-	char id[4]; // チャンク毎のID
-	int32_t size; // チャンクサイズ
-};
-
-// RIFFヘッダチャンク
-struct RiffHeader {
-	ChunkHeader chunk; // "RIFF"
-	char type[4]; // "WAVE"
-};
-
-// FMTチャンク
-struct FormatChunk {
-	ChunkHeader chunk; // "fmt"
-	WAVEFORMATEX fmt; // 波形フォーマット
-};
-
-// 音声データ
-struct SoundData {
-	// 波形フォーマット
-	WAVEFORMATEX wfex;
-	// バッファの先頭アドレス
-	BYTE* pBuffer;
-	// バッファのサイズ
-	unsigned int budderSize;
-};
 #pragma endregion
 
 #pragma region 自作関数
@@ -128,74 +98,6 @@ static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
 	MiniDumpWriteDump(GetCurrentProcess(), processId, dumpFileHandle, MiniDumpNormal, &minidumpInfomation, nullptr, nullptr);
 	// 他に関連づけられているSEH例外ハンドラがあれば実行。通常はプロセスを終了する。
 	return EXCEPTION_EXECUTE_HANDLER;
-}
-
-// CompileShader関数
-Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
-	// CompilerするShaderファイルへのパス
-	const std::wstring& filePath,
-	// Compilerに使用するProfile
-	const wchar_t* profile,
-	// 初期化で生成したものを3つ
-	Microsoft::WRL::ComPtr<IDxcUtils>& dxcUtils,
-	Microsoft::WRL::ComPtr<IDxcCompiler3>& dxcCompiler,
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler>& includeHandler)
-{
-	std::ofstream logStream;
-	/*--1.hlslファイルを読む--*/
-	// これからシェーダーをコンパイルする旨をログに出す
-	Logger::Write(ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
-	// hlslファイルを読む
-	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-	// 読めなかったら止める
-	assert(SUCCEEDED(hr));
-	// 読み込んだファイルの内容を設定する
-	DxcBuffer shaderSourceBuffer;
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
-
-	/*--2.Compileする--*/
-	LPCWSTR arguments[] = {
-		filePath.c_str(), // コンパイル対象のhlslファイルファイル名
-		L"-E", L"main", // エントリーポイントの指定。基本main以外にしない
-		L"-T", profile, // ShaderProfileの設定
-		L"-Zi", L"-Qembed_debug", // デバッグ用の情報を埋め込む
-		L"-Od", // 最適化を外しておく
-		L"-Zpr", // メモリレイアウトは行優先
-	};
-	// 実際にShaderをコンパイルする
-	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer, // 読み込んだファイル
-		arguments, // コンパイルオプション
-		_countof(arguments), //コンパイルオプションの数
-		includeHandler.Get(), // includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult) // コンパイル結果
-	);
-	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr));
-
-	/*--3.警告・エラーがでてないか確認する--*/
-	// 警告・エラーが出ていたらログに出して止める
-	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Logger::Write(shaderError->GetStringPointer());
-		// 警告・エラーダメゼッタイ
-		assert(false);
-	}
-
-	/*--4.Compile結果を受け取って返す--*/
-	// コンパイル結果から実行用のバイナリ部分を取得
-	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr));
-	// 成功したログを出す
-	Logger::Write(ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
-	// 実行用のバイナリを返却
-	return shaderBlob;
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
@@ -226,23 +128,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device
 		IID_PPV_ARGS(&vertexResource));
 	assert(SUCCEEDED(hr));
 	return vertexResource;
-}
-
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
-	const Microsoft::WRL::ComPtr<ID3D12Device>& device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
-{
-	/*--ディスクリプタヒープの生成--*/
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
-	descriptorHeapDesc.Type = heapType;
-	descriptorHeapDesc.NumDescriptors = numDescriptors;
-	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	HRESULT hr;
-	hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-	// ディスクリプタヒープが作れなかったので起動できない
-	assert(SUCCEEDED(hr));
-
-	return descriptorHeap;
 }
 
 DirectX::ScratchImage LoadTexture(const std::string& filePath) {
@@ -492,101 +377,6 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
-SoundData SoudLoadWave(const char* filename) {
-	/*--ファイルオープン--*/
-	// ファイル入力ストリームのインスタンス
-	std::ifstream file;
-	// .wavファイルをバイナリ―モードで開く
-	file.open(filename, std::ios_base::binary);
-	// ファイルオープン失敗を検出する
-	assert(file.is_open());
-
-	/*--.wavデータ読み込み--*/
-	RiffHeader riff;
-	file.read((char*)&riff, sizeof(riff));
-	// ファイルがRIFFかチェック
-	if (strncmp(riff.chunk.id, "RIFF", 4) != 0) {
-		assert(0);
-	}
-	// タイプがWAVEかチェック
-	if (strncmp(riff.type, "WAVE", 4) != 0) {
-		assert(0);
-	}
-
-	// Formatチャンクの読み込み
-	FormatChunk format = {};
-	// チャンクヘッダーの確認
-	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
-		assert(0);
-	}
-
-	// チャンク本体の読み込み
-	assert(format.chunk.size <= sizeof(format.fmt));
-	file.read((char*)&format.fmt, format.chunk.size);
-
-	// Dataチャンクの読み込み
-	ChunkHeader data;
-	file.read((char*)&data, sizeof(data));
-	// JUNKチャンクを検出した場合
-	if (strncmp(data.id, "JUNK", 4) == 0) {
-		// 読み取り位置をJUNKチャンクの終わりまで進める
-		file.seekg(data.size, std::ios_base::cur);
-		// 再読み込み
-		file.read((char*)&data, sizeof(data));
-	}
-
-	if (strncmp(data.id, "data", 4) != 0) {
-		assert(0);
-	}
-
-	// Dataチャンクのデータ部(波形データ)の読み込み
-	char* pBuffer = new char[data.size];
-	file.read(pBuffer, data.size);
-
-	// WAVEファイルを閉じる
-	file.close();
-
-	/*--読み込んだ音声データをリターン--*/
-	// returnするための音声データ
-	SoundData soundData = {};
-
-	soundData.wfex = format.fmt;
-	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
-	soundData.budderSize = data.size;
-
-	return soundData;
-}
-
-// 音声データ解放
-void SoundUnload(SoundData* soundData) {
-	// バッファのメモリ解放
-	delete[] soundData->pBuffer;
-
-	soundData->pBuffer = 0;
-	soundData->budderSize = 0;
-	soundData->wfex = {};
-}
-
-// 音声再生
-void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
-	HRESULT result;
-
-	// 波形フォーマットを元にSourceVoiceの生成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEEDED(result));
-
-	// 再生する波形データの設定
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = soundData.pBuffer;
-	buf.AudioBytes = soundData.budderSize;
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-
-	// 波形データの再生
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	result = pSourceVoice->Start();
-}
 #pragma endregion
 
 Application::Application(int width, int height, const wchar_t* title)
@@ -672,15 +462,8 @@ void Application::Run()
 	// graphicsの初期化
 	graphics_.Init(hwnd_, clientWidth_, clientHeight_, true);
 
-#pragma region XAudio2
-	//========================================
-	// XAudio2の変数宣言
-	//========================================
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-	IXAudio2MasteringVoice* masterVoice;
-	HRESULT result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	result = xAudio2->CreateMasteringVoice(&masterVoice);
-#pragma endregion
+    // XAudio2の初期化
+	xAudio2_.Init();
 
 	//DirectInput初期化
 	input_.Init(hInstance_, hwnd_);
@@ -692,83 +475,12 @@ void Application::Run()
 
 	ID3D12GraphicsCommandList* cmdList_ = graphics_.GetCmdList();
 
-#pragma region dxcCompiler初期化
-	// dxcCompilerを初期化
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
-	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
-	assert(SUCCEEDED(hr));
-#pragma endregion
+	// DxcCompilerの初期化
+	dxcCompiler_.Init();
 
-	// includeに対応するための設定を行っておく
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
-	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
-	assert(SUCCEEDED(hr));
-
-#pragma region RootSignature
 	// RootSignature作成
-	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-	descriptionRootSignature.Flags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0; // 0から始まる
-	descriptorRange[0].NumDescriptors = 1; // 数は1つ
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; //SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
-#pragma endregion
-
-#pragma region RootParameter
-	// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0; // レジスタ番号0を使う
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // VertexShaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 0; // レジスタ番号0と使う
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-	rootParameters[3].Descriptor.ShaderRegister = 1; // レジスタ番号1を使う
-	descriptionRootSignature.pParameters = rootParameters; // ルートパラメーター配列へのポインタ
-	descriptionRootSignature.NumParameters = _countof(rootParameters); // 配列の長さ
-#pragma endregion
-
-#pragma region staticSamplers
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // バイリニアフィルタ
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0~1の範囲外リピート
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較しない
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX; // ありったけのMipmapを使う
-	staticSamplers[0].ShaderRegister = 0;
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	descriptionRootSignature.pStaticSamplers = staticSamplers;
-	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
-#pragma endregion
-
-	// シリアライズしてバイナリにする
-	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature,
-		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Logger::Write(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-		assert(false);
-	}
-	// バイナリ元に作成
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
-	hr = graphics_.GetDevice()->CreateRootSignature(0,
-		signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootSignature));
-	assert(SUCCEEDED(hr));
+	rootSignatureFactory_.Init(&graphics_);
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = rootSignatureFactory_.CreateCommon();
 
 #pragma region Texture読み込み
 	// Textureを読んで転送する
@@ -880,22 +592,8 @@ void Application::Run()
 #pragma endregion
 
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs[2].SemanticName = "NORMAL";
-	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc3D{};
+	inputLayoutDesc3D = inputLayout_.CreateInputLayout3D();
 
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
@@ -917,18 +615,15 @@ void Application::Run()
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl",
-		L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexShaderBlob != nullptr);
+	dxcCompiler_.ShaderBlob(L"Object3D.VS.hlsl", L"vs_6_0", L"Object3D.PS.hlsl", L"ps_6_0");
 
-	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl",
-		L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob != nullptr);
+	IDxcBlob* vertexShaderBlob = dxcCompiler_.GetVertexShaderBlob();
+	IDxcBlob* pixelShaderBlob = dxcCompiler_.GetPixelShaderBlob();
 
 	// PSOを生成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc3D;
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
 	vertexShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
@@ -951,7 +646,7 @@ void Application::Run()
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	// 実際に生成
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	hr = graphics_.GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+	HRESULT hr = graphics_.GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
@@ -1010,9 +705,9 @@ void Application::Run()
 	vertexDataSprite[0].normal = { 0.0f, 0.0f, -1.0f };
 	vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f, 1.0f };
 	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
-	vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[2].position = { 360.0f, 360.0f, 0.0f, 1.0f };
 	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
-	vertexDataSprite[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[3].position = { 360.0f, 0.0f, 0.0f, 1.0f };
 	vertexDataSprite[3].texcoord = { 1.0f, 0.0f };
 
 	// インデックスリソースにデータを書き込む
@@ -1102,7 +797,7 @@ void Application::Run()
 	bool useMonsterBall = false;
 
 	// 音声読み込み
-	SoundData soundData1 = SoudLoadWave("resources/Alarm01.wav");
+	SoundData soundData1 = xAudio2_.SoundLoad("resources/gold.mp3");
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
@@ -1117,7 +812,7 @@ void Application::Run()
 
 		/*-- 更新処理 --*/
  		if (input_.IsPressed(DIK_SPACE)) {
- 			SoundPlayWave(xAudio2.Get(), soundData1);
+			xAudio2_.SoundPlayWave(soundData1);
 		}
 
 		debugCamera.Update();
@@ -1215,7 +910,7 @@ void Application::Run()
 			cmdList_->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
-			//cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -1225,11 +920,9 @@ void Application::Run()
 	}
 
 	input_.Shutdown();
-	// XAudio2解放
-	xAudio2.Reset();
 
-	// 音声データ解放
-	SoundUnload(&soundData1);
+	xAudio2_.Shutdown();
+	xAudio2_.SoundUnload(&soundData1);
 
 	// ImGuiの終了処理。初期化と逆順に行う
 	ImGui_ImplDX12_Shutdown();

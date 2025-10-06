@@ -4,6 +4,10 @@
 #include <string>
 #include <cassert>
 #include "Inputs.h"
+#include "Sound.h"
+#include "DxcCompiler.h"
+#include "RootSignatureFactory.h"
+#include "InputLayout.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -41,5 +45,9 @@ private:
 
 	Graphics graphics_;
 	Inputs input_;
+	Sound xAudio2_;
+	DxcCompiler dxcCompiler_;
+	RootSignatureFactory rootSignatureFactory_;
+	InputLayout inputLayout_;
 };
 
