@@ -13,32 +13,12 @@ void DxcCompiler::Init()
 	assert(SUCCEEDED(hr));
 }
 
-void DxcCompiler::ShaderBlob(
-	const std::wstring& vertexFilePath,
-	const wchar_t* vertexProfile,
-	const std::wstring& pixelFilePath,
-	const wchar_t* pixelProfile)
-{
-	// Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(vertexFilePath,
-		vertexProfile, dxcUtils_, dxcCompiler_, includeHandler_);
-	assert(vertexShaderBlob_ != nullptr);
-
-	pixelShaderBlob_ = CompileShader(pixelFilePath,
-		pixelProfile, dxcUtils_, dxcCompiler_, includeHandler_);
-	assert(pixelShaderBlob_ != nullptr);
-}
-
 // CompileShader関数
 Microsoft::WRL::ComPtr<IDxcBlob> DxcCompiler::CompileShader(
 	// CompilerするShaderファイルへのパス
 	const std::wstring& filePath,
 	// Compilerに使用するProfile
-	const wchar_t* profile,
-	// 初期化で生成したものを3つ
-	Microsoft::WRL::ComPtr<IDxcUtils>& dxcUtils,
-	Microsoft::WRL::ComPtr<IDxcCompiler3>& dxcCompiler,
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler>& includeHandler)
+	const wchar_t* profile)
 {
 	std::ofstream logStream;
 	/*--1.hlslファイルを読む--*/
@@ -46,7 +26,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> DxcCompiler::CompileShader(
 	Logger::Write(ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+	HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	// 読めなかったら止める
 	assert(SUCCEEDED(hr));
 	// 読み込んだファイルの内容を設定する
@@ -66,11 +46,11 @@ Microsoft::WRL::ComPtr<IDxcBlob> DxcCompiler::CompileShader(
 	};
 	// 実際にShaderをコンパイルする
 	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
+	hr = dxcCompiler_->Compile(
 		&shaderSourceBuffer, // 読み込んだファイル
 		arguments, // コンパイルオプション
 		_countof(arguments), //コンパイルオプションの数
-		includeHandler.Get(), // includeが含まれた諸々
+		includeHandler_.Get(), // includeが含まれた諸々
 		IID_PPV_ARGS(&shaderResult) // コンパイル結果
 	);
 	// コンパイルエラーではなくdxcが起動できないなど致命的な状況

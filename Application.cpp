@@ -615,19 +615,17 @@ void Application::Run()
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	dxcCompiler_.ShaderBlob(L"Object3D.VS.hlsl", L"vs_6_0", L"Object3D.PS.hlsl", L"ps_6_0");
-
-	IDxcBlob* vertexShaderBlob = dxcCompiler_.GetVertexShaderBlob();
-	IDxcBlob* pixelShaderBlob = dxcCompiler_.GetPixelShaderBlob();
+	Microsoft::WRL::ComPtr<IDxcBlob> vs3DBlob = dxcCompiler_.CompileShader(L"Object3D.VS.hlsl", L"vs_6_0");
+	Microsoft::WRL::ComPtr<IDxcBlob> ps3DBlob = dxcCompiler_.CompileShader(L"Object3D.PS.hlsl", L"ps_6_0");
 
 	// PSOを生成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc3D;
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	pixelShaderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.VS = { vs3DBlob->GetBufferPointer(),
+	vs3DBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.PS = { ps3DBlob->GetBufferPointer(),
+	ps3DBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
 
