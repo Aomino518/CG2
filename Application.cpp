@@ -383,6 +383,7 @@ Application::Application(int width, int height, const wchar_t* title)
 	: hInstance_(GetModuleHandle(nullptr)), title_(title ? title : L"CG2"),
 		clientWidth_(width), clientHeight_(height) {}
 
+
 Application::~Application()
 {
 	Shutdown();
@@ -595,6 +596,9 @@ void Application::Run()
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc3D{};
 	inputLayoutDesc3D = inputLayout_.CreateInputLayout3D();
 
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc2D{};
+	inputLayoutDesc2D = inputLayout_.CreateInputLayout2D();
+
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
@@ -618,35 +622,38 @@ void Application::Run()
 	Microsoft::WRL::ComPtr<IDxcBlob> vs3DBlob = dxcCompiler_.CompileShader(L"Object3D.VS.hlsl", L"vs_6_0");
 	Microsoft::WRL::ComPtr<IDxcBlob> ps3DBlob = dxcCompiler_.CompileShader(L"Object3D.PS.hlsl", L"ps_6_0");
 
+	Microsoft::WRL::ComPtr<IDxcBlob> vs2DBlob = dxcCompiler_.CompileShader(L"Object2D.VS.hlsl", L"vs_6_0");
+	Microsoft::WRL::ComPtr<IDxcBlob> ps2DBlob = dxcCompiler_.CompileShader(L"Object2D.PS.hlsl", L"ps_6_0");
+
 	// PSOを生成する
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc3D;
-	graphicsPipelineStateDesc.VS = { vs3DBlob->GetBufferPointer(),
-	vs3DBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.PS = { ps3DBlob->GetBufferPointer(),
-	ps3DBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.BlendState = blendDesc;
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
+	// 3D用
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc3D{};
+	psoBuilder_.Init(&graphics_);
+	psoDesc3D = psoBuilder_.CreatePsoDesc(
+			rootSignature,
+			inputLayoutDesc3D,
+			vs3DBlob,
+			ps3DBlob,
+			blendDesc,
+			rasterizerDesc
+			);
 
-	// DepthStencilの設定
-	graphicsPipelineStateDesc.DepthStencilState = graphics_.GetDepthStencilDesc();
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso3D = psoBuilder_.BuildPso(psoDesc3D);
 
-	// 書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	// 利用するトポロジ(形状)のタイプ。三角形
-	graphicsPipelineStateDesc.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	// どのように画面に色を打ち込むかの設定
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	// 実際に生成
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	HRESULT hr = graphics_.GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
-		IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr));
+	// 2D用
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc2D{};
+	psoBuilder_.Init(&graphics_);
+	psoDesc2D = psoBuilder_.CreatePsoDesc(
+		rootSignature,
+		inputLayoutDesc2D,
+		vs2DBlob,
+		ps2DBlob,
+		blendDesc,
+		rasterizerDesc
+	);
+
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso2D = psoBuilder_.BuildPso(psoDesc2D);
+
 
 	// 頂点リソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = CreateBufferResource(graphics_.GetDevice(), sizeof(VertexData) * modelData.vertices.size());
@@ -879,7 +886,7 @@ void Application::Run()
 			cmdList_->RSSetScissorRects(1, &scissorRect); // Scissorを設定
 			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 			cmdList_->SetGraphicsRootSignature(rootSignature.Get());
-			cmdList_->SetPipelineState(graphicsPipelineState.Get()); // PSOを設定
+			cmdList_->SetPipelineState(pso3D.Get()); // PSOを設定
 			cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 			cmdList_->IASetIndexBuffer(&indexBufferViewModel);
 			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する。
@@ -898,6 +905,8 @@ void Application::Run()
 			// 描画 (DrawCall)。
 			cmdList_->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
+			cmdList_->SetPipelineState(pso2D.Get());
+			cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			// Spriteの描画。変更が必要なものだけを変更する
 			cmdList_->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
 			cmdList_->IASetIndexBuffer(&indexBufferViewSprite);// IBV設定
@@ -906,6 +915,8 @@ void Application::Run()
 			cmdList_->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 
 			cmdList_->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			
+			cmdList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			// 描画 (DrawCall)。3頂点で一つのインスタンス
 			cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);

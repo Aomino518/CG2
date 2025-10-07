@@ -307,8 +307,6 @@ bool Graphics::CreateDevice(bool enableDebug)
 	}
 #endif
 
-	Logger::Write("Complete Create D3D12Device!!!");
-
 	// Descriptorサイズ取得
 	descSizeRTV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	descSizeDSV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);

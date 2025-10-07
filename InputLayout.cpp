@@ -26,6 +26,7 @@ D3D12_INPUT_LAYOUT_DESC InputLayout::CreateInputLayout2D()
 	inputElementDescs2D_[0].SemanticIndex = 0;
 	inputElementDescs2D_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs2D_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
 	inputElementDescs2D_[1].SemanticName = "TEXCOORD";
 	inputElementDescs2D_[1].SemanticIndex = 0;
 	inputElementDescs2D_[1].Format = DXGI_FORMAT_R32G32_FLOAT;

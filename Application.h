@@ -8,6 +8,7 @@
 #include "DxcCompiler.h"
 #include "RootSignatureFactory.h"
 #include "InputLayout.h"
+#include "PsoBuilder.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -49,5 +50,6 @@ private:
 	DxcCompiler dxcCompiler_;
 	RootSignatureFactory rootSignatureFactory_;
 	InputLayout inputLayout_;
+	PsoBuilder psoBuilder_;
 };
 
