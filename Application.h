@@ -3,7 +3,7 @@
 #include "Graphics.h"
 #include <string>
 #include <cassert>
-#include "Inputs.h"
+#include "Input.h"
 #include "Sound.h"
 #include "DxcCompiler.h"
 #include "RootSignatureFactory.h"
@@ -45,7 +45,7 @@ private:
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	Graphics graphics_;
-	Inputs input_;
+	Input input_;
 	Sound xAudio2_;
 	DxcCompiler dxcCompiler_;
 	RootSignatureFactory rootSignatureFactory_;

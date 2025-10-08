@@ -1,8 +1,8 @@
-#include "Inputs.h"
+#include "Input.h"
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-bool Inputs::Init(HINSTANCE hInst, HWND hwnd)
+bool Input::Init(HINSTANCE hInst, HWND hwnd)
 {
 	//========================================
 	// DirectInputの初期化
@@ -26,21 +26,14 @@ bool Inputs::Init(HINSTANCE hInst, HWND hwnd)
 	return true;
 }
 
-void Inputs::Shutdown()
+void Input::Shutdown()
 {
 	if (keyboard_) {
 		keyboard_->Unacquire();
-		keyboard_->Release();
-		keyboard_ = nullptr;
-	}
-
-	if (directInput_) {
-		directInput_->Release();
-		directInput_ = nullptr;
 	}
 }
 
-void Inputs::Update()
+void Input::Update()
 {
 	memcpy(preKey, key, sizeof(key));
 
@@ -49,17 +42,17 @@ void Inputs::Update()
 	keyboard_->GetDeviceState(sizeof(key), key);
 }
 
-bool Inputs::IsDown(int dik) const
+bool Input::IsDown(int dik) const
 {
 	return (key[dik] & 0x80) != 0;
 }
 
-bool Inputs::IsPressed(int dik) const
+bool Input::IsPressed(int dik) const
 {
 	return (key[dik] & 0x80) && !(preKey[dik] & 0x80);
 }
 
-bool Inputs::IsReleased(int dik) const
+bool Input::IsReleased(int dik) const
 {
 	return !(key[dik] & 0x80) && (preKey[dik] & 0x80);
 }

@@ -1,12 +1,17 @@
 #pragma once
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <wrl.h>
 #include <assert.h>
 
 
-class Inputs
+class Input
 {
 public:
+	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+public:
+
 	bool Init(HINSTANCE hInst, HWND hwnd);
 	void Shutdown();
 
@@ -16,8 +21,8 @@ public:
 	bool IsReleased(int dik) const;
 
 private:
-	IDirectInput8* directInput_ = nullptr;
-	IDirectInputDevice8* keyboard_ = nullptr;
+	ComPtr<IDirectInput8> directInput_ = nullptr;
+	ComPtr<IDirectInputDevice8> keyboard_ = nullptr;
 	BYTE key[256] = {};
 	BYTE preKey[256] = {};
 };
