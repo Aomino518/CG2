@@ -1,14 +1,8 @@
 #pragma once
 #include <Windows.h>
-#include "Graphics.h"
 #include <string>
+#include <vector>
 #include <cassert>
-#include "Input.h"
-#include "Sound.h"
-#include "DxcCompiler.h"
-#include "RootSignatureFactory.h"
-#include "InputLayout.h"
-#include "PsoBuilder.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -16,16 +10,16 @@
 class Application
 {
 public:
+	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 	Application(int width, int height, const wchar_t* title);
 	~Application();
 
 	bool Init();			// ウィンドウ作成
 	bool ProcessMessage();  // メッセージポンプ
-	void Run();
 	void Shutdown();		// 明示終了
 
 	// アクセッサ
-	HINSTANCE GetHInstance() const { return hInstance_; }
+	HINSTANCE GetHInstance() const { return wndclass.hInstance; }
 	HWND GetHWND() const { return hwnd_; }
 	int GetWidth() const { return clientWidth_; }
 	int GetHeight() const { return clientHeight_; }
@@ -33,6 +27,7 @@ public:
 private:
 	HINSTANCE hInstance_ = nullptr;
 	HWND hwnd_ = nullptr;
+	WNDCLASS wndclass{};
 	std::wstring className_ = L"CG2WindowClass";
 	std::wstring title_ = L"CG2";
 	int clientWidth_ = 1280;
@@ -42,14 +37,5 @@ private:
 
 	static LRESULT CALLBACK WndProcSetup(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT CALLBACK WndProcThunk(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
-	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
-
-	Graphics graphics_;
-	Input input_;
-	Sound xAudio2_;
-	DxcCompiler dxcCompiler_;
-	RootSignatureFactory rootSignatureFactory_;
-	InputLayout inputLayout_;
-	PsoBuilder psoBuilder_;
 };
 

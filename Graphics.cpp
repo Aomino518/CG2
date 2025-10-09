@@ -141,9 +141,6 @@ void Graphics::Shutdown()
 	factory_.Reset();
 
 	CloseHandle(fenceEvent_);
-
-	// COMの終了処理
-	CoUninitialize();
 }
 
 void Graphics::BeginFrame(const float clearColor[4])

@@ -1,9 +1,9 @@
 #pragma once
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include <wrl.h>
 #include <assert.h>
-
+#include "Application.h"
+#include <wrl.h>
 
 class Input
 {
@@ -12,7 +12,7 @@ public:
 
 public:
 
-	bool Init(HINSTANCE hInst, HWND hwnd);
+	bool Init(Application* app);
 	void Shutdown();
 
 	void Update();
