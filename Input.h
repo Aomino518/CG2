@@ -12,7 +12,7 @@ public:
 
 public:
 
-	bool Init(Application* app);
+	void Init(Application* app);
 	void Shutdown();
 
 	void Update();
@@ -25,5 +25,6 @@ private:
 	ComPtr<IDirectInputDevice8> keyboard_ = nullptr;
 	BYTE key[256] = {};
 	BYTE preKey[256] = {};
+	Application* app_ = nullptr;
 };
 

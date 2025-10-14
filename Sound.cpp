@@ -1,13 +1,15 @@
 #include "Sound.h"
 #include <vector>
 #include <assert.h>
+#include "Logger.h"
+#include <algorithm>
 
 bool Sound::Init()
 {
 	HRESULT result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	result = xAudio2_->CreateMasteringVoice(&masterVoice_);
 
-	result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+	result = MFStartup(MF_VERSION, 0);
 	if (SUCCEEDED(result)) {
 		mfStarted_ = true;
 	}
@@ -99,33 +101,83 @@ SoundData Sound::SoundLoadWave(const char* filename) {
 
 SoundData Sound::SoundLoadMP3(const wchar_t* wpath)
 {
+	Logger::Write("SoundLoadMp3開始");
 	SoundData soundData = {};
 	if (!mfStarted_) {
 		return soundData;
 	}
 
 	Microsoft::WRL::ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
-	MFCreateSourceReaderFromURL(wpath, NULL, &pMFSourceReader);
+	MFCreateSourceReaderFromURL(wpath, nullptr, &pMFSourceReader);
+	Logger::Write("MFCreateSourceReaderFromURL通った");
 
-	Microsoft::WRL::ComPtr<IMFMediaType> pMFMediaType{ nullptr };
-	HRESULT hr = MFCreateMediaType(&pMFMediaType);
+	// ストリーム選択
+	HRESULT hr = pMFSourceReader->SetStreamSelection(static_cast<DWORD>(MF_SOURCE_READER_ALL_STREAMS), FALSE);
 
 	if (FAILED(hr)) {
 		return soundData;
 	}
+	Logger::Write("MF_SOURCE_READER_ALL_STREAMS通った");
+
+	hr = pMFSourceReader->SetStreamSelection(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), TRUE);
+
+	if (FAILED(hr)) {
+		return soundData;
+	}
+	Logger::Write("MF_SOURCE_READER_FIRST_AUDIO_STREAM通った");
+
+	// ネイティブ型からch/rateを取っておく
+	Microsoft::WRL::ComPtr<IMFMediaType> pMFMediaType{ nullptr };
+	UINT32 ch = 2, rate = 48000;
+	if (SUCCEEDED(pMFSourceReader->GetNativeMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), 0, &pMFMediaType))) {
+		UINT32 v = 0;
+		if (SUCCEEDED(pMFMediaType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &v))) {
+			ch = v;
+		}
+
+		if (SUCCEEDED(pMFMediaType->GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, &v))) {
+			rate = v;
+		}
+	}
+
+	hr = MFCreateMediaType(&pMFMediaType);
+
+	if (FAILED(hr)) {
+		Logger::Write("MFCreateMediaTypeエラー");
+		return soundData;
+	}
+	Logger::Write("MFCreateMediaType通った");
 
 	pMFMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	pMFMediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+	pMFMediaType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, ch);
+	pMFMediaType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, rate);
+	pMFMediaType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+	pMFMediaType->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, (ch * 16) / 8);
+	pMFMediaType->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, rate * (ch * 16) / 8);
+
 	hr = pMFSourceReader->SetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), nullptr, pMFMediaType.Get());
 	
 	if (FAILED(hr)) {
+		Logger::Write("SetCurrentMediaTypeエラー");
 		return soundData;
 	}
+	Logger::Write("SetCurrentMediaType通った");
 
 	Microsoft::WRL::ComPtr<IMFMediaType> finalType;
 	hr = pMFSourceReader->GetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), &finalType);
 	
 	if (FAILED(hr)) {
+		Logger::Write("GetCurrentMediaTypeエラー");
+		return soundData;
+	}
+	Logger::Write("GetCurrentMediaType通った");
+
+	WAVEFORMATEX* waveFormat{ nullptr };
+	hr = MFCreateWaveFormatExFromMFMediaType(finalType.Get(), &waveFormat, nullptr);
+
+	if (FAILED(hr) || waveFormat == nullptr) {
+		Logger::Write("waveFormatがnullptrかMFCreateWaveFormatExFromMFMediaTypeエラー");
 		return soundData;
 	}
 
@@ -144,20 +196,19 @@ SoundData Sound::SoundLoadMP3(const wchar_t* wpath)
 		pMFSample->ConvertToContiguousBuffer(&pMFMediaBuffer);
 
 		BYTE* pBuffer{ nullptr };
-		DWORD cbCurrentLength{ 0 };
-		pMFMediaBuffer->Lock(&pBuffer, nullptr, &cbCurrentLength);
+		DWORD cbCurrentLength = 0, maxLength = 0;
+		pMFMediaBuffer->Lock(&pBuffer, &maxLength, &cbCurrentLength);
 
-		mediaData.resize(static_cast<size_t>(mediaData.size()) + static_cast<size_t>(cbCurrentLength));
-		memcpy(mediaData.data() + mediaData.size() - static_cast<size_t>(cbCurrentLength), pBuffer, static_cast<size_t>(cbCurrentLength));
+		if (cbCurrentLength) {
+			size_t old = mediaData.size();
+			mediaData.resize(old + cbCurrentLength);
+			std::memcpy(mediaData.data() + old, pBuffer, cbCurrentLength);
+		}
+
+		//mediaData.resize(static_cast<size_t>(mediaData.size()) + static_cast<size_t>(cbCurrentLength));
+		//memcpy(mediaData.data() + mediaData.size() - static_cast<size_t>(cbCurrentLength), pBuffer, static_cast<size_t>(cbCurrentLength));
 
 		pMFMediaBuffer->Unlock();
-	}
-
-	WAVEFORMATEX* waveFormat{ nullptr };
-	hr = MFCreateWaveFormatExFromMFMediaType(finalType.Get(), &waveFormat, nullptr);
-	
-	if (FAILED(hr) || waveFormat == nullptr) {
-		return soundData;
 	}
 
 	BYTE* heap = new BYTE[mediaData.size()];
@@ -174,15 +225,19 @@ SoundData Sound::SoundLoadMP3(const wchar_t* wpath)
 
 SoundData Sound::SoundLoad(const char* filename)
 {
+	Logger::Write("Soundロード開始");
 	std::string path(filename ? filename : "");
 	std::string ext = ToLowerExt(path);
 
 	SoundData soundData = {};
 
+	Logger::Write("Soundがwavかmp3か判定開始");
 	if (ext == ".wav") {
+		Logger::Write("Soundはwav");
 		soundData = SoundLoadWave(filename);
 	}
 	if (ext == ".mp3") {
+		Logger::Write("Soundはmp3");
 		std::wstring w = ToWide(filename);
 		soundData = SoundLoadMP3(w.c_str());
 	}
@@ -238,5 +293,6 @@ std::wstring Sound::ToWide(const char* utf8) {
 std::string Sound::ToLowerExt(const std::string& path) {
 	auto pos = path.find_last_of('.');
 	std::string ext = (pos == std::string::npos) ? "" : path.substr(pos);
+	std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return (char)std::tolower(c); });
 	return ext;
 }

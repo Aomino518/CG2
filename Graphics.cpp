@@ -238,21 +238,27 @@ bool Graphics::CreateDevice(bool enableDebug)
 #endif
 
 	// アダプタ選定
-	adapter_.Reset();
-	for (UINT i = 0; factory_->EnumAdapterByGpuPreference(
-		i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter_)) != DXGI_ERROR_NOT_FOUND; ++i) {
-		DXGI_ADAPTER_DESC3 desc;
-		ZeroMemory(&desc, sizeof(desc));
+	adapter_ = nullptr;
 
-		if (FAILED(adapter_->GetDesc3(&desc))) {
-			adapter_.Reset();
-		} else if (desc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE) {
-			adapter_.Reset(); // ソフトウェアは不採用
-		} else {
-			Logger::Write(ConvertString(std::format(L"Use Adapter: {}\n", desc.Description)));
-			break; // 採用
+	for (UINT i = 0; factory_->EnumAdapterByGpuPreference(i,
+		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter_)) !=
+		DXGI_ERROR_NOT_FOUND; ++i) {
+		// アダプターの情報を取得する
+		DXGI_ADAPTER_DESC3 adapterDesc{};
+		HRESULT hr = adapter_->GetDesc3(&adapterDesc);
+		assert(SUCCEEDED(hr));
+
+		// ソフトウェアアダプタでなければ採用
+		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
+			// 採用したアダプタの内容をログに出力
+			Logger::Write(ConvertString(std::format(L"Use Adapter: {}\n", adapterDesc.Description)));
+			break;
 		}
+		// ソフトウェアアダプタの場合は見なかったことにする
+		adapter_ = nullptr;
 	}
+	// 適切なアダプタが見つからなかったので起動できない
+	assert(adapter_ != nullptr);
 
 	if (!adapter_) {
 		Logger::Write("ERROR: No suitable hardware adapter found.");

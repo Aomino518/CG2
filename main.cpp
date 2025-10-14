@@ -18,9 +18,8 @@
 #include "PsoBuilder.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
+#include <algorithm>
 #pragma comment(lib, "Dbghelp.lib")
-
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #pragma region 構造体
 struct Material {
@@ -57,9 +56,31 @@ struct MaterialData {
 	std::string textureFilePath;
 };
 
+// モデル関係の構造体
 struct ModelData {
 	std::vector<VertexData> vertices;
+	std::vector<uint32_t> indices;
 	MaterialData material;
+};
+
+// 三つ組のキー
+struct TripletKey {
+	uint32_t v, vt, vn;
+	bool operator == (const TripletKey&) const = default;
+};
+
+struct TripletHash {
+	size_t operator()(const TripletKey& k) const noexcept {
+		size_t h = 0;
+		auto mix = [&](uint32_t x) {
+			h ^= std::hash<uint32_t>{}(x)+0x9e3779b97f4a7c15ULL + (h << 5) + (h >> 2);
+			};
+
+		mix(k.v);
+		mix(k.vt);
+		mix(k.vn);
+		return h;
+	}
 };
 
 struct D3DResourceLeakChecker {
@@ -316,6 +337,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
 	assert(file.is_open());
 
+	std::unordered_map<TripletKey, uint32_t, TripletHash> lut;
+
 	while (std::getline(file, line)) {
 		std::string identifier;
 		std::istringstream s(line);
@@ -335,34 +358,47 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			s >> normal.x >> normal.y >> normal.z;
 			normals.push_back(normal);
 		} else if (identifier == "f") {
-			VertexData triangle[3];
+			//VertexData triangle[3];
+
+			struct FaceElm { uint32_t v, t, n; } f[3]{};
+
 			// 面は三角形限定。その他は未対応
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
+				std::replace(vertexDefinition.begin(), vertexDefinition.end(), '/', ' ');
 				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得する
 				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/'); // /区切りでインデックスを読んでいく
-					elementIndices[element] = std::stoi(index);
-				}
-				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-				position.x *= -1.0f;
-				texcoord.y = 1.0f - texcoord.y;
-				normal.x *= -1.0f;
-				//VertexData vertex = { position, texcoord, normal };
-				//modelData.vertices.push_back(vertex);
-				triangle[faceVertex] = { position, texcoord, normal };
+
+				v >> f[faceVertex].v >> f[faceVertex].t >> f[faceVertex].n;
+				f[faceVertex].v--;
+				f[faceVertex].t--;
+				f[faceVertex].n--;
 			}
-			// 頂点を逆順で登録、回り順を逆順にする
-			modelData.vertices.push_back(triangle[2]);
-			modelData.vertices.push_back(triangle[1]);
-			modelData.vertices.push_back(triangle[0]);
+
+			for (int order : {2, 1, 0}) {
+				TripletKey key{ f[order].v, f[order].t, f[order].n };
+				auto it = lut.find(key);
+				uint32_t idx;
+				if (it == lut.end()) {
+					// 頂点生成
+					Vector4 p = positions[key.v];
+					Vector2 t = texcoords[key.vt];
+					Vector3 n = normals[key.vn];
+
+					p.x *= -1.0f;
+					t.y = 1.0f - t.y;
+					n.x *= -1.0f;
+
+					VertexData vtx{ p, t, n };
+					idx = (uint32_t)modelData.vertices.size();
+					modelData.vertices.push_back(vtx);
+					lut.emplace(key, idx);
+				} else {
+					idx = it->second;
+				}
+				modelData.indices.push_back(idx);
+			}
 
 		} else if (identifier == "mtllib") {
 			// materialTemplateLibraryファイルの名前を取得する
@@ -376,12 +412,21 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
-
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+	D3DResourceLeakChecker leakCheck;
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+	SetUnhandledExceptionFilter(ExportDump);
 	Logger::Init();
 	Logger::Write("アプリ開始");
+
+	std::unique_ptr<Application> app = std::make_unique<Application>(1280, 720, L"CG2");
+	app->Init();
+	if (!app) {
+		Logger::Write("App 初期化失敗");
+		Logger::Shutdown();
+		return false;
+	}
 
 	Graphics graphics;
 	Input input;
@@ -390,17 +435,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	RootSignatureFactory rootSignatureFactory;
 	InputLayout inputLayout;
 	PsoBuilder psoBuilder;
-
-	std::unique_ptr<Application> app = std::make_unique<Application>(1280, 720, L"CG2");
-	if (!app->Init()) {
-		Logger::Write("App 初期化失敗");
-		Logger::Shutdown();
-		return false;
-	}
-	
-	D3DResourceLeakChecker leakCheck;
-	CoInitializeEx(0, COINIT_MULTITHREADED);
-	SetUnhandledExceptionFilter(ExportDump);
 
 	// graphicsの初期化
 	graphics.Init(app->GetHWND(), app->GetWidth(), app->GetHeight(), true);
@@ -581,6 +615,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	);
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso3D = psoBuilder.BuildPso(psoDesc3D);
+	Logger::Write("PSO3D生成完了");
 
 	// 2D用
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc2D{};
@@ -595,8 +630,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	);
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso2D = psoBuilder.BuildPso(psoDesc2D);
+	Logger::Write("PSO2D生成完了");
 
-
+#pragma region モデル用の頂点リソース
 	// 頂点リソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = CreateBufferResource(graphics.GetDevice(), sizeof(VertexData) * modelData.vertices.size());
 
@@ -608,7 +644,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	// 1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
+	Logger::Write("VertexResource生成完了");
 
+	// インデックスモデル用の頂点リソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferModel = CreateBufferResource(graphics.GetDevice(), sizeof(uint32_t) * modelData.indices.size());
+
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewModel{};
+	// リソースの先頭のアドレスから使う
+	indexBufferViewModel.BufferLocation = indexBufferModel->GetGPUVirtualAddress();
+	indexBufferViewModel.SizeInBytes = UINT(sizeof(uint32_t) * modelData.indices.size());
+	indexBufferViewModel.Format = DXGI_FORMAT_R32_UINT;
+	Logger::Write("indexBufferViewModel生成完了");
+
+	// モデル用の頂点リソースにデータを書き込む
+	VertexData* vertexData = nullptr;
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData)* modelData.vertices.size());
+	vertexResource->Unmap(0, nullptr);
+	Logger::Write("VertexData生成完了");
+
+	// モデル用の頂点リソースにデータを書き込む
+	uint32_t* indexDataModel = nullptr;
+	// 書き込むためのアドレスを取得
+	indexBufferModel->Map(0, nullptr, reinterpret_cast<void**>(&indexDataModel));
+	std::memcpy(indexDataModel, modelData.indices.data(), sizeof(uint32_t)* modelData.indices.size());
+	indexBufferModel->Unmap(0, nullptr);
+
+	Logger::Write("indexDataModelに書き込み完了");
+#pragma endregion
+
+#pragma region スプライト用の頂点リソース
 	/*--IndexBufferViewの作成--*/
 	/*--Sprite用--*/
 	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
@@ -618,6 +684,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
 	// インデックスはuint32_tとする
 	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+
+	Logger::Write("IndexBufferView生成完了");
 
 	// Sprite用の頂点リソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSprite = CreateBufferResource(graphics.GetDevice(), sizeof(VertexData) * 4);
@@ -630,22 +698,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 1頂点あたりのサイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
-	/*--Model用--*/
-	D3D12_INDEX_BUFFER_VIEW indexBufferViewModel{};
-	// リソースの先頭のアドレスから使う
-	indexBufferViewModel.BufferLocation = indexResourceModel->GetGPUVirtualAddress();
-	indexBufferViewModel.SizeInBytes = sizeof(uint32_t) * 6;
-	indexBufferViewModel.Format = DXGI_FORMAT_R32_UINT;
+	Logger::Write("Sprite用の頂点リソース生成完了");
 
-
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexData = nullptr;
-	// 書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
-
+	// Sprite用の頂点リソース
 	VertexData* vertexDataSprite = nullptr;
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	Logger::Write("VertexDataSprite生成完了");
 	// 矩形
 	vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
 	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
@@ -657,7 +715,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[3].position = { 360.0f, 0.0f, 0.0f, 1.0f };
 	vertexDataSprite[3].texcoord = { 1.0f, 0.0f };
 
-	// インデックスリソースにデータを書き込む
+	// Sprite用のインデックスリソースにデータを書き込む
 	uint32_t* indexDataSprite = nullptr;
 	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
 	indexDataSprite[0] = 0;
@@ -666,11 +724,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[3] = 1;
 	indexDataSprite[4] = 3;
 	indexDataSprite[5] = 2;
+	Logger::Write("indexResourceに書き込み完了");
+#pragma endregion
 
 	//uint32_t index = 0;
-	uint32_t* indexDataModel = nullptr;
-	indexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&indexDataModel));
-	std::memcpy(indexDataModel, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+	//uint32_t* indexDataModel = nullptr;
+	//indexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&indexDataModel));
+	//std::memcpy(indexDataModel, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
 	/*for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
@@ -698,6 +758,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
+	Logger::Write("viewport");
 
 	// シザー矩形
 	D3D12_RECT scissorRect{};
@@ -706,6 +767,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.right = app->GetWidth();
 	scissorRect.top = 0;
 	scissorRect.bottom = app->GetHeight();
+	Logger::Write("scissorRect");
 
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
@@ -732,19 +794,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvHeap.Get(),
 		srvHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvHeap->GetGPUDescriptorHandleForHeapStart());
+	Logger::Write("ImGui");
 
 	// 初期色 (RGBA)
 	float modelColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float translateSprite[3] = { 0.0f, 0.0f, 0.0f };
+	Logger::Write("初期色");
 
 	float transformRotate[3] = { 0.0f, 0.0f, 0.0f };
 
 	// Textureの切り替え変数
 	bool useMonsterBall = false;
+	Logger::Write("Textureの切り替え変数");
 
 	// 音声読み込み
 	SoundData soundData1 = xAudio2.SoundLoad("resources/gold.mp3");
+	Logger::Write("音声読み込み");
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
@@ -829,11 +895,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 			cmdList_->SetGraphicsRootSignature(rootSignature.Get());
 			cmdList_->SetPipelineState(pso3D.Get()); // PSOを設定
+			cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 			cmdList_->IASetIndexBuffer(&indexBufferViewModel);
-			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する。
-			cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する。
 			cmdList_->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
 			// wvp用のCBufferの場所を設定
@@ -845,7 +911,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			cmdList_->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 
 			// 描画 (DrawCall)。
-			cmdList_->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+			cmdList_->DrawIndexedInstanced(UINT(modelData.indices.size()), 1, 0, 0, 0);
 
 			cmdList_->SetPipelineState(pso2D.Get());
 			cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -882,6 +948,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	graphics.Shutdown();
 
+	Logger::Write("AppのShutdown");
 	app->Shutdown();
 
 	Logger::Write("アプリ終了");

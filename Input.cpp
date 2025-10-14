@@ -2,12 +2,13 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-bool Input::Init(Application* app)
+void Input::Init(Application* app)
 {
+	app_ = app;
 	//========================================
 	// DirectInputの初期化
 	//========================================
-	HRESULT result = DirectInput8Create(app->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput_, nullptr);
+	HRESULT result = DirectInput8Create(app_->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput_, nullptr);
 	assert(SUCCEEDED(result));
 
 	// キーボードデバイスの生成
@@ -20,10 +21,8 @@ bool Input::Init(Application* app)
 
 	// 排他制御レベルのセット
 	result = keyboard_->SetCooperativeLevel(
-		app->GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		app_->GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
-
-	return true;
 }
 
 void Input::Shutdown()

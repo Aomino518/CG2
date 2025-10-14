@@ -10,39 +10,59 @@
 #include "DebugCamera.h"
 #define _USE_MATH_DEFINES 
 #include <math.h>
+#include "Logger.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#pragma endregion
+LRESULT Application::WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wp, lp)) {
+		Logger::Write("ループ開始");
+		return true;
+	}
+
+	// メッセージに応じてゲーム固有の処理を行う
+	switch (msg) {
+	case WM_DESTROY:
+		// OSに対してアプリの終了を伝える
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	// 標準のメッセージ処理行う
+	return DefWindowProc(hWnd, msg, wp, lp);
+}
 
 Application::Application(int width, int height, const wchar_t* title)
-	: hInstance_(GetModuleHandle(nullptr)), title_(title ? title : L"CG2"),
-		clientWidth_(width), clientHeight_(height) {}
-
+{
+	clientWidth_ = width;
+	clientHeight_ = height;
+	title_ = title;
+}
 
 Application::~Application()
 {
-	Shutdown();
 }
 
-bool Application::Init()
+void Application::Init()
 {
 	/*--ウィンドウクラスの登録--*/
 
 	// ウィンドウプロシージャ
-	wndclass.lpfnWndProc = Application::WndProcSetup;
+	wndclass.lpfnWndProc = WindowProc;
 
 	// ウィンドウクラス名
 	wndclass.lpszClassName = className_.c_str();
 
 	// インスタンスハンドル
-	wndclass.hInstance = hInstance_;
+	wndclass.hInstance = GetModuleHandle(nullptr);;
 
 	// カーソル
 	wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 	// ウィンドウクラスを登録する
 	RegisterClass(&wndclass);
+
 
 	/*--ウィンドウサイズを決定--*/
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
@@ -66,14 +86,11 @@ bool Application::Init()
 		this // オプション
 	);
 
-	if (!hwnd_) {
-		return false;
-	}
+	// ゲッター関数で取得するために代入
+	hInstance_ = wndclass.hInstance;
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd_, SW_SHOW);
-	isRunning_ = true;
-	return true;
 }
 
 bool Application::ProcessMessage()
@@ -81,13 +98,12 @@ bool Application::ProcessMessage()
 	MSG msg{};
 	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 		if (msg.message == WM_QUIT) { 
-			isRunning_ = false; 
 			return false; 
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	return isRunning_;
+	return true;
 }
 
 void Application::Shutdown()
@@ -98,51 +114,4 @@ void Application::Shutdown()
 
 	// COMの終了処理
 	CoUninitialize();
-
-	isRunning_ = false;
-}
-
-LRESULT Application::WndProcSetup(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	if(msg == WM_NCCREATE) {
-		auto cs = reinterpret_cast<CREATESTRUCT*>(lp);
-		auto that = reinterpret_cast<Application*>(cs->lpCreateParams);
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(that));
-		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Application::WndProcThunk));
-		return that->WndProc(hWnd, msg, wp, lp);
-	}
-	return DefWindowProc(hWnd, msg, wp, lp);
-}
-
-LRESULT Application::WndProcThunk(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	auto that = reinterpret_cast<Application*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	return that ? that->WndProc(hWnd, msg, wp, lp) : DefWindowProc(hWnd, msg, wp, lp);
-}
-
-LRESULT Application::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wp, lp)) {
-		return true;
-	}
-
-	// メッセージに応じてゲーム固有の処理を行う
-	switch (msg) {
-	case WM_CLOSE:
-		// ここで明示的に破棄
-		DestroyWindow(hWnd);
-		return 0;
-	case WM_SIZE:
-		clientWidth_ = LOWORD(lp);
-		clientHeight_ = HIWORD(lp);
-		return 0;
-		// ウィンドウが破棄された
-	case WM_DESTROY:
-		// OSに対してアプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	// 標準のメッセージ処理行う
-	return DefWindowProc(hWnd, msg, wp, lp);
 }

@@ -10,16 +10,16 @@
 class Application
 {
 public:
-	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 	Application(int width, int height, const wchar_t* title);
 	~Application();
 
-	bool Init();			// ウィンドウ作成
+	void Init();			// ウィンドウ作成
 	bool ProcessMessage();  // メッセージポンプ
 	void Shutdown();		// 明示終了
 
 	// アクセッサ
-	HINSTANCE GetHInstance() const { return wndclass.hInstance; }
+	HINSTANCE GetHInstance() const { return hInstance_; }
 	HWND GetHWND() const { return hwnd_; }
 	int GetWidth() const { return clientWidth_; }
 	int GetHeight() const { return clientHeight_; }
@@ -33,9 +33,5 @@ private:
 	int clientWidth_ = 1280;
 	int clientHeight_ = 720;
 	DWORD style_ = WS_OVERLAPPEDWINDOW;
-	bool isRunning_ = false;
-
-	static LRESULT CALLBACK WndProcSetup(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
-	static LRESULT CALLBACK WndProcThunk(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 };
 
