@@ -16,6 +16,8 @@
 #include "RootSignatureFactory.h"
 #include "InputLayout.h"
 #include "PsoBuilder.h"
+#include "SpriteCommon.h"
+#include "Sprite.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <algorithm>
@@ -459,6 +461,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootSignatureFactory.Init(&graphics);
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = rootSignatureFactory.CreateCommon();
 
+	std::unique_ptr<SpriteCommon> spriteCommon = std::make_unique<SpriteCommon>();
+	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+
 #pragma region Texture読み込み
 	// Textureを読んで転送する
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
@@ -794,19 +799,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvHeap.Get(),
 		srvHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvHeap->GetGPUDescriptorHandleForHeapStart());
-	Logger::Write("ImGui");
+	Logger::Write("ImGui初期化");
 
 	// 初期色 (RGBA)
 	float modelColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float triangleColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float translateSprite[3] = { 0.0f, 0.0f, 0.0f };
-	Logger::Write("初期色");
 
 	float transformRotate[3] = { 0.0f, 0.0f, 0.0f };
 
 	// Textureの切り替え変数
 	bool useMonsterBall = false;
-	Logger::Write("Textureの切り替え変数");
 
 	// 音声読み込み
 	SoundData soundData1 = xAudio2.SoundLoad("resources/gold.mp3");
