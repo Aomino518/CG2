@@ -1,0 +1,11 @@
+アプリ開始
+Use Adapter: NVIDIA GeForce RTX 4060 Laptop GPU
+
+D3D12CreateDevice OK (FeatureLevel: 12.2)
+Complete Create D3D12Device!!!
+Complete Create Device
+Complete Create Commands
+Complete Create SwapChain
+Complete Create HeapAndTargetView
+Complete Create Fence
+Complete Create D3D12Device!!!
