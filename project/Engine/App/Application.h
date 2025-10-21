@@ -1,0 +1,37 @@
+#pragma once
+#include <Windows.h>
+#include <string>
+#include <vector>
+#include <cassert>
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+
+class Application
+{
+public:
+	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+	Application(int width, int height, const wchar_t* title);
+	~Application();
+
+	void Init();			// ウィンドウ作成
+	bool ProcessMessage();  // メッセージポンプ
+	void Shutdown();		// 明示終了
+
+	// アクセッサ
+	HINSTANCE GetHInstance() const { return hInstance_; }
+	HWND GetHWND() const { return hwnd_; }
+	int GetWidth() const { return clientWidth_; }
+	int GetHeight() const { return clientHeight_; }
+
+private:
+	HINSTANCE hInstance_ = nullptr;
+	HWND hwnd_ = nullptr;
+	WNDCLASS wndclass{};
+	std::wstring className_ = L"CG2WindowClass";
+	std::wstring title_ = L"CG2";
+	int clientWidth_ = 1280;
+	int clientHeight_ = 720;
+	DWORD style_ = WS_OVERLAPPEDWINDOW;
+};
+
