@@ -460,9 +460,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// RootSignature作成
 	rootSignatureFactory.Init(&graphics);
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = rootSignatureFactory.CreateCommon();
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rs2D = rootSignatureFactory.Create2D();
 
 	std::unique_ptr<SpriteCommon> spriteCommon = std::make_unique<SpriteCommon>();
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+
+	// スプライト共通部の作成
+	spriteCommon->Init(&graphics, dxcCompiler, rs2D.Get());
 
 #pragma region Texture読み込み
 	// Textureを読んで転送する
@@ -577,9 +581,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc3D{};
 	inputLayoutDesc3D = inputLayout.CreateInputLayout3D();
 
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc2D{};
-	inputLayoutDesc2D = inputLayout.CreateInputLayout2D();
-
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
@@ -603,9 +604,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<IDxcBlob> vs3DBlob = dxcCompiler.CompileShader(L"resources/hlsl/Object3D.VS.hlsl", L"vs_6_0");
 	Microsoft::WRL::ComPtr<IDxcBlob> ps3DBlob = dxcCompiler.CompileShader(L"resources/hlsl/Object3D.PS.hlsl", L"ps_6_0");
 
-	Microsoft::WRL::ComPtr<IDxcBlob> vs2DBlob = dxcCompiler.CompileShader(L"resources/hlsl/Object2D.VS.hlsl", L"vs_6_0");
-	Microsoft::WRL::ComPtr<IDxcBlob> ps2DBlob = dxcCompiler.CompileShader(L"resources/hlsl/Object2D.PS.hlsl", L"ps_6_0");
-
 	// PSOを生成する
 	// 3D用
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc3D{};
@@ -621,21 +619,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso3D = psoBuilder.BuildPso(psoDesc3D);
 	Logger::Write("PSO3D生成完了");
-
-	// 2D用
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc2D{};
-	psoBuilder.Init(&graphics);
-	psoDesc2D = psoBuilder.CreatePsoDesc(
-		rootSignature,
-		inputLayoutDesc2D,
-		vs2DBlob,
-		ps2DBlob,
-		blendDesc,
-		rasterizerDesc
-	);
-
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso2D = psoBuilder.BuildPso(psoDesc2D);
-	Logger::Write("PSO2D生成完了");
 
 #pragma region モデル用の頂点リソース
 	// 頂点リソース
@@ -916,8 +899,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 描画 (DrawCall)。
 			cmdList_->DrawIndexedInstanced(UINT(modelData.indices.size()), 1, 0, 0, 0);
 
-			cmdList_->SetPipelineState(pso2D.Get());
-			cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			spriteCommon->DrawCommon();
 			// Spriteの描画。変更が必要なものだけを変更する
 			cmdList_->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
 			cmdList_->IASetIndexBuffer(&indexBufferViewSprite);// IBV設定
