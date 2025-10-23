@@ -51,6 +51,18 @@ public:
 	void SetMaterial(Vector4 material) { materialData->color = material; }
 	void SetUvTransform(Transform uvTransform) { uvTransform_ = uvTransform; }
 
+	// Getter
+	const Vector2& GetPosition() const { return position; }
+	float GetRotation() const { return rotation; }
+	const Vector4& GetColor() const { return materialData->color; }
+	const Vector2& GetSize() const { return size; }
+
+	// Setter
+	void SetPosition(const Vector2& position) { this->position = position; }
+	void SetRotation(float rotation) { this->rotation = rotation; }
+	void SetColor(const Vector4& color) { materialData->color = color; }
+	void SetSize(const Vector2& size) { this->size = size; }
+
 private:
 	SpriteCommon* spriteCommon = nullptr;
 
@@ -74,4 +86,8 @@ private:
 	Transform uvTransform_ = {};
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
+
+	Vector2 position = { 0.0f, 0.0f };
+	float rotation = 0.0f;
+	Vector2 size = { 360.0f, 360.0f };
 };

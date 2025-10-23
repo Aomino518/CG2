@@ -439,11 +439,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rs2D = rootSignatureFactory.Create2D();
 
 	std::unique_ptr<SpriteCommon> spriteCommon = std::make_unique<SpriteCommon>();
-	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+	std::vector<std::unique_ptr<Sprite>> sprites;
 
 	// スプライト共通部の作成
 	spriteCommon->Init(&graphics, dxcCompiler, rs2D.Get());
-	sprite->Init(spriteCommon.get());
+
+	Vector4 spriteMaterial = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector2 positoin;
+	float rotation = 0.0f;
+	Vector2 size = {100.0f, 100.0f};
 
 #pragma region Texture読み込み
 	// Textureを読んで転送する
@@ -667,7 +671,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	//Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
-	Transform transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	Transform uvTransformSprite = {
 		{1.0f, 1.0f, 1.0f},
@@ -705,7 +708,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	const float clear[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
 
-	Vector4 spriteMaterial = { 1.0f, 1.0f, 1.0f, 1.0f };
+	ImGui::StyleColorsDark();
+	ImGuiStyle& s = ImGui::GetStyle();
+	ImVec4* c = s.Colors;
+
+	c[ImGuiCol_WindowBg] = ImVec4(0.02f, 0.03f, 0.05f, 1.0f);
+	c[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.25f, 0.35f, 1.0f);
+	c[ImGuiCol_Button] = ImVec4(0.00f, 0.40f, 0.55f, 0.9f);
+	c[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.55f, 0.75f, 1.0f);
+	c[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.60f, 0.90f, 1.0f);
+	c[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.40f, 0.55f, 1.0f);
+	c[ImGuiCol_Text] = ImVec4(0.80f, 0.90f, 1.00f, 1.0f);
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (app->ProcessMessage()) {
@@ -726,10 +739,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		materialData->color.z = modelColor[2];
 		materialData->color.w = modelColor[3];
 
-		sprite->SetTransform(transformSprite);
-		sprite->SetMaterial(spriteMaterial);
-		sprite->SetTexture(textureSrvHandleGPU);
-		sprite->SetUvTransform(uvTransformSprite);
+		for (uint32_t i = 0; i < 5; ++i) {
+			positoin = { 100.0f + i * 200.0f, 200.0f };
+			auto sprite = std::make_unique<Sprite>();
+			sprite->Init(spriteCommon.get());
+			sprite->SetPosition(positoin);
+			sprite->SetRotation(rotation);
+			sprite->SetColor(spriteMaterial);
+			sprite->SetSize(size);
+			sprite->SetTexture(textureSrvHandleGPU);
+			sprite->SetUvTransform(uvTransformSprite);
+			sprites.push_back(std::move(sprite));
+		}
+
+		//sprite->SetTransform(transformSprite);
+		//sprite->SetMaterial(spriteMaterial);
+		//sprite->SetTexture(textureSrvHandleGPU);
+		//sprite->SetUvTransform(uvTransformSprite);
 
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 		Matrix4x4 viewMatrix = debugCamera.GetViewMatrix();
@@ -739,7 +765,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wvpData->World = worldMatrix;
 		wvpData->WVP = worldViewProjectionMatrix;
 
-		sprite->Update();
+		for (auto& sprite : sprites) {
+			sprite->Update();
+		}
 
 		// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 		ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
@@ -749,13 +777,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Checkbox("enableLighting", (bool*)&materialData->enableLighting);
 
 		ImGui::ColorEdit4("spriteColor", (float*)&spriteMaterial);
-		ImGui::SliderFloat3("translateSprite", (float*)&transformSprite.translate, 0.0f, 1000.0f, "%.3f");
-		ImGui::SliderFloat3("rotateSprite", (float*)&transformSprite.rotate, 0.0f, 10.0f, "%.3f");
-		ImGui::SliderFloat3("scaleSprite", (float*)&transformSprite.scale, 0.0f, 10.0f, "%.3f");
+		ImGui::SliderFloat2("translateSprite", (float*)&positoin, 0.0f, 1000.0f, "%.3f");
+		//ImGui::SliderFloat3("rotateSprite", (float*)&transformSprite.rotate, 0.0f, 10.0f, "%.3f");
+		//ImGui::SliderFloat3("scaleSprite", (float*)&transformSprite.scale, 0.0f, 10.0f, "%.3f");
+		ImGui::Text("positoin.x : %f", positoin.x);
+		ImGui::Text("positoin.y : %f", positoin.y);
 		ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+		//ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+		//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+		//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 
 		// ImGuiの内部コマンドを生成する
 		ImGui::Render();
@@ -792,7 +822,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		cmdList_->DrawIndexedInstanced(UINT(modelData.indices.size()), 1, 0, 0, 0);
 
 		spriteCommon->DrawCommon();
-		sprite->Draw();
+		for (auto& sprite : sprites) {
+			sprite->Draw();
+		}
 
 		// 実際のcommandListのImGuiの描画コマンドを積む
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList_);

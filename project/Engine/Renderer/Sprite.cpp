@@ -33,15 +33,18 @@ void Sprite::Init(SpriteCommon* spriteCommon_) {
 	// VertexDataに割り当て
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	// 矩形
-	vertexData[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	vertexData[0].position = { 0.0f, 1.0f, 0.0f, 1.0f };
 	vertexData[0].texcoord = { 0.0f, 1.0f };
 	vertexData[0].normal = { 0.0f, 0.0f, -1.0f };
 	vertexData[1].position = { 0.0f, 0.0f, 0.0f, 1.0f };
 	vertexData[1].texcoord = { 0.0f, 0.0f };
-	vertexData[2].position = { 360.0f, 360.0f, 0.0f, 1.0f };
+	vertexData[1].normal = { 0.0f, 0.0f, -1.0f };
+	vertexData[2].position = { 1.0f, 1.0f, 0.0f, 1.0f };
 	vertexData[2].texcoord = { 1.0f, 1.0f };
-	vertexData[3].position = { 360.0f, 0.0f, 0.0f, 1.0f };
+	vertexData[2].normal = { 0.0f, 0.0f, -1.0f };
+	vertexData[3].position = { 1.0f, 0.0f, 0.0f, 1.0f };
 	vertexData[3].texcoord = { 1.0f, 0.0f };
+	vertexData[3].normal = { 0.0f, 0.0f, -1.0f };
 	Logger::Write("VertexDataに割り当て完了");
 
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
@@ -75,6 +78,13 @@ void Sprite::Update()
 	Graphics* graphics = spriteCommon->GetGraphics();
 	uint32_t width = graphics->GetWidth();
 	uint32_t height = graphics->GetHeight();
+
+	// translateの更新
+	transform_.translate = { position.x, position.y, 0.0f };
+	// rotationの更新
+	transform_.rotate = { 0.0f,0.0f, rotation };
+	// scaleの更新
+	transform_.scale = { size.x, size.y, 1.0f };
 
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
