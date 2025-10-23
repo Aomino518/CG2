@@ -1,5 +1,8 @@
 #pragma once
 #include <cstdint>
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 struct Matrix3x3 {
 	float m[3][3];
@@ -7,18 +10,6 @@ struct Matrix3x3 {
 
 struct Matrix4x4 {
 	float m[4][4];
-};
-
-struct Vector2 {
-	float x, y;
-};
-
-struct Vector3 {
-	float x, y, z;
-};
-
-struct Vector4 {
-	float x, y, z, w;
 };
 
 // 加算
