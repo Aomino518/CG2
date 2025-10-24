@@ -58,10 +58,10 @@ public:
 	const Vector2& GetSize() const { return size; }
 
 	// Setter
-	void SetPosition(const Vector2& position) { this->position = position; }
-	void SetRotation(float rotation) { this->rotation = rotation; }
-	void SetColor(const Vector4& color) { materialData->color = color; }
-	void SetSize(const Vector2& size) { this->size = size; }
+	void SetPosition(const Vector2& position_) { this->position = position_; }
+	void SetRotation(float rotation_) { this->rotation = rotation_; }
+	void SetColor(const Vector4& color_) { materialData->color = color_; }
+	void SetSize(const Vector2& size_) { this->size = size_; }
 
 private:
 	SpriteCommon* spriteCommon = nullptr;
