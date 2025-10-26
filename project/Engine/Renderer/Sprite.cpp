@@ -102,6 +102,8 @@ void Sprite::Update()
 
 void Sprite::Draw()
 {
+	assert(textureSrvHandleGPU_.ptr != 0 && "Sprite texture not set!");
+
 	cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
 	cmdList_->IASetIndexBuffer(&indexBufferView);// IBV設定
@@ -112,7 +114,6 @@ void Sprite::Draw()
 
 	cmdList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
 
-	// 描画 (DrawCall)。3頂点で一つのインスタンス
 	cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 

@@ -6,6 +6,7 @@
 #include "Vector4.h"
 #include "Matrix.h"
 #include "Graphics.h"
+#include "TextureManager.h"
 
 class SpriteCommon;
 
@@ -41,12 +42,16 @@ public:
 
 	void Draw();
 
-	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE handle) { textureSrvHandleGPU_ = handle; }
+	void SetTexture(uint32_t textureId) { 
+		textureSrvHandleGPU_ = TextureManager::GetGPUHandle(textureId);
+	}
+
 	void SetTransform(Transform transform) { 
 		transform_.translate = transform.translate; 
 		transform_.rotate = transform.rotate;
 		transform_.scale = transform.scale;
 	}
+
 	Transform& TransformRef() { return transform_; }
 	void SetMaterial(Vector4 material) { materialData->color = material; }
 	void SetUvTransform(Transform uvTransform) { uvTransform_ = uvTransform; }
@@ -83,7 +88,7 @@ private:
 	Transform transform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
-	Transform uvTransform_ = {};
+	Transform uvTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
