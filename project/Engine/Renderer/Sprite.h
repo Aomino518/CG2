@@ -61,12 +61,18 @@ public:
 	float GetRotation() const { return rotation; }
 	const Vector4& GetColor() const { return materialData->color; }
 	const Vector2& GetSize() const { return size; }
+	const Vector2& GetAnchorPoint() const { return anchorPoint; }
+	bool GetFlipX() const { return isFlipX_; }
+	bool GetFlipY() const { return isFlipY_; }
 
 	// Setter
 	void SetPosition(const Vector2& position_) { this->position = position_; }
 	void SetRotation(float rotation_) { this->rotation = rotation_; }
 	void SetColor(const Vector4& color_) { materialData->color = color_; }
 	void SetSize(const Vector2& size_) { this->size = size_; }
+	void SetAnchorPoint(const Vector2& anchorPoint_) { this->anchorPoint = anchorPoint_; }
+	void SetFlipX(bool isFlipX) { this->isFlipX_ = isFlipX; }
+	void SetFlipY(bool isFlipY) { this->isFlipY_ = isFlipY; }
 
 private:
 	SpriteCommon* spriteCommon = nullptr;
@@ -95,4 +101,12 @@ private:
 	Vector2 position = { 0.0f, 0.0f };
 	float rotation = 0.0f;
 	Vector2 size = { 360.0f, 360.0f };
+
+	// アンカーポイント
+	Vector2 anchorPoint = { 0.0f, 0.0f };
+
+	// 左右フリップ
+	bool isFlipX_ = false;
+	// 上下フリップ
+	bool isFlipY_ = false;
 };

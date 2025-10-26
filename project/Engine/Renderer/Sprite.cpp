@@ -86,6 +86,29 @@ void Sprite::Update()
 	// scaleの更新
 	transform_.scale = { size.x, size.y, 1.0f };
 
+	// アンカーポイントによる頂点再計算
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	// 左右回転
+	if (isFlipX_) {
+		left = -left;
+		right = -right;
+	}
+
+	// 上下回転
+	if (isFlipY_) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	vertexData[0].position = { left,  bottom, 0.0f, 1.0f }; // 左下
+	vertexData[1].position = { left,  top,    0.0f, 1.0f }; // 左上
+	vertexData[2].position = { right, bottom, 0.0f, 1.0f }; // 右下
+	vertexData[3].position = { right, top,    0.0f, 1.0f }; // 右上
+
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform_.translate));

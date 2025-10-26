@@ -368,22 +368,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rs2D = rootSignatureFactory.Create2D();
 
 	std::unique_ptr<SpriteCommon> spriteCommon = std::make_unique<SpriteCommon>();
-	std::vector<std::unique_ptr<Sprite>> sprites;
+	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 
 	// スプライト共通部の作成
 	spriteCommon->Init(&graphics, dxcCompiler, rs2D.Get());
 
 	Vector4 spriteMaterial = { 1.0f, 1.0f, 1.0f, 1.0f };
-	Vector2 positoin;
+	Vector2 positoin = {0.0f, 0.0f};
 	float rotation = 0.0f;
 	Vector2 size = {100.0f, 100.0f};
 
 	uint32_t tHChecker = TextureManager::Load("resources/uvChecker.png");
-	uint32_t tHMonsterBall = TextureManager::Load("resources/monsterBall.png");
-	uint32_t tHCombo1 = TextureManager::Load("resources/combo1.png");
-
-	std::vector<uint32_t> textureHandles = { tHChecker, tHMonsterBall, tHCombo1 };
-	std::vector<std::string> textureNames = { "uvChecker", "monsterBall", "combo1" };
 
 #pragma region Texture読み込み
 	// モデル読み込み
@@ -647,20 +642,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	c[ImGuiCol_Text] = ImVec4(0.80f, 0.90f, 1.00f, 1.0f);
 	c[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 0.00f, 1.0f);
 
-	for (uint32_t i = 0; i < 5; ++i) {
-		positoin = { 100.0f + i * 200.0f, 200.0f };
-		auto sprite = std::make_unique<Sprite>();
-		sprite->Init(spriteCommon.get());
-		sprite->SetPosition(positoin);
-		sprite->SetRotation(rotation);
-		sprite->SetColor(spriteMaterial);
-		sprite->SetSize(size);
-		sprite->SetTexture(tHChecker);
-		sprite->SetUvTransform(uvTransformSprite);
-		sprites.push_back(std::move(sprite));
-	}
-	std::vector<int> currentTexIndex(sprites.size(), 0);
-
+	sprite->Init(spriteCommon.get());
+	sprite->SetPosition(positoin);
+	sprite->SetRotation(rotation);
+	sprite->SetSize(size);
+	sprite->SetMaterial(spriteMaterial);
+	sprite->SetTexture(tHChecker);
+	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (app->ProcessMessage()) {
 		ImGui_ImplDX12_NewFrame();
@@ -674,6 +662,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		debugCamera.Update();
+
+		sprite->SetPosition(positoin);
+		sprite->Update();
 
 		//materialData->color.x = modelColor[0];
 		//materialData->color.y = modelColor[1];
@@ -693,13 +684,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wvpData->World = worldMatrix;
 		wvpData->WVP = worldViewProjectionMatrix;*/
 
-		for (auto& sprite : sprites) {
-			sprite->SetRotation(rotation);
-			sprite->SetColor(spriteMaterial);
-			sprite->SetSize(size);
-			sprite->Update();
-		}
-
 		// 開発用のUIの処理、実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 		/*ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
 		ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
@@ -707,40 +691,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::ColorEdit4("modelColor", modelColor);
 		ImGui::Checkbox("enableLighting", (bool*)&materialData->enableLighting);*/
 
-		int id = 0;
-		for (auto& sprite : sprites) {
-			ImGui::PushID(id); // 複数スプライトを識別するためにIDを分ける
-			ImGui::Text("Sprite %d", id);
-
-			// コンボボックス（プルダウンメニュー）で選択
-			if (ImGui::BeginCombo("Texture", textureNames[currentTexIndex[id]].c_str())) {
-				for (int n = 0; n < textureNames.size(); n++) {
-					bool isSelected = (currentTexIndex[id] == n);
-					if (ImGui::Selectable(textureNames[n].c_str(), isSelected)) {
-						currentTexIndex[id] = n;
-						sprite->SetTexture(textureHandles[n]); // ←ここで即反映！
-					}
-					if (isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndCombo();
-			}
-			ImGui::PopID();
-			id++;
-		}
-
-		ImGui::ColorEdit4("spriteColor", (float*)&spriteMaterial);
-		int index = 0;
-		for (auto& sprite : sprites) {
-			ImGui::PushID(index);
-			Vector2 pos = sprite->GetPosition();
-			if (ImGui::SliderFloat2("Pos", (float*)&pos, 0.0f, 1000.0f)) {
-				sprite->SetPosition(pos);
-			}
-			ImGui::PopID();
-			index++;
-		}
-		//ImGui::SliderFloat2("translateSprite", (float*)&positoin, 0.0f, 1000.0f, "%.3f");
+		
+		ImGui::SliderFloat2("translateSprite", (float*)&positoin, 0.0f, 1000.0f, "%.3f");
 		//ImGui::SliderFloat3("rotateSprite", (float*)&transformSprite.rotate, 0.0f, 10.0f, "%.3f");
 		//ImGui::SliderFloat3("scaleSprite", (float*)&transformSprite.scale, 0.0f, 10.0f, "%.3f");
 		ImGui::Text("positoin.x : %f", positoin.x);
@@ -785,9 +737,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		cmdList_->DrawIndexedInstanced(UINT(modelData.indices.size()), 1, 0, 0, 0);*/
 
 		spriteCommon->DrawCommon();
-		for (auto& sprite : sprites) {
-			sprite->Draw();
-		}
+		sprite->Draw();
 
 		cmdList_->SetDescriptorHeaps(_countof(heaps), heaps);
 		// 実際のcommandListのImGuiの描画コマンドを積む
