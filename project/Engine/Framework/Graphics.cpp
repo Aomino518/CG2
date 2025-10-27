@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "Logger.h"
 #include "StringUtil.h"
+#include "TextureManager.h"
 #include <format>
 #include <cassert>
 #pragma comment(lib, "d3d12.lib")
@@ -181,8 +182,8 @@ void Graphics::EndFrame()
 	HRESULT hr = cmdList_->Close();
 	assert(SUCCEEDED(hr));
 
-	Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { cmdList_.Get() };
-	cmdQueue_->ExecuteCommandLists(1, commandLists->GetAddressOf());
+	ID3D12CommandList* cmdLists[] = { cmdList_.Get() };
+	cmdQueue_->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 
 	// GPUとOSに画面の交換を行うよう通知する
 	swapChain_->Present(1, 0);
@@ -223,6 +224,8 @@ void Graphics::WaitGPU()
 		// イベントを待つ
 		WaitForSingleObject(fenceEvent_, INFINITE);
 	}
+
+	TextureManager::ClearIntermediate();
 }
 
 bool Graphics::CreateDevice(bool enableDebug)
@@ -381,7 +384,7 @@ bool Graphics::CreateHeapsAndTargets()
 	device_->CreateDepthStencilView(depthTex_.Get(), &dsvDesc, dsvCpuHandle);
 
 	// SRV用のヒープでディスクリプタの数は128。SRVはShaderないで触れるものなので、ShaderVisibleはtrue
-	srvHeap_ = CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvHeap_ = CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, Graphics::kMaxSRVCount, true);
 
 	return true;
 }

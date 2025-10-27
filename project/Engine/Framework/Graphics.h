@@ -7,6 +7,9 @@
 class Graphics
 {
 public:
+	// 最大SRV数 (最大テクスチャ枚数)
+	static constexpr uint32_t kMaxSRVCount = 4096;
+
 	bool Init(HWND hwnd, uint32_t width, uint32_t height, bool enableDebug = true);
 	void Shutdown();
 
