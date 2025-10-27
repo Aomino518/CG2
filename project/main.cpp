@@ -376,7 +376,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector4 spriteMaterial = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector2 positoin = {0.0f, 0.0f};
 	float rotation = 0.0f;
-	Vector2 size = {100.0f, 100.0f};
+	//Vector2 size = {100.0f, 100.0f};
 
 	uint32_t tHChecker = TextureManager::Load("resources/uvChecker.png");
 
@@ -642,13 +642,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	c[ImGuiCol_Text] = ImVec4(0.80f, 0.90f, 1.00f, 1.0f);
 	c[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 0.00f, 1.0f);
 
-	sprite->Init(spriteCommon.get());
-	sprite->SetPosition(positoin);
-	sprite->SetRotation(rotation);
-	sprite->SetSize(size);
-	sprite->SetMaterial(spriteMaterial);
-	sprite->SetTexture(tHChecker);
+	sprite->Create(spriteCommon.get(), tHChecker, positoin, Color::WHITE);
 	
+	sprite->SetRotation(rotation);
+	Vector4 materialColor = sprite->GetColor();
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (app->ProcessMessage()) {
 		ImGui_ImplDX12_NewFrame();
@@ -664,7 +662,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		debugCamera.Update();
 
 		sprite->SetPosition(positoin);
-		sprite->Update();
+		sprite->SetColor(materialColor);
 
 		//materialData->color.x = modelColor[0];
 		//materialData->color.y = modelColor[1];
@@ -691,7 +689,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::ColorEdit4("modelColor", modelColor);
 		ImGui::Checkbox("enableLighting", (bool*)&materialData->enableLighting);*/
 
-		
+		ImGui::ColorEdit4("modelColor", (float*)&materialColor);
 		ImGui::SliderFloat2("translateSprite", (float*)&positoin, 0.0f, 1000.0f, "%.3f");
 		//ImGui::SliderFloat3("rotateSprite", (float*)&transformSprite.rotate, 0.0f, 10.0f, "%.3f");
 		//ImGui::SliderFloat3("scaleSprite", (float*)&transformSprite.scale, 0.0f, 10.0f, "%.3f");

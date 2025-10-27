@@ -7,6 +7,7 @@
 #include "Matrix.h"
 #include "Graphics.h"
 #include "TextureManager.h"
+#include "Color.h"
 
 class SpriteCommon;
 
@@ -43,13 +44,8 @@ public:
 	void Draw();
 
 	void SetTexture(uint32_t textureId) { 
+		textureIndex_ = textureId;
 		textureSrvHandleGPU_ = TextureManager::GetGPUHandle(textureId);
-	}
-
-	void SetTransform(Transform transform) { 
-		transform_.translate = transform.translate; 
-		transform_.rotate = transform.rotate;
-		transform_.scale = transform.scale;
 	}
 
 	Transform& TransformRef() { return transform_; }
@@ -57,22 +53,38 @@ public:
 	void SetUvTransform(Transform uvTransform) { uvTransform_ = uvTransform; }
 
 	// Getter
-	const Vector2& GetPosition() const { return position; }
-	float GetRotation() const { return rotation; }
+	const Vector2& GetPosition() const { return position_; }
+	float GetRotation() const { return rotation_; }
 	const Vector4& GetColor() const { return materialData->color; }
-	const Vector2& GetSize() const { return size; }
-	const Vector2& GetAnchorPoint() const { return anchorPoint; }
+	const Vector2& GetSize() const { return size_; }
+	const Vector2& GetAnchorPoint() const { return anchorPoint_; }
 	bool GetFlipX() const { return isFlipX_; }
 	bool GetFlipY() const { return isFlipY_; }
+	const Vector2& GetTextureLeftTop() const { return textureLeftTop_; }
+	const Vector2& GetTextureSize() const { return textureSize_; }
 
 	// Setter
-	void SetPosition(const Vector2& position_) { this->position = position_; }
-	void SetRotation(float rotation_) { this->rotation = rotation_; }
+	void SetPosition(const Vector2& position) { this->position_ = position; }
+	void SetRotation(float rotation) { this->rotation_ = rotation; }
 	void SetColor(const Vector4& color_) { materialData->color = color_; }
-	void SetSize(const Vector2& size_) { this->size = size_; }
-	void SetAnchorPoint(const Vector2& anchorPoint_) { this->anchorPoint = anchorPoint_; }
+	void SetSize(const Vector2& size) { this->size_ = size; }
+	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint_ = anchorPoint; }
 	void SetFlipX(bool isFlipX) { this->isFlipX_ = isFlipX; }
 	void SetFlipY(bool isFlipY) { this->isFlipY_ = isFlipY; }
+	void SetTextureLeftTop(const Vector2& textureLeftTop) { this->textureLeftTop_ = textureLeftTop; }
+	void SetTextureSize(const Vector2& textureSize) { this->textureSize_ = textureSize; }
+	void SetAlpha(float a) { materialData->color.w = a; }
+	void SetColorRGB(float r, float g, float b) {
+		materialData->color.x = r;
+		materialData->color.y = g;
+		materialData->color.z = b;
+	}
+
+	void Create(SpriteCommon* common, uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size = { 0.0f, 0.0f });
+	void Move(const Vector2& delta);
+	void Rotate(float deltaAngle);
+	void Scale(float factor);
+	void Scale(const Vector2& factor);
 
 private:
 	SpriteCommon* spriteCommon = nullptr;
@@ -98,15 +110,26 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
-	Vector2 position = { 0.0f, 0.0f };
-	float rotation = 0.0f;
-	Vector2 size = { 360.0f, 360.0f };
+	Vector2 position_ = { 0.0f, 0.0f };
+	float rotation_ = 0.0f;
+	Vector2 size_ = { 360.0f, 360.0f };
 
 	// アンカーポイント
-	Vector2 anchorPoint = { 0.0f, 0.0f };
+	Vector2 anchorPoint_ = { 0.0f, 0.0f };
 
 	// 左右フリップ
 	bool isFlipX_ = false;
 	// 上下フリップ
 	bool isFlipY_ = false;
+
+	// テクスチャ左上座標
+	Vector2 textureLeftTop_ = { 0.0f, 0.0f };
+	// テクスチャ切り出しサイズ
+	Vector2 textureSize_ = { 100.0f, 100.0f };
+
+	// テクスチャ番号
+	uint32_t textureIndex_ = 0;
+
+	// テクスチャサイズをイメージに合わせる
+	void AdjustTextureSize();
 };

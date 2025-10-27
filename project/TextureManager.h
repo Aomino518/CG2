@@ -23,10 +23,14 @@ public:
 
 	static void ClearIntermediate();
 
+	// Getter関数
+	static const DirectX::TexMetadata& GetMetaData(uint32_t textureIndex);
+
 private:
 	struct TextureData {
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+		DirectX::TexMetadata metadata;
 	};
 	
 	static ID3D12Device* device_;

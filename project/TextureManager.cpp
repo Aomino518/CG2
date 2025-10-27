@@ -64,7 +64,7 @@ uint32_t TextureManager::Load(const std::string& filePath)
 
 	// 登録してID発行
 	uint32_t id = static_cast<uint32_t>(textures_.size());
-	textures_.push_back({ textureResource, textureSrvHandleGPU });
+	textures_.push_back({ textureResource, textureSrvHandleGPU, metadata});
 	pathToId_[filePath] = id;
 
 	return id;
@@ -86,6 +86,17 @@ void TextureManager::ClearIntermediate()
 {
 	// Fence後に呼ぶ
 	intermediasteResource_.clear();
+}
+
+const DirectX::TexMetadata& TextureManager::GetMetaData(uint32_t textureIndex)
+{
+	// 範囲外指定違反チェック
+	assert(textureIndex < textures_.size() && "テクスチャ番号が範囲外です");
+
+	// テクスチャデータの参照を取得
+	const TextureData& textureData = textures_[textureIndex];
+
+	return textureData.metadata;
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::CreateBufferResource(size_t sizeInBytes)

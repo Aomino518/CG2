@@ -80,17 +80,17 @@ void Sprite::Update()
 	uint32_t height = graphics->GetHeight();
 
 	// translateの更新
-	transform_.translate = { position.x, position.y, 0.0f };
+	transform_.translate = { position_.x, position_.y, 0.0f };
 	// rotationの更新
-	transform_.rotate = { 0.0f,0.0f, rotation };
+	transform_.rotate = { 0.0f,0.0f, rotation_ };
 	// scaleの更新
-	transform_.scale = { size.x, size.y, 1.0f };
+	transform_.scale = { size_.x, size_.y, 1.0f };
 
 	// アンカーポイントによる頂点再計算
-	float left = 0.0f - anchorPoint.x;
-	float right = 1.0f - anchorPoint.x;
-	float top = 0.0f - anchorPoint.y;
-	float bottom = 1.0f - anchorPoint.y;
+	float left = 0.0f - anchorPoint_.x;
+	float right = 1.0f - anchorPoint_.x;
+	float top = 0.0f - anchorPoint_.y;
+	float bottom = 1.0f - anchorPoint_.y;
 
 	// 左右回転
 	if (isFlipX_) {
@@ -109,6 +109,20 @@ void Sprite::Update()
 	vertexData[2].position = { right, bottom, 0.0f, 1.0f }; // 右下
 	vertexData[3].position = { right, top,    0.0f, 1.0f }; // 右上
 
+	const DirectX::TexMetadata& metaData = TextureManager::GetMetaData(textureIndex_);
+
+	// UV座標を計算
+	float tex_left = textureLeftTop_.x / metaData.width;
+	float tex_right = (textureLeftTop_.x + textureSize_.x) / metaData.width;
+	float tex_top = textureLeftTop_.y / metaData.height;
+	float tex_bottom = (textureLeftTop_.y + textureSize_.y) / metaData.height;
+
+	// 頂点データに書き込み
+	vertexData[0].texcoord = { tex_left,  tex_bottom };
+	vertexData[1].texcoord = { tex_left,  tex_top };
+	vertexData[2].texcoord = { tex_right, tex_bottom };
+	vertexData[3].texcoord = { tex_right, tex_top };
+
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform_.translate));
@@ -125,6 +139,8 @@ void Sprite::Update()
 
 void Sprite::Draw()
 {
+	Update();
+
 	assert(textureSrvHandleGPU_.ptr != 0 && "Sprite texture not set!");
 
 	cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
@@ -138,6 +154,44 @@ void Sprite::Draw()
 	cmdList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
 
 	cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+void Sprite::Create(SpriteCommon* common, uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size)
+{
+	Init(common);
+	SetTexture(textureId);
+	SetPosition(pos);
+	SetColor(color);
+
+	if (size.x == 0.0f && size.y == 0.0f) {
+		AdjustTextureSize();
+	} else {
+		AdjustTextureSize();
+		SetSize(size);
+	}
+}
+
+void Sprite::Move(const Vector2& delta)
+{
+	position_.x += delta.x;
+	position_.y += delta.y;
+}
+
+void Sprite::Rotate(float deltaAngle)
+{
+	rotation_ += deltaAngle;
+}
+
+void Sprite::Scale(float factor)
+{
+	size_.x *= factor;
+	size_.y *= factor;
+}
+
+void Sprite::Scale(const Vector2& factor)
+{
+	size_.x *= factor.x;
+	size_.y *= factor.y;
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
@@ -168,4 +222,14 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device
 		IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
 	return resource;
+}
+
+void Sprite::AdjustTextureSize()
+{
+	const DirectX::TexMetadata& metaData = TextureManager::GetMetaData(textureIndex_);
+
+	textureSize_.x = static_cast<float>(metaData.width);
+	textureSize_.y = static_cast<float>(metaData.height);
+	// 画像サイズをテクスチャのサイズに合わせる
+	size_ = textureSize_;
 }
