@@ -4,15 +4,13 @@
 #include <Graphics.h>
 #include <DxcCompiler.h>
 #include <InputLayout.h>
-#include <PsoBuilder.h>
+#include "PsoBuilder.h"
 
 class SpriteCommon {
 public:
-	void Init(Graphics* graphics, DxcCompiler dxcCompiler, ID3D12RootSignature* rootSignature);
+	void Init(DxcCompiler dxcCompiler, ID3D12RootSignature* rootSignature);
 	void DrawCommon();
 	ID3D12PipelineState* GetPipelineState() { return pipelineState_.Get(); }
-
-	Graphics* GetGraphics() const { return graphics_; }
 
 private:
 	// グラフィックパイプラインの作成

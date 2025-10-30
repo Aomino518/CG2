@@ -37,7 +37,7 @@ struct TransformationMatrix {
 
 class Sprite {
 public:
-	void Init(SpriteCommon* spriteCommon_);
+	void Init();
 
 	void Update();
 
@@ -80,7 +80,7 @@ public:
 		materialData->color.z = b;
 	}
 
-	void Create(SpriteCommon* common, uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size = { 0.0f, 0.0f });
+	void Create(uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size = { 0.0f, 0.0f });
 	void Move(const Vector2& delta);
 	void Rotate(float deltaAngle);
 	void Scale(float factor);

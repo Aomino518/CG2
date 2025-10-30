@@ -11,6 +11,7 @@
 #define _USE_MATH_DEFINES 
 #include <math.h>
 #include "Logger.h"
+#pragma comment(lib, "winmm.lib")
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -88,6 +89,9 @@ void Application::Init()
 
 	// ゲッター関数で取得するために代入
 	hInstance_ = wndclass.hInstance;
+
+	// システムタイマーの分解能を上げる
+	timeBeginPeriod(1);
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd_, SW_SHOW);

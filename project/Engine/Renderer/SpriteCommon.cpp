@@ -1,12 +1,11 @@
 #include "SpriteCommon.h"
 
 
-void SpriteCommon::Init(Graphics* graphics, DxcCompiler dxcCompiler, ID3D12RootSignature* rootSignature)
+void SpriteCommon::Init(DxcCompiler dxcCompiler, ID3D12RootSignature* rootSignature)
 {
-	graphics_ = graphics;
 	rootSignature_ = rootSignature;
-	CreateGraphicPipeline(graphics, dxcCompiler);
-	cmdList_ = graphics->GetCmdList();
+	CreateGraphicPipeline(Graphics::GetInstance(), dxcCompiler);
+	cmdList_ = Graphics::GetCmdList();
 }
 
 void SpriteCommon::DrawCommon()

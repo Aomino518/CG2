@@ -3,25 +3,33 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cstdint>
+#include <chrono>
+#include <thread>
+#include "D3DResourceLeakChecker.h"
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
 
 class Graphics
 {
 public:
+	static Graphics* GetInstance();
+
 	// 最大SRV数 (最大テクスチャ枚数)
 	static constexpr uint32_t kMaxSRVCount = 4096;
 
 	bool Init(HWND hwnd, uint32_t width, uint32_t height, bool enableDebug = true);
 	void Shutdown();
 
-	void BeginFrame(const float clearColor[4]);
+	void BeginFrame();
 	void EndFrame();
 
 	// 同期待ち
 	void WaitGPU();
 
 	// ゲッター
-	ID3D12Device* GetDevice() const { return device_.Get(); }
-	ID3D12GraphicsCommandList* GetCmdList() const { return cmdList_.Get(); }
+	static ID3D12Device* GetDevice() { return device_.Get(); }
+	static ID3D12GraphicsCommandList* GetCmdList() { return cmdList_.Get(); }
 	ID3D12DescriptorHeap* GetSrvHeap() const { return srvHeap_.Get(); }
 
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentRTV() const { return rtvHandles_[backBufferIndex_]; }
@@ -31,8 +39,8 @@ public:
 	uint32_t GetRTVDescriptorSize() const { return descSizeRTV_; }
 	uint32_t GetDSVDescriptorSize() const { return descSizeDSV_; }
 
-	uint32_t GetWidth() const { return width_; }
-	uint32_t GetHeight() const { return height_; }
+	static uint32_t GetWidth() { return width_; }
+	static uint32_t GetHeight() { return height_; }
 
 	D3D12_DEPTH_STENCIL_DESC GetDepthStencilDesc() const { return depthStencilDesc; }
 	DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() const { return swapChainDesc; }
@@ -41,23 +49,36 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVHeap() const { return srvHeap_; }
 	uint32_t GetDescriptorSizeSRV() const { return descSizeSRV_; }
 
+	D3D12_VIEWPORT GetViewport() const { return viewport_; }
+	D3D12_RECT GetScissorRect() const { return scissorRect_; }
+
 private:
 	bool CreateDevice(bool enableDebug);
-	bool CreateSwapChain(HWND hwnd);
+	bool CreateSwapChain();
 	bool CreateHeapsAndTargets();
 	bool CreateCommands();
 	bool CreateSyncObjects();
+	bool CreateViewport();
+	bool CreateScissorRect();
+	bool CreateImGuiInit();
+
+	// FPSの固定初期化
+	void InitFixFPS();
+	// FPS固定更新
+	void UpdateFixFPS();
 
 	// 基本
-	uint32_t width_ = 0, height_ = 0;
+	HWND hwnd_;
+	static uint32_t width_;
+	static uint32_t height_;
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory_;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> adapter_;
-	Microsoft::WRL::ComPtr<ID3D12Device> device_;
+	static Microsoft::WRL::ComPtr<ID3D12Device> device_;
 
 	// コマンド
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList_;
+	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList_;
 
 	// スワップチェーン
 	static constexpr uint32_t kBufferCount = 2;
@@ -85,5 +106,17 @@ private:
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	D3D12_RESOURCE_BARRIER barrier{};
+
+	// ビューポート
+	D3D12_VIEWPORT viewport_{};
+
+	// シザー矩形
+	D3D12_RECT scissorRect_{};
+
+	// 画面クリアカラー
+	const float clear[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
+
+	// 記録時間(FPS固定用)
+	std::chrono::steady_clock::time_point reference_;
 };
 

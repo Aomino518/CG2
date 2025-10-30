@@ -1,16 +1,14 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
 
-void Sprite::Init(SpriteCommon* spriteCommon_) {
-	this->spriteCommon = spriteCommon_;
-
-	cmdList_ = spriteCommon_->GetGraphics()->GetCmdList();
+void Sprite::Init() {
+	cmdList_ = Graphics::GetCmdList();
 
 	// VertexResourceの作成
-	vertexResource = CreateBufferResource(spriteCommon_->GetGraphics()->GetDevice(), sizeof(VertexData) * 4);
+	vertexResource = CreateBufferResource(Graphics::GetDevice(), sizeof(VertexData) * 4);
 	
 	// IndexResourceの作成
-	indexResource = CreateBufferResource(spriteCommon_->GetGraphics()->GetDevice(), sizeof(uint32_t) * 6);
+	indexResource = CreateBufferResource(Graphics::GetDevice(), sizeof(uint32_t) * 6);
 	
 	// VertexBufferViewを作成する
 	// リソースの先頭のアドレスから使う
@@ -57,7 +55,7 @@ void Sprite::Init(SpriteCommon* spriteCommon_) {
 	Logger::Write("indexDataに割り当て完了");
 
 	// マテリアルリソースを作る
-	materialResource = CreateBufferResource(spriteCommon_->GetGraphics()->GetDevice(), sizeof(Material));
+	materialResource = CreateBufferResource(Graphics::GetDevice(), sizeof(Material));
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	// SpriteはLightingしないのでfalseを設定する
 	materialData->color = Vector4(1, 1, 1, 1);
@@ -65,7 +63,7 @@ void Sprite::Init(SpriteCommon* spriteCommon_) {
 	materialData->uvTransform = MakeIdentity4x4();
 
 	// TransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	transformationMatrixResource = CreateBufferResource(spriteCommon_->GetGraphics()->GetDevice(), sizeof(TransformationMatrix));
+	transformationMatrixResource = CreateBufferResource(Graphics::GetDevice(), sizeof(TransformationMatrix));
 	// 書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
 	// 単位行列を書きこんでおく
@@ -75,9 +73,8 @@ void Sprite::Init(SpriteCommon* spriteCommon_) {
 
 void Sprite::Update()
 {
-	Graphics* graphics = spriteCommon->GetGraphics();
-	uint32_t width = graphics->GetWidth();
-	uint32_t height = graphics->GetHeight();
+	uint32_t width = Graphics::GetWidth();
+	uint32_t height = Graphics::GetHeight();
 
 	// translateの更新
 	transform_.translate = { position_.x, position_.y, 0.0f };
@@ -139,8 +136,6 @@ void Sprite::Update()
 
 void Sprite::Draw()
 {
-	Update();
-
 	assert(textureSrvHandleGPU_.ptr != 0 && "Sprite texture not set!");
 
 	cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
@@ -156,9 +151,9 @@ void Sprite::Draw()
 	cmdList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Sprite::Create(SpriteCommon* common, uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size)
+void Sprite::Create(uint32_t textureId, const Vector2& pos, const Vector4& color, const Vector2& size)
 {
-	Init(common);
+	Init();
 	SetTexture(textureId);
 	SetPosition(pos);
 	SetColor(color);
