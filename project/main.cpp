@@ -1,7 +1,6 @@
 #include "Application.h"
 #include "Logger.h"
 #include <format>
-#include <dxgidebug.h>
 #include <dbghelp.h>
 #include <strsafe.h>
 #include <sstream>
@@ -20,6 +19,7 @@
 #include "Sprite.h"
 #include "TextureManager.h"
 #include <algorithm>
+#include <psapi.h>
 #pragma comment(lib, "Dbghelp.lib")
 
 #pragma region 構造体
@@ -60,21 +60,19 @@ struct TripletHash {
 	}
 };
 
-struct D3DResourceLeakChecker {
-	~D3DResourceLeakChecker() {
-		// リソースリークチェック
-		Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
-		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-			debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-			debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-			debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-		}
-	}
-};
-
 #pragma endregion
 
 #pragma region 自作関数
+void ShowMemoryUsage() {
+	PROCESS_MEMORY_COUNTERS pmc;
+	if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+		// メモリ使用量をMB単位で計算
+		double memoryUsageMB = pmc.WorkingSetSize / (1024.0 * 1024.0);
+
+		ImGui::Text("Memory Usage: %.2f MB", memoryUsageMB);
+	}
+}
+
 static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
 	// 時刻を取得して、時刻をなめに入れたファイルを作成、Dumpsディレクトリ以下に出力
 	SYSTEMTIME time;
@@ -357,7 +355,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 初期化完了ログ
 	Logger::Write("Complete Create D3D12Device!!!");
 
-	ID3D12GraphicsCommandList* cmdList_ = graphics.GetCmdList();
+	//ID3D12GraphicsCommandList* cmdList_ = graphics.GetCmdList();
 
 	// DxcCompilerの初期化
 	dxcCompiler.Init();
@@ -371,7 +369,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 
 	// スプライト共通部の作成
-	spriteCommon->Init(&graphics, dxcCompiler, rs2D.Get());
+	spriteCommon->Init(dxcCompiler, rs2D.Get());
 
 	Vector4 spriteMaterial = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector2 positoin = {0.0f, 0.0f};
@@ -569,26 +567,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 	}*/
 
-	// ビューポート
-	D3D12_VIEWPORT viewport{};
-	// クライアント領域のサイズと一緒にして画面全体に表示
-	viewport.Width = float(app->GetWidth());
-	viewport.Height = float(app->GetHeight());
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	Logger::Write("viewport");
-
-	// シザー矩形
-	D3D12_RECT scissorRect{};
-	// 基本的にビューポートと同じ矩形が構成されるようにする
-	scissorRect.left = 0;
-	scissorRect.right = app->GetWidth();
-	scissorRect.top = 0;
-	scissorRect.bottom = app->GetHeight();
-	Logger::Write("scissorRect");
-
 	// Transform変数を作る
 	Transform transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	//Transform cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -10.0f} };
@@ -599,27 +577,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f, 0.0f, 0.0f},
 	};
 
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = graphics.GetSwapChainDesc();
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = graphics.GetRTVDesc();
-
-	// ImGuiの初期化
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(app->GetHWND());
-	ImGui_ImplDX12_Init(graphics.GetDevice(),
-		swapChainDesc.BufferCount,
-		rtvDesc.Format,
-		graphics.GetSRVHeap().Get(),
-		graphics.GetSRVHeap()->GetCPUDescriptorHandleForHeapStart(),
-		graphics.GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
-	Logger::Write("ImGui初期化");
-
 	// 初期色 (RGBA)
 	float modelColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	// Textureの切り替え変数
-	bool useMonsterBall = false;
 
 	// 音声読み込み
 	SoundData soundData1 = xAudio2.SoundLoad("resources/gold.mp3");
@@ -627,22 +586,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 
-	const float clear[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
-
-	ImGui::StyleColorsDark();
-	ImGuiStyle& s = ImGui::GetStyle();
-	ImVec4* c = s.Colors;
-
-	c[ImGuiCol_WindowBg] = ImVec4(0.02f, 0.03f, 0.05f, 1.0f);
-	c[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.25f, 0.35f, 1.0f);
-	c[ImGuiCol_Button] = ImVec4(0.00f, 0.40f, 0.55f, 0.9f);
-	c[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.55f, 0.75f, 1.0f);
-	c[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.60f, 0.90f, 1.0f);
-	c[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.40f, 0.55f, 1.0f);
-	c[ImGuiCol_Text] = ImVec4(0.80f, 0.90f, 1.00f, 1.0f);
-	c[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 0.00f, 1.0f);
-
-	sprite->Create(spriteCommon.get(), tHChecker, positoin, Color::WHITE);
+	sprite->Create(tHChecker, positoin, Color::WHITE);
 	
 	sprite->SetRotation(rotation);
 	Vector4 materialColor = sprite->GetColor();
@@ -663,6 +607,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		sprite->SetPosition(positoin);
 		sprite->SetColor(materialColor);
+		sprite->Update();
 
 		//materialData->color.x = modelColor[0];
 		//materialData->color.y = modelColor[1];
@@ -695,7 +640,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ImGui::SliderFloat3("scaleSprite", (float*)&transformSprite.scale, 0.0f, 10.0f, "%.3f");
 		ImGui::Text("positoin.x : %f", positoin.x);
 		ImGui::Text("positoin.y : %f", positoin.y);
-		ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+		ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+		ShowMemoryUsage();
 		//ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
@@ -705,16 +651,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		/*-- 描画処理 --*/
-		graphics.BeginFrame(clear);
+		graphics.BeginFrame();
 
-		// 描画用のDescriptorHeapの設定
-		ID3D12DescriptorHeap* heaps[] = { graphics.GetSRVHeap().Get() };
-		cmdList_->SetDescriptorHeaps(_countof(heaps), heaps);
-
-		cmdList_->RSSetViewports(1, &viewport); // Viewportを設定
-		cmdList_->RSSetScissorRects(1, &scissorRect); // Scissorを設定
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		cmdList_->SetGraphicsRootSignature(rootSignature.Get());
+		//cmdList_->SetGraphicsRootSignature(rootSignature.Get());
 		/*cmdList_->SetPipelineState(pso3D.Get()); // PSOを設定
 		cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList_->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
@@ -737,24 +677,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		spriteCommon->DrawCommon();
 		sprite->Draw();
 
-		cmdList_->SetDescriptorHeaps(_countof(heaps), heaps);
-		// 実際のcommandListのImGuiの描画コマンドを積む
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), graphics.GetCmdList());
-
 		graphics.EndFrame();
 	}
+	TextureManager::Shutdown();
 
 	input.Shutdown();
 
 	xAudio2.Shutdown();
 	xAudio2.SoundUnload(&soundData1);
 
-	// ImGuiの終了処理。初期化と逆順に行う
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-
-	TextureManager::Shutdown();
 
 	graphics.Shutdown();
 

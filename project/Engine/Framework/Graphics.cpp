@@ -9,6 +9,216 @@
 
 using Microsoft::WRL::ComPtr;
 
+ComPtr<ID3D12Device> Graphics::device_ = nullptr;
+ComPtr<ID3D12GraphicsCommandList> Graphics::cmdList_ = nullptr;
+uint32_t Graphics::width_ = 0;
+uint32_t Graphics::height_ = 0;
+
+Graphics* Graphics::GetInstance()
+{
+	static Graphics instance;
+	return &instance;
+}
+
+bool Graphics::Init(HWND hwnd, uint32_t width, uint32_t height, bool enableDebug)
+{
+	// FPSの固定初期化
+	InitFixFPS();
+
+	width_ = width;
+	height_ = height;
+	hwnd_ = hwnd;
+
+#ifdef _DEBUG
+	if (enableDebug) {
+		ComPtr<ID3D12Debug1> debugController = nullptr;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+			// デバッグレイヤー有効化する
+			debugController->EnableDebugLayer();
+			debugController->SetEnableGPUBasedValidation(true);
+		}
+	}
+#endif
+
+	// グラフィックスに関連するオブジェクトを生成・管理するインターフェイス(DXGIFactory)を生成
+	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&factory_));
+	assert(SUCCEEDED(hr));
+
+	if (!CreateDevice(enableDebug)) {
+		Logger::Write("Generation failed Device");
+		return false;
+	}
+	Logger::Write("Complete Create Device");
+
+	if (!CreateCommands()) {
+		Logger::Write("Generation failed Commands");
+		return false;
+	}
+	Logger::Write("Complete Create Commands");
+
+	if (!CreateSwapChain()) {
+		Logger::Write("Generation failed SwapChain");
+		return false;
+	}
+	Logger::Write("Complete Create SwapChain");
+
+	if (!CreateHeapsAndTargets()) {
+		Logger::Write("Generation failed HeapAndTargetView");
+		return false;
+	}
+	Logger::Write("Complete Create HeapAndTargetView");
+
+	if (!CreateSyncObjects()) {
+		Logger::Write("Generation failed Fence");
+		return false;
+	}
+	Logger::Write("Complete Create Fence");
+
+	if (!CreateViewport()) {
+		Logger::Write("Generation failed Viewport");
+		return false;
+	}
+
+	if (!CreateScissorRect()) {
+		Logger::Write("Generation failed ScissorRect");
+		return false;
+	}
+
+	if (!CreateImGuiInit()) {
+		Logger::Write("Generation failed ImGuiInit");
+		return false;
+	}
+	Logger::Write("Complete Create ImGuiInit");
+
+	return true;
+}
+
+void Graphics::Shutdown()
+{
+	// ImGuiの終了処理。初期化と逆順に行う
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+	WaitGPU();
+
+	for (auto& bb : backBuffers_) {
+		bb.Reset();
+	}
+	depthTex_.Reset();
+	srvHeap_.Reset();
+	dsvHeap_.Reset();
+	rtvHeap_.Reset();
+
+	cmdList_.Reset();
+	cmdAllocator_.Reset();
+	cmdQueue_.Reset();
+
+	fence_.Reset();
+	swapChain_.Reset();
+	device_.Reset();
+	adapter_.Reset();
+	factory_.Reset();
+
+	CloseHandle(fenceEvent_);
+}
+
+void Graphics::BeginFrame()
+{
+	// これから書き込むバックバッファのインデックス取得
+	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
+	// TransitionBarrierの設定
+	// 今回バリアはTransition
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	// Noneにしておく
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	// バリアを張る対象のリソース。現在のバックバッファに対して行う
+	barrier.Transition.pResource = backBuffers_[backBufferIndex_].Get();
+	// 遷移前(現在)のResourceState
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	// 遷移後のResourceState
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	// TransitionBarrierを張る
+	cmdList_->ResourceBarrier(1, &barrier);
+
+	// 描画先のRTVとDSVを設定する
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+	cmdList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex_], false, &dsvHandle);
+	cmdList_->ClearRenderTargetView(rtvHandles_[backBufferIndex_], clear, 0, nullptr);
+	// 指定した深度で画面をクリアする
+	cmdList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	// 描画用のDescriptorHeapの設定
+	ID3D12DescriptorHeap* heaps[] = { srvHeap_.Get()};
+	cmdList_->SetDescriptorHeaps(_countof(heaps), heaps);
+
+	cmdList_->RSSetViewports(1, &viewport_); // Viewportを設定
+	cmdList_->RSSetScissorRects(1, &scissorRect_); // Scissorを設定
+}
+
+void Graphics::EndFrame()
+{
+	// 実際のcommandListのImGuiの描画コマンドを積む
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList_.Get());
+
+	// TransitionBarrierの設定
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	// TransitionBarrierを張る
+	cmdList_->ResourceBarrier(1, &barrier);
+
+	//コマンドリストの内容を確定させる。全てコマンドを積んでからCloseすること
+	HRESULT hr = cmdList_->Close();
+	assert(SUCCEEDED(hr));
+
+	ID3D12CommandList* cmdLists[] = { cmdList_.Get() };
+	cmdQueue_->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+
+	// FPS固定
+	UpdateFixFPS();
+
+	// GPUとOSに画面の交換を行うよう通知する
+	swapChain_->Present(1, 0);
+
+	// Fenceの値を更新
+	fenceValue_++;
+	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
+	cmdQueue_->Signal(fence_.Get(), fenceValue_);
+
+	// Fenceの値が指定したSignal値にたどり着いているか確認する
+	// GetCompletedValveの初期値はFence作成時に渡した初期値
+	if (fence_->GetCompletedValue() < fenceValue_) {
+		// 指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを指定する
+		fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+		// イベントを待つ
+		WaitForSingleObject(fenceEvent_, INFINITE);
+	}
+
+	// 次のフレーム用のコマンドリストを準備
+	hr = cmdAllocator_->Reset();
+	assert(SUCCEEDED(hr));
+	hr = cmdList_->Reset(cmdAllocator_.Get(), nullptr);
+	assert(SUCCEEDED(hr));
+}
+
+void Graphics::WaitGPU()
+{
+	// Fenceの値を更新
+	fenceValue_++;
+	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
+	cmdQueue_->Signal(fence_.Get(), fenceValue_);
+
+	// Fenceの値が指定したSignal値にたどり着いているか確認する
+	// GetCompletedValveの初期値はFence作成時に渡した初期値
+	if (fence_->GetCompletedValue() < fenceValue_) {
+		// 指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを指定する
+		fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+		// イベントを待つ
+		WaitForSingleObject(fenceEvent_, INFINITE);
+	}
+
+	TextureManager::ClearIntermediate();
+}
 static ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 	const Microsoft::WRL::ComPtr<ID3D12Device>& device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {
@@ -64,168 +274,6 @@ static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriptorSize * index);
 	return handleCPU;
-}
-
-bool Graphics::Init(HWND hwnd, uint32_t width, uint32_t height, bool enableDebug)
-{
-	width_ = width;
-	height_ = height;
-
-#ifdef _DEBUG
-	if (enableDebug) {
-		ComPtr<ID3D12Debug1> debugController = nullptr;
-		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-			// デバッグレイヤー有効化する
-			debugController->EnableDebugLayer();
-			debugController->SetEnableGPUBasedValidation(true);
-		}
-	}
-#endif
-
-	// グラフィックスに関連するオブジェクトを生成・管理するインターフェイス(DXGIFactory)を生成
-	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&factory_));
-	assert(SUCCEEDED(hr));
-
-	if (!CreateDevice(enableDebug)) {
-		Logger::Write("Generation failed Device");
-		return false;
-	}
-	Logger::Write("Complete Create Device");
-
-	if (!CreateCommands()) {
-		Logger::Write("Generation failed Commands");
-		return false;
-	}
-	Logger::Write("Complete Create Commands");
-
-	if (!CreateSwapChain(hwnd)) {
-		Logger::Write("Generation failed SwapChain");
-		return false;
-	}
-	Logger::Write("Complete Create SwapChain");
-
-	if (!CreateHeapsAndTargets()) {
-		Logger::Write("Generation failed HeapAndTargetView");
-		return false;
-	}
-	Logger::Write("Complete Create HeapAndTargetView");
-
-	if (!CreateSyncObjects()) {
-		Logger::Write("Generation failed Fence");
-		return false;
-	}
-	Logger::Write("Complete Create Fence");
-
-	return true;
-}
-
-void Graphics::Shutdown()
-{
-	WaitGPU();
-
-	for (auto& bb : backBuffers_) {
-		bb.Reset();
-	}
-	depthTex_.Reset();
-	srvHeap_.Reset();
-	dsvHeap_.Reset();
-	rtvHeap_.Reset();
-
-	cmdList_.Reset();
-	cmdAllocator_.Reset();
-	cmdQueue_.Reset();
-
-	fence_.Reset();
-	swapChain_.Reset();
-	device_.Reset();
-	adapter_.Reset();
-	factory_.Reset();
-
-	CloseHandle(fenceEvent_);
-}
-
-void Graphics::BeginFrame(const float clearColor[4])
-{
-	// これから書き込むバックバッファのインデックス取得
-	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
-	// TransitionBarrierの設定
-	// 今回バリアはTransition
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	// Noneにしておく
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	// バリアを張る対象のリソース。現在のバックバッファに対して行う
-	barrier.Transition.pResource = backBuffers_[backBufferIndex_].Get();
-	// 遷移前(現在)のResourceState
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	// 遷移後のResourceState
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	// TransitionBarrierを張る
-	cmdList_->ResourceBarrier(1, &barrier);
-
-	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
-	cmdList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex_], false, &dsvHandle);
-	cmdList_->ClearRenderTargetView(rtvHandles_[backBufferIndex_], clearColor, 0, nullptr);
-	// 指定した深度で画面をクリアする
-	cmdList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-}
-
-void Graphics::EndFrame()
-{
-	// TransitionBarrierの設定
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	// TransitionBarrierを張る
-	cmdList_->ResourceBarrier(1, &barrier);
-
-	//コマンドリストの内容を確定させる。全てコマンドを積んでからCloseすること
-	HRESULT hr = cmdList_->Close();
-	assert(SUCCEEDED(hr));
-
-	ID3D12CommandList* cmdLists[] = { cmdList_.Get() };
-	cmdQueue_->ExecuteCommandLists(_countof(cmdLists), cmdLists);
-
-	// GPUとOSに画面の交換を行うよう通知する
-	swapChain_->Present(1, 0);
-
-	// Fenceの値を更新
-	fenceValue_++;
-	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
-	cmdQueue_->Signal(fence_.Get(), fenceValue_);
-
-	// Fenceの値が指定したSignal値にたどり着いているか確認する
-	// GetCompletedValveの初期値はFence作成時に渡した初期値
-	if (fence_->GetCompletedValue() < fenceValue_) {
-		// 指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを指定する
-		fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
-		// イベントを待つ
-		WaitForSingleObject(fenceEvent_, INFINITE);
-	}
-
-	// 次のフレーム用のコマンドリストを準備
-	hr = cmdAllocator_->Reset();
-	assert(SUCCEEDED(hr));
-	hr = cmdList_->Reset(cmdAllocator_.Get(), nullptr);
-	assert(SUCCEEDED(hr));
-}
-
-void Graphics::WaitGPU()
-{
-	// Fenceの値を更新
-	fenceValue_++;
-	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
-	cmdQueue_->Signal(fence_.Get(), fenceValue_);
-
-	// Fenceの値が指定したSignal値にたどり着いているか確認する
-	// GetCompletedValveの初期値はFence作成時に渡した初期値
-	if (fence_->GetCompletedValue() < fenceValue_) {
-		// 指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを指定する
-		fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
-		// イベントを待つ
-		WaitForSingleObject(fenceEvent_, INFINITE);
-	}
-
-	TextureManager::ClearIntermediate();
 }
 
 bool Graphics::CreateDevice(bool enableDebug)
@@ -321,7 +369,7 @@ bool Graphics::CreateDevice(bool enableDebug)
 	return true;
 }
 
-bool Graphics::CreateSwapChain(HWND hwnd)
+bool Graphics::CreateSwapChain()
 {
 	/*--スワップチェーンを生成する--*/
 	swapChain_ = nullptr;
@@ -334,7 +382,7 @@ bool Graphics::CreateSwapChain(HWND hwnd)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	HRESULT hr = factory_->CreateSwapChainForHwnd(cmdQueue_.Get(), hwnd, &swapChainDesc, nullptr, nullptr,
+	HRESULT hr = factory_->CreateSwapChainForHwnd(cmdQueue_.Get(), hwnd_, &swapChainDesc, nullptr, nullptr,
 		reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
 
 	assert(SUCCEEDED(hr));
@@ -427,4 +475,172 @@ bool Graphics::CreateSyncObjects()
 	assert(fenceEvent_ != nullptr);
 
 	return true;
+}
+
+bool Graphics::CreateViewport()
+{
+	// クライアント領域のサイズと一緒にして画面全体に表示
+	viewport_.Width = float(width_);
+	viewport_.Height = float(height_);
+	viewport_.TopLeftX = 0;
+	viewport_.TopLeftY = 0;
+	viewport_.MinDepth = 0.0f;
+	viewport_.MaxDepth = 1.0f;
+	Logger::Write("viewport");
+
+	return true;
+}
+
+bool Graphics::CreateScissorRect()
+{
+	// 基本的にビューポートと同じ矩形が構成されるようにする
+	scissorRect_.left = 0;
+	scissorRect_.right = width_;
+	scissorRect_.top = 0;
+	scissorRect_.bottom = height_;
+	Logger::Write("scissorRect");
+
+	return true;
+}
+
+bool Graphics::CreateImGuiInit()
+{
+	// ImGuiの初期化
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplWin32_Init(hwnd_);
+	ImGui_ImplDX12_Init(GetDevice(),
+		swapChainDesc.BufferCount,
+		rtvDesc.Format,
+		GetSRVHeap().Get(),
+		GetSRVHeap()->GetCPUDescriptorHandleForHeapStart(),
+		GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
+	Logger::Write("ImGui初期化");
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImVec4* c = style.Colors;
+
+	// --- 基本背景・テキスト ---
+	c[ImGuiCol_Text] = ImVec4(0.80f, 0.90f, 1.00f, 1.00f);
+	c[ImGuiCol_TextDisabled] = ImVec4(0.30f, 0.45f, 0.55f, 1.00f);
+	c[ImGuiCol_WindowBg] = ImVec4(0.02f, 0.03f, 0.05f, 1.00f);
+	c[ImGuiCol_ChildBg] = ImVec4(0.03f, 0.04f, 0.07f, 1.00f);
+	c[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.07f, 0.10f, 0.98f);
+	c[ImGuiCol_Border] = ImVec4(0.10f, 0.30f, 0.45f, 0.60f);
+	c[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+
+	// --- フレーム（入力欄、スライダーなど） ---
+	c[ImGuiCol_FrameBg] = ImVec4(0.03f, 0.06f, 0.10f, 1.00f);
+	c[ImGuiCol_FrameBgHovered] = ImVec4(0.05f, 0.18f, 0.28f, 1.00f);
+	c[ImGuiCol_FrameBgActive] = ImVec4(0.07f, 0.25f, 0.38f, 1.00f);
+
+	// --- タイトルバー・ウィンドウ装飾 ---
+	c[ImGuiCol_TitleBg] = ImVec4(0.00f, 0.10f, 0.15f, 1.00f);
+	c[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.25f, 0.35f, 1.00f);
+	c[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.10f, 0.15f, 0.70f);
+	c[ImGuiCol_MenuBarBg] = ImVec4(0.02f, 0.08f, 0.12f, 1.00f);
+
+	// --- ボタン ---
+	c[ImGuiCol_Button] = ImVec4(0.00f, 0.40f, 0.55f, 0.90f);
+	c[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.55f, 0.75f, 1.00f);
+	c[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.60f, 0.90f, 1.00f);
+
+	// --- ヘッダー（ツリーノード、リスト選択など） ---
+	c[ImGuiCol_Header] = ImVec4(0.00f, 0.30f, 0.45f, 0.80f);
+	c[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.40f, 0.55f, 1.00f);
+	c[ImGuiCol_HeaderActive] = ImVec4(0.00f, 0.55f, 0.75f, 1.00f);
+
+	// --- スクロールバー ---
+	c[ImGuiCol_ScrollbarBg] = ImVec4(0.01f, 0.02f, 0.03f, 1.00f);
+	c[ImGuiCol_ScrollbarGrab] = ImVec4(0.05f, 0.25f, 0.35f, 1.00f);
+	c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.08f, 0.40f, 0.55f, 1.00f);
+	c[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.10f, 0.55f, 0.75f, 1.00f);
+
+	// --- スライダー ---
+	c[ImGuiCol_SliderGrab] = ImVec4(0.00f, 0.55f, 0.80f, 1.00f);
+	c[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.70f, 1.00f, 1.00f);
+
+	// --- チェックマーク ---
+	c[ImGuiCol_CheckMark] = ImVec4(0.00f, 0.75f, 1.00f, 1.00f);
+
+	// --- セパレーター ---
+	c[ImGuiCol_Separator] = ImVec4(0.10f, 0.30f, 0.45f, 0.80f);
+	c[ImGuiCol_SeparatorHovered] = ImVec4(0.15f, 0.45f, 0.65f, 1.00f);
+	c[ImGuiCol_SeparatorActive] = ImVec4(0.20f, 0.60f, 0.85f, 1.00f);
+
+	// --- リサイズグリップ ---
+	c[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 0.45f, 0.65f, 0.60f);
+	c[ImGuiCol_ResizeGripHovered] = ImVec4(0.00f, 0.60f, 0.85f, 0.80f);
+	c[ImGuiCol_ResizeGripActive] = ImVec4(0.00f, 0.75f, 1.00f, 1.00f);
+
+	// --- タブ ---
+	c[ImGuiCol_Tab] = ImVec4(0.00f, 0.25f, 0.35f, 0.90f);
+	c[ImGuiCol_TabHovered] = ImVec4(0.00f, 0.40f, 0.60f, 1.00f);
+	c[ImGuiCol_TabActive] = ImVec4(0.00f, 0.55f, 0.80f, 1.00f);
+	c[ImGuiCol_TabUnfocused] = ImVec4(0.00f, 0.15f, 0.20f, 0.80f);
+	c[ImGuiCol_TabUnfocusedActive] = ImVec4(0.00f, 0.30f, 0.45f, 0.90f);
+
+	// --- ドッキング・テーブル ---
+	c[ImGuiCol_TableHeaderBg] = ImVec4(0.00f, 0.20f, 0.30f, 1.00f);
+	c[ImGuiCol_TableBorderStrong] = ImVec4(0.10f, 0.35f, 0.55f, 1.00f);
+	c[ImGuiCol_TableBorderLight] = ImVec4(0.05f, 0.25f, 0.40f, 1.00f);
+	c[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	c[ImGuiCol_TableRowBgAlt] = ImVec4(0.03f, 0.05f, 0.08f, 0.50f);
+
+	// --- プロット・ドラッグ・ドロップ ---
+	c[ImGuiCol_PlotLines] = ImVec4(0.00f, 0.70f, 1.00f, 1.00f);
+	c[ImGuiCol_PlotLinesHovered] = ImVec4(0.20f, 0.90f, 1.00f, 1.00f);
+	c[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 0.60f, 0.90f, 1.00f);
+	c[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 0.80f, 1.00f, 1.00f);
+	c[ImGuiCol_DragDropTarget] = ImVec4(0.00f, 0.75f, 1.00f, 0.90f);
+
+	// --- ナビゲーション・モーダル背景 ---
+	c[ImGuiCol_NavHighlight] = ImVec4(0.00f, 0.60f, 0.90f, 1.00f);
+	c[ImGuiCol_NavWindowingHighlight] = ImVec4(0.00f, 0.55f, 0.80f, 0.70f);
+	c[ImGuiCol_NavWindowingDimBg] = ImVec4(0.00f, 0.05f, 0.10f, 0.50f);
+	c[ImGuiCol_ModalWindowDimBg] = ImVec4(0.00f, 0.02f, 0.05f, 0.80f);
+
+	// --- テーマ全体の丸み・間隔調整 ---
+	style.WindowRounding = 6.0f;
+	style.FrameRounding = 5.0f;
+	style.GrabRounding = 4.0f;
+	style.ScrollbarRounding = 8.0f;
+	style.TabRounding = 5.0f;
+	style.FramePadding = ImVec2(6.0f, 4.0f);
+	style.ItemSpacing = ImVec2(6.0f, 6.0f);
+	style.WindowBorderSize = 1.0f;
+	style.FrameBorderSize = 0.5f;
+
+	return true;
+}
+
+void Graphics::InitFixFPS()
+{
+	// 現在時間を記録する
+	reference_ = std::chrono::steady_clock::now();
+}
+
+void Graphics::UpdateFixFPS()
+{
+	// 1/60秒にぴったりの時間
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
+	// 1/60秒よりわずかに短い時間
+	const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 64.5f));
+
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	// 前回記録からの経過時間を取得
+	const std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+	
+	// 1/60(より僅かに短い時間) 経ってない場合
+	if (elapsed < kMinTime) {
+		// 1/60秒経過するまで微小なスリープを繰り返す
+		while (std::chrono::steady_clock::now() - reference_ < kMinTime) {
+			// 1マイクロ秒スリープ
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+
+	// 現在の時間を記録する
+	reference_ = std::chrono::steady_clock::now();
 }

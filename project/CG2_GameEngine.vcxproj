@@ -148,6 +148,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\App\Application.cpp" />
     <ClCompile Include="Engine\Framework\DebugCamera.cpp" />
     <ClCompile Include="Engine\Framework\DxcCompiler.cpp" />
@@ -215,6 +216,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Color.h" />
+    <ClInclude Include="D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\App\Application.h" />
     <ClInclude Include="Engine\Framework\DebugCamera.h" />
     <ClInclude Include="Engine\Framework\DxcCompiler.h" />

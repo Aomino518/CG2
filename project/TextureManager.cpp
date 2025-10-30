@@ -74,6 +74,13 @@ void TextureManager::Shutdown()
 {
 	textures_.clear();
 	pathToId_.clear();
+
+	intermediaste_.Reset();
+	intermediasteResource_.clear();
+
+	device_ = nullptr;
+	cmdList_ = nullptr;
+	srvHeap_ = nullptr;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUHandle(uint32_t textureId)
