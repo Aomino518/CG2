@@ -7,6 +7,8 @@
 #include "Vector4.h"
 #include "Sprite.h"
 #include "Entity3D.h"
+#include "AssetBrowser.h"
+#include "SceneView.h"
 #ifdef USE_IMGUI
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
@@ -29,11 +31,17 @@ public:
 	void BegineInspector();
 	void EndInspector();
 	void CameraSetting(Vector3& positoin, Vector3& rotation);
+	void AssetBrowserDraw();
+	void SceneViewDraw(std::vector<std::unique_ptr<Sprite>>& sprites);
+	void Inspector(std::vector<std::unique_ptr<Sprite>>& sprites);
+	void LoadAssets(const std::string& directoryPath);
 
 private:
 	void StyleSetting();
 
 	Application* app_ = nullptr;
 	Graphics* graphics_ = nullptr;
+	std::unique_ptr<AssetBrowser> assetBrowser = std::make_unique<AssetBrowser>();
+	std::unique_ptr<SceneView> sceneView = std::make_unique<SceneView>();
 };
 

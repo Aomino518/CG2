@@ -82,7 +82,7 @@ void ImGuiManager::SpriteSetting(const std::string& spriteName, Sprite* sprite)
 		{
 			ImGui::DragFloat2("Position", (float*)&spritePosition, 1.00f, -1280.0f, 1280.0f, "%.2f");
 			ImGui::SliderAngle("Rotation", (float*)&spriteRotate, 0.0f, 360.0f, "%.3f");
-			ImGui::DragFloat2("Scale", (float*)&spriteScale, 1.00f, 0.0f, 1280.0f, "%.2f");
+			ImGui::DragFloat2("Scale", (float*)&spriteScale, 1.0f, 0.0f, 1280.0f, "%.2f");
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
@@ -174,6 +174,66 @@ void ImGuiManager::CameraSetting(Vector3& positoin, Vector3& rotation)
 		ImGui::DragFloat3("Position", (float*)&positoin, 0.01f, -10.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Rotation", (float*)&rotation, 0.01f, -360.0f, 360.0f, "%.2f");
 	}
+#endif
+}
+
+void ImGuiManager::AssetBrowserDraw()
+{
+#ifdef USE_IMGUI
+	assetBrowser->Draw();
+#endif
+}
+
+void ImGuiManager::SceneViewDraw(std::vector<std::unique_ptr<Sprite>>& sprites)
+{
+#ifdef USE_IMGUI
+	sceneView->Draw(sprites);
+#endif
+}
+
+void ImGuiManager::Inspector(std::vector<std::unique_ptr<Sprite>>& sprites)
+{
+#ifdef USE_IMGUI
+	ImGui::Begin("Imspector", nullptr, ImGuiWindowFlags_MenuBar);
+	if (ImGui::BeginMenuBar()) {
+		if (ImGui::BeginMenu("Menu")) {
+			if (ImGui::MenuItem("Create")) {
+
+			}
+
+			if (ImGui::MenuItem("Delete")) {
+
+			}
+
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+
+	for (int i = 0; i < sprites.size(); i++) {
+		std::string label = "Sprite" + std::to_string(i);
+		if (ImGui::CollapsingHeader(label.c_str())) {
+			ImGui::PushID(label.c_str());
+			Vector2 pos = sprites[i]->GetPosition();
+			float rotation = sprites[i]->GetRotation();
+			Vector2 scale = sprites[i]->GetSize();
+			ImGui::DragFloat2("Position", (float*)&pos, 1.0f, 0.0f, 1280.0f, "%0.1f");
+			ImGui::SliderAngle("Rotation", (float*)&rotation, 0.0f, 360.0f, "%.3f");
+			ImGui::DragFloat2("Scale", (float*)&scale, 1.0f, 0.0f, 1280.0f, "%.1f");
+			sprites[i]->SetPosition(pos);
+			sprites[i]->SetRotation(rotation);
+			sprites[i]->SetSize(scale);
+			ImGui::PopID();
+		}
+	}
+	ImGui::End();
+#endif
+}
+
+void ImGuiManager::LoadAssets(const std::string& directoryPath)
+{
+#ifdef USE_IMGUI
+	assetBrowser->LoadAssets(directoryPath);
 #endif
 }
 

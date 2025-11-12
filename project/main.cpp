@@ -51,12 +51,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SoundData sHAudio4 = se->SoundLoad("resources/se_itemget.wav"); 
 
 	// Sprite
-	Vector2 positoin = {0.0f, 0.0f};
+	/*Vector2 positoin = {0.0f, 0.0f};
 	float rotation = 0.0f;
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 	uint32_t tHChecker = TextureManager::GetInstance()->Load("resources/uvChecker.png");
 	sprite->Create(tHChecker, positoin, Color::WHITE);
-	sprite->SetRotation(rotation);
+	sprite->SetRotation(rotation);*/
+
+	// ドラッグドロップで生成するSpriteを格納
+	std::vector<std::unique_ptr<Sprite>> sprites;
 
 	// Model
 	std::unique_ptr<Entity3D> entity = std::make_unique<Entity3D>();
@@ -72,6 +75,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraPos);
 	engine.GetEntityCommon()->SetDefaultCamera(camera.get());
+
+	imgui.LoadAssets("resources");
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (engine.GetApp()->ProcessMessage()) {
@@ -103,17 +108,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		camera->SetTranslate(cameraPos);
 		camera->Update();
 
-		sprite->Update();
+		//sprite->Update();
+		for (auto& sprite : sprites) {
+			sprite->Update();
+		}
 
 		entity->SetCamera(camera.get());
 		entity->Update();
 
 		imgui.BegineFrame();
-		imgui.BegineInspector();
+
+		imgui.AssetBrowserDraw();
+		imgui.SceneViewDraw(sprites);
+		imgui.Inspector(sprites);
+
+		/*imgui.BegineInspector();
 		imgui.CameraSetting(cameraPos, cameraRotate);
 		imgui.SpriteSetting("uvChecker", sprite.get());
 		imgui.ModelSetting("axis.obj", entity.get());
-		imgui.EndInspector();
+		imgui.EndInspector();*/
+
 		imgui.Stats();
 		imgui.EndFrame();
 
@@ -124,7 +138,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		entity->Draw();
 
 		engine.GetSpriteCommon()->DrawCommon();
-		sprite->Draw();
+		//sprite->Draw();
+		for (auto& sprite : sprites) {
+			sprite->Draw();
+		}
 
 		imgui.Draw();
 		engine.EndFrame();

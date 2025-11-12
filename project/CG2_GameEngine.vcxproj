@@ -151,6 +151,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssetBrowser.cpp" />
+    <ClCompile Include="SceneView.cpp" />
     <ClCompile Include="SeekerEngine\Framework\Camera.cpp" />
     <ClCompile Include="SeekerEngine\Utils\Color.cpp" />
     <ClCompile Include="SeekerEngine\Utils\CreateResorceUtils.cpp" />
@@ -243,6 +245,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetBrowser.h" />
+    <ClInclude Include="SceneView.h" />
     <ClInclude Include="SeekerEngine\Framework\Camera.h" />
     <ClInclude Include="SeekerEngine\Utils\Color.h" />
     <ClInclude Include="SeekerEngine\Utils\CreateResorceUtils.h" />
