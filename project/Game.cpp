@@ -3,7 +3,7 @@
 void Game::Init()
 {
 	SEFramework::Init();
-	sceneManager_ = std::make_unique<SceneManager>();
+	//sceneManager_ = std::make_unique<SceneManager>();
 }
 
 void Game::Shutdown()
@@ -14,10 +14,10 @@ void Game::Shutdown()
 void Game::Update()
 {
 	SEFramework::Update();
-	sceneManager_->Update();
+	SceneManager::GetInstance()->Update();
 }
 
 void Game::Draw()
 {
-	sceneManager_->Draw();
+	SceneManager::GetInstance()->Draw();
 }

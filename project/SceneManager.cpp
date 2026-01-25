@@ -1,5 +1,14 @@
 #include "SceneManager.h"
 
+SceneManager* SceneManager::instance_ = nullptr;
+
+SceneManager* SceneManager::GetInstance() {
+	if (instance_ == nullptr) {
+		instance_ = new SceneManager;
+	}
+	return instance_;
+}
+
 void SceneManager::Update() {
 
 	if (nextScene_) {
@@ -27,6 +36,11 @@ void SceneManager::Draw() {
 	if (scene_) {
 		scene_->Draw();
 	}
+}
+
+void SceneManager::Shutdown() {
+	scene_.reset();
+	nextScene_.reset();
 }
 
 SceneManager::SceneManager()

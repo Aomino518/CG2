@@ -50,6 +50,7 @@ void SeekerEngine::Update()
 
 void SeekerEngine::Shutdown()
 {
+	SceneManager::GetInstance()->Shutdown();
 	ImGuiManager::GetInstance()->Shutdown();
 	LightManager::GetInstance()->Shutdown();
 	ParticleManager::GetInstance()->Shutdown();
