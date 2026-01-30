@@ -232,10 +232,16 @@ SoundData Sound::SoundLoadWave(const char* filename) {
 
 	// Formatチャンクの読み込み
 	FormatChunk format = {};
-	// チャンクヘッダーの確認
-	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
-		assert(0);
+	while (true) {
+		file.read((char*)&format.chunk, sizeof(ChunkHeader));
+		if (file.eof()) assert(0 && "fmtチャンクが見つかりません");
+
+		if (strncmp(format.chunk.id, "fmt ", 4) == 0) {
+			break;
+		}
+
+		// fmt以外なら中身を飛ばして次へ
+		file.seekg(format.chunk.size, std::ios_base::cur);
 	}
 
 	// チャンク本体の読み込み
@@ -244,17 +250,19 @@ SoundData Sound::SoundLoadWave(const char* filename) {
 
 	// Dataチャンクの読み込み
 	ChunkHeader data;
-	file.read((char*)&data, sizeof(data));
-	// JUNKチャンクを検出した場合
-	if (strncmp(data.id, "JUNK", 4) == 0) {
-		// 読み取り位置をJUNKチャンクの終わりまで進める
-		file.seekg(data.size, std::ios_base::cur);
-		// 再読み込み
+	while (true) {
 		file.read((char*)&data, sizeof(data));
-	}
+		if (file.eof()) {
+			assert(0 && "dataチャンクが見つかりませんでした");
+		}
 
-	if (strncmp(data.id, "data", 4) != 0) {
-		assert(0);
+		// "data" チャンクを見つけたらループを抜ける
+		if (strncmp(data.id, "data", 4) == 0) {
+			break;
+		}
+
+		// それ以外のチャンク（"LIST" や "JUNK" など）はサイズ分だけ読み飛ばす
+		file.seekg(data.size, std::ios_base::cur);
 	}
 
 	/*--読み込んだ音声データをリターン--*/

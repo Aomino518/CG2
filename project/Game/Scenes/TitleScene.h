@@ -17,6 +17,9 @@ public:
 	void Shutdown() override;
 
 private:
+	// メンバ関数
+	void UpdateImGui(); // ImGuiの更新処理
+
 	// テクスチャ
 	uint32_t texTitleLogo_;
 	uint32_t texPressSpace_;
@@ -27,6 +30,7 @@ private:
 
 	// モデル
 	std::unique_ptr<Entity3D> modelPlayer_;
+	std::unique_ptr<Entity3D> modelSkydome_;
 
 	// カメラマネージャー
 	std::unique_ptr<CameraManager> camMgr_;
