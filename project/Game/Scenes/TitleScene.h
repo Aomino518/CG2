@@ -17,6 +17,18 @@ public:
 	void Shutdown() override;
 
 private:
-	std::unique_ptr<Sprite> sprite;
+	// テクスチャ
+	uint32_t texTitleLogo_;
+	uint32_t texPressSpace_;
+
+	// スプライト
+	std::unique_ptr<Sprite> sprTitleLogo_;
+	std::unique_ptr<Sprite> sprUiPressSpace_;
+
+	// モデル
+	std::unique_ptr<Entity3D> modelPlayer_;
+
+	// カメラマネージャー
+	std::unique_ptr<CameraManager> camMgr_;
 };
 

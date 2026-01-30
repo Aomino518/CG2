@@ -8,7 +8,7 @@ void PlayScene::Init()
 
 void PlayScene::Update()
 {
-   
+    /*-- 更新処理 --*/
 }
 
 void PlayScene::Draw()

@@ -196,6 +196,25 @@ void Sprite::Scale(const Vector2& factor)
 	size_.y *= factor.y;
 }
 
+void Sprite::UpdateColorBlink(const Vector4& baseColor, const Vector4& blinkColor)
+{
+	colorBlinkFrame_++;
+
+	if (colorBlinkFrame_ == 60) {
+		colorBlinkFrame_ = 0;
+	}
+
+	float t = (sinf(colorBlinkFrame_ * colorBlinkSpeed_) + 1.0f) * 0.5f;
+
+	Vector4 c;
+	c.x = baseColor.x + (blinkColor.x - baseColor.x) * t;
+	c.y = baseColor.y + (blinkColor.y - baseColor.y) * t;
+	c.z = baseColor.z + (blinkColor.z - baseColor.z) * t;
+	c.w = 1.0f;
+
+	SetColor(c);
+}
+
 void Sprite::AdjustTextureSize()
 {
 	const DirectX::TexMetadata& metaData = TextureManager::GetInstance()->GetMetaData(textureIndex_);
