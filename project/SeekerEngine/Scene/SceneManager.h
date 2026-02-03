@@ -1,8 +1,6 @@
 #pragma once
 #include "SeekerEngine.h"
 #include "BaseScene.h"
-#include "TitleScene.h"
-#include "PlayScene.h"
 #include "AbstractSceneFactory.h"
 
 class SceneManager

@@ -73,6 +73,12 @@ public:
 	void Rotate(float deltaAngle);
 	void Scale(float factor);
 	void Scale(const Vector2& factor);
+	/// <summary>
+	/// 点滅する色の更新
+	/// </summary>
+	/// <param name="baseColor">元の色</param>
+	/// <param name="blinkColor">点滅させる色</param>
+	void UpdateColorBlink(const Vector4& baseColor, const Vector4& blinkColor);
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
@@ -119,4 +125,8 @@ private:
 
 	// ブレンドモード取得
 	BlendMode mode_ = kBlendModeNone;
+
+	// 色の点滅
+	int colorBlinkFrame_ = 0;
+	float colorBlinkSpeed_ = 0.1f;
 };

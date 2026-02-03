@@ -25,6 +25,9 @@ void Sound::Init() {
 }
 
 void Sound::Shutdown() {
+	StopBGM();
+	StopSE();
+
 	if (masterVoice_) {
 		masterVoice_->DestroyVoice();
 		masterVoice_ = nullptr;
@@ -148,7 +151,7 @@ void Sound::StopSE()
 
 void Sound::RestartBGM()
 {
-	if (!currentData_.pBuffer.empty()) {
+	if (currentData_.pBuffer.empty()) {
 		return;
 	}
 

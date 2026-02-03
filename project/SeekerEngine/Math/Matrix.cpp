@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include <cmath>
+#include <algorithm>
 
 // 加算
 Vector3 Add(const Vector3& v1, const Vector3& v2) {
@@ -391,6 +392,51 @@ bool IsCollision(const AABB& aabb, const Vector3& point)
 	return (aabb.min.x <= point.x && point.x <= aabb.max.x) &&
 		(aabb.min.y <= point.y && point.y <= aabb.max.y) &&
 		(aabb.min.z <= point.z && point.z <= aabb.max.z);
+}
+
+bool IsCollision(const Sphere& s1, const Sphere& s2) {
+	float distance = Length(s2.center - s1.center);
+
+	if (distance <= s1.radius + s2.radius) {
+		return true;
+	}
+
+	return false;
+}
+
+float Lerp(const float start, const float end, float t)
+{
+	return start + (end - start) * t;
+}
+
+Vector3 GetForwardFromTransform(const Vector3& rotate)
+{
+	Matrix4x4 rotMat =
+		MakeAffineMatrix(
+			{ 1.0f, 1.0f, 1.0f },
+			rotate,
+			{ 0.0f, 0.0f, 0.0f });
+
+	Vector3 forward = { 0.0f, 0.0f, 1.0f };
+	return Normalize(TransformNormal(forward, rotMat));
+}
+
+Vector3 TransformToVector3(const Vector3& vector, const Matrix4x4& matrix)
+{
+	Vector3 result;
+	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][0];
+	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
+	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
+	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
+
+	// wで割って正規化
+	if (w != 0.0f) {
+		result.x /= w;
+		result.y /= w;
+		result.z /= w;
+	}
+
+	return result;
 }
 
 Vector2& operator+=(Vector2& v1, const Vector2& v2) {
