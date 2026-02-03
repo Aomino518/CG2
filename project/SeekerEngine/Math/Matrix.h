@@ -1,20 +1,15 @@
 #pragma once
 #include <cstdint>
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
+#include "CreateResorceUtils.h"
 
 struct AABB {
 	Vector3 min;
 	Vector3 max;
 };
 
-struct Matrix3x3 {
-	float m[3][3];
-};
-
-struct Matrix4x4 {
-	float m[4][4];
+struct Sphere {
+	Vector3 center;
+	float radius;
 };
 
 // 加算
@@ -124,6 +119,23 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 Matrix4x4 Transpose(const Matrix4x4& matrix);
 
 bool IsCollision(const AABB& aabb, const Vector3& point);
+
+// 球同士の当たり判定を返す関数
+bool IsCollision(const Sphere& s1, const Sphere& s2);
+
+/// <summary>
+/// 線形補完関数
+/// </summary>
+/// <param name="start">始まりの数値</param>
+/// <param name="end">終わりの数値</param>
+/// <param name="t">時間</param>
+/// <returns>線形補完値</returns>
+float Lerp(const float start, const float end, float t);
+
+Vector3 GetForwardFromTransform(const Vector3& rotate);
+
+// 座標変換
+Vector3 TransformToVector3(const Vector3& vector, const Matrix4x4& matrix);
 
 // オペレーター
 Vector2& operator+=(Vector2& v1, const Vector2& v2);

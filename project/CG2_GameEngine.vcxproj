@@ -151,7 +151,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\EnemyManager.cpp" />
+    <ClCompile Include="Game\Objects\Bullet.cpp" />
+    <ClCompile Include="Game\Objects\Enemy.cpp" />
+    <ClCompile Include="Game\Fade.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Game\Objects\Player.cpp" />
     <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp" />
     <ClCompile Include="Game\Scenes\ClearScene.cpp" />
     <ClCompile Include="Game\Scenes\GameOverScene.cpp" />
@@ -287,6 +292,13 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\EnemyManager.h" />
+    <ClInclude Include="Game\Objects\Bullet.h" />
+    <ClInclude Include="Game\Objects\Enemy.h" />
+    <ClInclude Include="Game\Fade.h" />
+    <ClInclude Include="Game\Objects\Player.h" />
+    <ClInclude Include="SeekerEngine\Math\Matrix3x3.h" />
+    <ClInclude Include="SeekerEngine\Math\Matrix4x4.h" />
     <ClInclude Include="SeekerEngine\Scene\AbstractSceneFactory.h" />
     <ClInclude Include="SeekerEngine\Scene\BaseScene.h" />
     <ClInclude Include="Game\Scenes\ClearScene.h" />
