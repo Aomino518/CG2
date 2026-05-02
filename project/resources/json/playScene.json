@@ -312,6 +312,7 @@
             }
         }
     },
+    "particles2D": {},
     "sprites": {
         "uvChecker": {
             "blendMode": 1,
@@ -342,8 +343,8 @@
     },
     "windowState": {
         "showCamera": true,
-        "showSound": false,
-        "showStats": false
+        "showSound": true,
+        "showStats": true
     },
     "worldField": {
         "TestWind_001": {
@@ -394,5 +395,6 @@
                 "z": 0.0
             }
         }
-    }
+    },
+    "worldField2D": null
 }
