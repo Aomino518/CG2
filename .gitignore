@@ -321,3 +321,4 @@ logs/
 *.log
 Dumps/
 **/imgui.ini
+*.pdb
