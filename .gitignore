@@ -322,3 +322,4 @@ logs/
 Dumps/
 **/imgui.ini
 *.pdb
+/project/externals/assimp/lib/Debug/assimp-vc143-mtd.pdb
