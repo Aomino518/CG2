@@ -155,7 +155,7 @@
     <ClCompile Include="Game\Objects\Bullet.cpp" />
     <ClCompile Include="Game\Objects\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Game\main.cpp" />
     <ClCompile Include="Game\Objects\Player.cpp" />
     <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp" />
     <ClCompile Include="Game\Scenes\ClearScene.cpp" />
