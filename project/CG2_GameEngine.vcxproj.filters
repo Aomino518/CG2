@@ -45,13 +45,6 @@
     <Filter Include="ヘッダー ファイル\Engine\Utility">
       <UniqueIdentifier>{8ea90864-fdc7-4b9b-874c-1c8342b0ae16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル\HLSL">
-      <UniqueIdentifier>{d80eaf7a-6378-4229-8743-9c459faf768a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダー ファイル\Engine\Core">
       <UniqueIdentifier>{9e7fe7a6-42bd-435d-84e9-60a66064589f}</UniqueIdentifier>
     </Filter>
@@ -64,23 +57,8 @@
     <Filter Include="ヘッダー ファイル\Application\Scenes">
       <UniqueIdentifier>{2dc4d60d-db49-44ca-9c70-6bda83167331}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Application\GameObject">
-      <UniqueIdentifier>{9796a1f8-a80c-4f9a-81d1-c175b8e7eb4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダー ファイル\Application\Objects">
       <UniqueIdentifier>{4fd185d2-47f8-4c15-81dc-22dcf4c85ef2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\GameObject\2D">
-      <UniqueIdentifier>{f9d52404-6c1d-4ba2-bea9-d6fa72388afa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\GameObject\3D">
-      <UniqueIdentifier>{44e9d7d1-1cb8-48ab-8a79-94c7dac53a13}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\GameObject\Effect">
-      <UniqueIdentifier>{8e60e2d4-d798-46b1-b4a5-bb0dca78b89e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\GameObject\Light">
-      <UniqueIdentifier>{4c520b6f-30fe-42d2-9e23-42941ab836e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\Engine\Core">
       <UniqueIdentifier>{cf8e0572-ed91-4627-9b1e-d6c5dcd29571}</UniqueIdentifier>
@@ -97,50 +75,66 @@
     <Filter Include="ソース ファイル\Application">
       <UniqueIdentifier>{af18872f-d883-4b15-aef7-49dff6430bf1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Application\GameObject">
-      <UniqueIdentifier>{3037a88b-909a-487d-a517-adac14b8d8a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\Application\Objects">
       <UniqueIdentifier>{495f4bc3-cce8-4962-90fa-f89d29a348fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\Application\Scenes">
       <UniqueIdentifier>{6ffd5d5c-83ee-420e-8977-2b46defd76db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Application\GameObject\2D">
-      <UniqueIdentifier>{1f7d3141-8b9e-4a28-9530-38e55363ee3d}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\Engine\Light">
+      <UniqueIdentifier>{b7c545a0-66c0-4ac7-8608-8491e76c0881}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Application\GameObject\3D">
+    <Filter Include="ソース ファイル\Engine\3D">
       <UniqueIdentifier>{b1447642-872c-4c0c-99c2-2486dd52750e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Application\GameObject\Effect">
+    <Filter Include="ソース ファイル\Engine\2D">
+      <UniqueIdentifier>{1f7d3141-8b9e-4a28-9530-38e55363ee3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\DebugShape">
+      <UniqueIdentifier>{65f37708-6374-4ab3-a14a-a12dd0c8a14c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Editor">
+      <UniqueIdentifier>{d84eb9a1-9fba-4496-bbd5-32711eb31581}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル\HLSL">
+      <UniqueIdentifier>{d80eaf7a-6378-4229-8743-9c459faf768a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Effect">
       <UniqueIdentifier>{ca30a9e5-264c-49c9-9b7b-8cdcdf877aa9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Application\GameObject\Light">
-      <UniqueIdentifier>{b7c545a0-66c0-4ac7-8608-8491e76c0881}</UniqueIdentifier>
+    <Filter Include="ヘッダー ファイル\Engine\2D">
+      <UniqueIdentifier>{f9d52404-6c1d-4ba2-bea9-d6fa72388afa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3D">
+      <UniqueIdentifier>{44e9d7d1-1cb8-48ab-8a79-94c7dac53a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Effect">
+      <UniqueIdentifier>{8e60e2d4-d798-46b1-b4a5-bb0dca78b89e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Light">
+      <UniqueIdentifier>{4c520b6f-30fe-42d2-9e23-42941ab836e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Editor">
+      <UniqueIdentifier>{93196abf-bf5b-4ded-a81c-ca32698d1037}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\DebugShape">
+      <UniqueIdentifier>{bf242301-1b62-4078-918b-298aea11081c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp">
+      <UniqueIdentifier>{e883e6cb-19cf-41ad-94a6-bf923ae58681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Application\Base">
+      <UniqueIdentifier>{ed795803-2c8d-437c-b0b6-b560ded22eec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Application\Base">
+      <UniqueIdentifier>{1a92046b-02b0-401f-8adb-24beb4db53af}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="externals\imgui\imgui.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <Filter>externals\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="SeekerEngine\Audio\Sound.cpp">
       <Filter>ソース ファイル\Engine\Audio</Filter>
     </ClCompile>
@@ -189,13 +183,7 @@
     <ClCompile Include="SeekerEngine\Input\Input.cpp">
       <Filter>ソース ファイル\Engine\Input</Filter>
     </ClCompile>
-    <ClCompile Include="SeekerEngine\Math\Matrix.cpp">
-      <Filter>ソース ファイル\Engine\Math</Filter>
-    </ClCompile>
     <ClCompile Include="SeekerEngine\Scene\SceneManager.cpp">
-      <Filter>ソース ファイル\Engine\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Scene\SceneFactory.cpp">
       <Filter>ソース ファイル\Engine\Scene</Filter>
     </ClCompile>
     <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp">
@@ -213,35 +201,35 @@
     <ClCompile Include="SeekerEngine\Utility\StringUtil.cpp">
       <Filter>ソース ファイル\Engine\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\Camera.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\Camera.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\CameraManager.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\CameraManager.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\DebugCamera.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\DebugCamera.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\Entity3D.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\Entity3D.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\Entity3DCommon.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\Entity3DCommon.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\Model.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\Model.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\3D\ModelManager.cpp">
-      <Filter>ソース ファイル\Application\GameObject\3D</Filter>
+    <ClCompile Include="SeekerEngine\3D\ModelManager.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\2D\Sprite.cpp">
-      <Filter>ソース ファイル\Application\GameObject\2D</Filter>
+    <ClCompile Include="SeekerEngine\2D\Sprite.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\2D\SpriteCommon.cpp">
-      <Filter>ソース ファイル\Application\GameObject\2D</Filter>
+    <ClCompile Include="SeekerEngine\2D\SpriteCommon.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\2D\TextureManager.cpp">
-      <Filter>ソース ファイル\Application\GameObject\2D</Filter>
+    <ClCompile Include="SeekerEngine\2D\TextureManager.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
     </ClCompile>
     <ClCompile Include="Game\Scenes\ClearScene.cpp">
       <Filter>ソース ファイル\Application\Scenes</Filter>
@@ -255,18 +243,23 @@
     <ClCompile Include="Game\Scenes\TitleScene.cpp">
       <Filter>ソース ファイル\Application\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\Effect\ParticleManager.cpp">
-      <Filter>ソース ファイル\Application\GameObject\Effect</Filter>
+    <ClCompile Include="SeekerEngine\Effect\ParticleManager.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\Effect\ParticleEmitter.cpp">
-      <Filter>ソース ファイル\Application\GameObject\Effect</Filter>
+    <ClCompile Include="SeekerEngine\Effect\ParticleEmitter.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObject\Light\LightManager.cpp">
-      <Filter>ソース ファイル\Application\GameObject\Light</Filter>
+    <ClCompile Include="SeekerEngine\Light\LightManager.cpp">
+      <Filter>ソース ファイル\Engine\Light</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Game.cpp">
+    <ClCompile Include="Game\main.cpp">
       <Filter>ソース ファイル\Application</Filter>
     </ClCompile>
+    <ClCompile Include="SeekerEngine\Math\MathFunc.cpp">
+      <Filter>ソース ファイル\Engine\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Math\MathOperator.cpp">
+      <Filter>ソース ファイル\Engine\Math</Filter>
     <ClCompile Include="Game\main.cpp">
       <Filter>ソース ファイル\Application</Filter>
     </ClCompile>
@@ -284,6 +277,54 @@
     </ClCompile>
     <ClCompile Include="Game\EnemyManager.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw.cpp">
+      <Filter>ソース ファイル\Engine\DebugShape</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw2D.cpp">
+      <Filter>ソース ファイル\Engine\DebugShape</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw3D.cpp">
+      <Filter>ソース ファイル\Engine\DebugShape</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Editor\Editor.cpp">
+      <Filter>ソース ファイル\Engine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Effect\Particle2DManager.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Effect\Particle2DEmitter.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Effect\Emitter2DManager.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Effect\EmitterManager.cpp">
+      <Filter>ソース ファイル\Engine\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\2D\WorldField2DManager.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\2D\AccelerationField2D.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\3D\WorldFieldManager.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\3D\AccelerationField.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Utility\ImGuiUtils.cpp">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="SeekerEngine\Utility\JsonUtils.cpp">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Base\Game.cpp">
+      <Filter>ソース ファイル\Application\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Base\SceneFactory.cpp">
+      <Filter>ソース ファイル\Application\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -311,32 +352,20 @@
     <FxCompile Include="resources\hlsl\Particle3D.VS.hlsl">
       <Filter>リソース ファイル\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape3D.VS.hlsl">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape2D.PS.hlsl">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape2D.VS.hlsl">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape3D.PS.hlsl">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="externals\imgui\imconfig.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_internal.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_rectpack.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_textedit.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_truetype.h">
-      <Filter>externals\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="SeekerEngine\Audio\SoundManager.h">
       <Filter>ヘッダー ファイル\Engine\Audio</Filter>
     </ClInclude>
@@ -394,13 +423,7 @@
     <ClInclude Include="SeekerEngine\Math\Vector2.h">
       <Filter>ヘッダー ファイル\Engine\Math</Filter>
     </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Matrix.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
     <ClInclude Include="SeekerEngine\Scene\SceneManager.h">
-      <Filter>ヘッダー ファイル\Engine\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Scene\SceneFactory.h">
       <Filter>ヘッダー ファイル\Engine\Scene</Filter>
     </ClInclude>
     <ClInclude Include="SeekerEngine\Scene\AbstractSceneFactory.h">
@@ -433,47 +456,347 @@
     <ClInclude Include="Game\Scenes\GameOverScene.h">
       <Filter>ヘッダー ファイル\Application\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\CameraManager.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\CameraManager.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\Camera.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\Camera.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\DebugCamera.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\DebugCamera.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\Entity3D.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\Entity3D.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\Entity3DCommon.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\Entity3DCommon.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\Model.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\Model.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\3D\ModelManager.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\3D</Filter>
+    <ClInclude Include="SeekerEngine\3D\ModelManager.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\2D\TextureManager.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\2D</Filter>
+    <ClInclude Include="SeekerEngine\2D\TextureManager.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\2D\SpriteCommon.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\2D</Filter>
+    <ClInclude Include="SeekerEngine\2D\SpriteCommon.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\2D\Sprite.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\2D</Filter>
+    <ClInclude Include="SeekerEngine\2D\Sprite.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\Light\LightManager.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\Light</Filter>
+    <ClInclude Include="SeekerEngine\Light\LightManager.h">
+      <Filter>ヘッダー ファイル\Engine\Light</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\Effect\ParticleManager.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\Effect</Filter>
+    <ClInclude Include="SeekerEngine\Effect\ParticleManager.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObject\Effect\ParticleEmitter.h">
-      <Filter>ヘッダー ファイル\Application\GameObject\Effect</Filter>
+    <ClInclude Include="SeekerEngine\Effect\ParticleEmitter.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Game.h">
+    <ClInclude Include="SeekerEngine\Math\AABB.h">
+      <Filter>ヘッダー ファイル\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw.h">
+      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw2D.h">
+      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw3D.h">
+      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Editor\Editor.h">
+      <Filter>ヘッダー ファイル\Engine\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Effect\Emitter2DManager.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Effect\EmitterManager.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Effect\Particle2DEmitter.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Effect\Particle2DManager.h">
+      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Math\MathFunc.h">
+      <Filter>ヘッダー ファイル\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Math\MathOperator.h">
+      <Filter>ヘッダー ファイル\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Utility\JsonTransform.h">
+      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Utility\JsonMath.h">
+      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Utility\JsonUtils.h">
+      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Utility\ImGuiUtils.h">
+      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\2D\WorldField2DManager.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\3D\WorldFieldManager.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\2D\AccelerationField2D.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\3D\AccelerationField.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SeekerEngine\Math\MathTypes.h">
+      <Filter>ヘッダー ファイル\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\aabb.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\anim.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\camera.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cexport.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cfileio.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cimport.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\color4.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\config.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\defs.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Hash.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\light.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogAux.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\material.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\mesh.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\metadata.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\postprocess.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Profiler.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\qnan.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\quaternion.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\scene.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\texture.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\types.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector2.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector3.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\version.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Vertex.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h">
+      <Filter>externals\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneIncludes.h">
       <Filter>ヘッダー ファイル\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Base\SceneFactory.h">
+      <Filter>ヘッダー ファイル\Application\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Base\Game.h">
+      <Filter>ヘッダー ファイル\Application\Base</Filter>
     </ClInclude>
     <ClInclude Include="Game\Fade.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -498,11 +821,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt">
-      <Filter>externals\imgui</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="resources\hlsl\Object2D.hlsli">
       <Filter>リソース ファイル\HLSL</Filter>
     </None>
@@ -514,6 +832,38 @@
     </None>
     <None Include="resources\hlsl\Particle3D.hlsli">
       <Filter>リソース ファイル\HLSL</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\.editorconfig" />
+    <None Include="externals\assimp\include\assimp\config.h.in" />
+    <None Include="resources\hlsl\DebugShape2D.hlsli">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </None>
+    <None Include="resources\hlsl\DebugShape3D.hlsli">
+      <Filter>リソース ファイル\HLSL</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\color4.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\material.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix3x3.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix4x4.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\quaternion.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector2.inl">
+      <Filter>externals\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector3.inl">
+      <Filter>externals\assimp</Filter>
     </None>
   </ItemGroup>
 </Project>

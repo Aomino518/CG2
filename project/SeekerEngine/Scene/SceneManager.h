@@ -1,7 +1,8 @@
 #pragma once
-#include "SeekerEngine.h"
 #include "BaseScene.h"
 #include "AbstractSceneFactory.h"
+#include <memory>
+#include <string>
 
 class SceneManager
 {
@@ -23,6 +24,10 @@ public:
 		this->sceneFactory_ = std::move(sceneFactory);
 	}
 
+	const char* GetCurrentSceneName() const;
+	BaseScene* GetCurrentScene() const { return scene_.get(); }
+
+	bool GetIsEndRequest() { return scene_->GetIsEndRequest(); }
 
 private:
 	SceneManager() = default;

@@ -1,53 +1,77 @@
 #pragma once
 #include <stdlib.h>
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Sprite.h"
-#include "CameraManager.h"
-#include "BlendStateUtils.h"
-#include "ParticleManager.h"
-#include "ParticleEmitter.h"
+#include <string>
+#include <nlohmann/json.hpp>
 #ifdef USE_IMGUI
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
+#include "imgui.h"
+#include "imgui_impl_dx12.h"
+#include "imgui_impl_win32.h"
 #endif
+
+enum class UITheme {
+	Default,
+	Cyberpunk
+};
 
 class Application;
 class Graphics;
-class Entity3D;
+class CameraManager;
 class ImGuiManager
 {
 public:
 	static ImGuiManager* GetInstance();
 
 	void Init();
-	void BegineFrame();
+	void BeginFrame();
 	void EndFrame();
 	void Draw();
 	void Shutdown();
 
-	void SpriteSetting(const std::string& spriteName, Sprite* sprite);
-	void ModelSetting(const std::string& modelName, Entity3D* model);
+	void DrawSoundWindow();
+	void DrawCameraWindow(CameraManager* cameraManager);
+	void DrawMainMenuBar();
+	void DrawLoggerWindow();
+
+	void DrawEditor();
+
 	void Stats();
 	void ShowMemoryUsage();
-	void BegineInspector();
+	void BeginInspector();
 	void EndInspector();
-	void CameraSetting(CameraManager* cameraManager);
-	void ParticleSetting(const std::string& name, ParticleEmitter* emitter);
-	void LightSetting();
-	void SoundSetting();
+	void SaveScenesJson();
+	void LoadScenesJson();
+	void ClearScenesJson();
+	void DrawConfirmPopup();
 
+	nlohmann::json SaveEditorJson() const;
+	void LoadEditorJson(const nlohmann::json& j);
+	
 private:
+
+	// メンバ関数
 	ImGuiManager() = default;
 	~ImGuiManager() = default;
 	ImGuiManager(const ImGuiManager&) = delete;
 	ImGuiManager& operator=(const ImGuiManager&) = delete;
 
-	void StyleSetting();
+	void ApplyStyle();
+	void DrawDockSpace();
 
+	// メンバ変数
 	Application* app_ = nullptr;
 	Graphics* graphics_ = nullptr;
+
+	// 表示するWindowのフラグ
+	struct WindowFlags {
+		bool showStats = true;
+		bool showCamera = true;
+		bool showSound = true;
+		bool showConsole = true;
+	};
+
+	WindowFlags windowState_;
+	bool requestSavePopup_ = false;
+	bool requestLoadPopup_ = false;
+	bool requestClearPopup_ = false;
 };
 

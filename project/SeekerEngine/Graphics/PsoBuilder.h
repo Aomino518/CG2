@@ -16,13 +16,14 @@ public:
 		Microsoft::WRL::ComPtr<IDxcBlob> psBlob, 
 		D3D12_BLEND_DESC blendState,
 		D3D12_RASTERIZER_DESC rasterizerDesc,
-		D3D12_DEPTH_STENCIL_DESC depthStencilDesc
+		D3D12_DEPTH_STENCIL_DESC depthStencilDesc,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType
 		);
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> BuildPso(D3D12_GRAPHICS_PIPELINE_STATE_DESC desc);
 
 private:
 	Graphics* graphics_;
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc_{};
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc_ = {};
 };
 

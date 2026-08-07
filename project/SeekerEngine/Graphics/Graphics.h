@@ -4,8 +4,6 @@
 #include <dxgi1_6.h>
 #include <cstdint>
 #include <chrono>
-#include <thread>
-#include "D3DResourceLeakChecker.h"
 
 class Graphics
 {
@@ -20,6 +18,10 @@ public:
 
 	// 同期待ち
 	void WaitGPU();
+
+	void Resize(uint32_t width, uint32_t height);
+
+	bool IsInit() const;
 
 	// ゲッター
 	static ID3D12Device* GetDevice() { return device_.Get(); }
@@ -109,5 +111,13 @@ private:
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
+
+private:
+	// DrawCallした数
+	uint32_t drawCallCount_ = 0;
+public:
+	void ResetDrawCallCount() { drawCallCount_ = 0; }
+	void AddDrawCallCount(uint32_t count = 1) { drawCallCount_ += count; }
+	uint32_t GetDrawCallCount() const { return drawCallCount_; }
 };
 

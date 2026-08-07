@@ -13,7 +13,7 @@ enum BlendMode {
 	// 減算
 	kBlendModeSubtract,
 	// 乗算
-	kBlendModeMultily,
+	kBlendModeMultiply,
 	// スクリーン
 	kBlendModeScreen,
 	// 利用してはいけない
@@ -60,7 +60,7 @@ inline D3D12_BLEND_DESC CreateBlendDesc(BlendMode mode) {
 		desc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
 
-	case kBlendModeMultily:
+	case kBlendModeMultiply:
 		desc.RenderTarget[0].BlendEnable = TRUE;
 		desc.RenderTarget[0].SrcBlend = D3D12_BLEND_ZERO;
 		desc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_COLOR;
@@ -83,7 +83,3 @@ inline D3D12_BLEND_DESC CreateBlendDesc(BlendMode mode) {
 
 	return desc;
 }
-
-
-
-

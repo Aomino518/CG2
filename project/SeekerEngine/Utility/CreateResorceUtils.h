@@ -12,7 +12,7 @@
 #include "Matrix4x4.h"
 #include <unordered_map>
 #include <algorithm>
-#include "Matrix.h"
+#include "MathFunc.h"
 
 struct Transform {
 	Vector3 scale;
@@ -61,6 +61,12 @@ struct TripletHash {
 	}
 };
 
+struct Node {
+	Matrix4x4 localMatrix;
+	std::string name;
+	std::vector<Node> children;
+};
+
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;
@@ -71,6 +77,7 @@ struct ModelData {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
 	MaterialData material;
+	Node rootNode;
 };
 
 struct DirectionalLight {
@@ -97,15 +104,52 @@ struct SpotLight {
 	float decay;
 	float cosAngle;
 	float cosFalloffStart;
-	float padding[2];
+	float padding;
 };
 
 struct Particle {
 	Transform transform;
+	Vector3 rotateVelocity;
 	Vector3 velocity;
 	Vector4 color;
+	Vector4 startColor;
+	Vector4 endColor;
+	Vector3 startScale;
+	Vector3 endScale;
 	float lifeTime;
 	float currentTime;
+};
+
+enum class SpawnShape {
+	Box,
+	Sphere
+};
+
+struct ParticleConfig {
+	Vector3 minVelocity = { -0.1f, -0.1f, -0.1f }; // 速度の最小値
+	Vector3 maxVelocity = { 0.1f,  0.1f,  0.1f }; // 速度の最大値
+	Vector3 minOffset = { -0.5f, -0.5f, -0.5f }; // オフセットの最小値
+	Vector3 maxOffset = { 0.5f,  0.5f,  0.5f }; // オフセットの最大値
+	Vector4 startColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // 開始色
+	Vector4 endColor = { 1.0f, 1.0f, 1.0f, 0.0f }; // 終了色
+	Vector4 startColorMin = { 1.0f, 1.0f, 1.0f, 1.0f }; // 開始色の最小値
+	Vector4 startColorMax = { 1.0f, 1.0f, 1.0f, 1.0f }; // 開始色の最大値
+	Vector4 endColorMin = { 1.0f, 1.0f, 1.0f, 0.0f };   // 終了色の最小値
+	Vector4 endColorMax = { 1.0f, 1.0f, 1.0f, 0.0f };   // 終了色の最大値
+	Vector3 startScaleMin = { 0.5f, 0.5f, 0.5f }; // 初期スケールの最小値
+	Vector3 startScaleMax = { 1.0f, 1.0f, 1.0f }; // 初期スケールの最大値
+	Vector3 endScaleMin = { 0.5f, 0.5f, 0.5f };   // 終了スケールの最小値
+	Vector3 endScaleMax = { 1.5f, 1.5f, 1.5f };   // 終了スケールの最大値
+	float minLifeTime = 1.0f; // 生存時間の最小値
+	float maxLifeTime = 3.0f; // 生存時間の最大値
+	Vector3 minRotate = { 0.0f, 0.0f, 0.0f }; // 回転角の最小値
+	Vector3 maxRotate = { 0.0f, 0.0f, 0.0f }; // 回転角の最大値
+	Vector3 minRotateVelocity = { 0.0f, 0.0f, 0.0f }; // 回転速度の最小値
+	Vector3 maxRotateVelocity = { 0.0f, 0.0f, 0.0f }; // 回転速度の最大値
+	SpawnShape shape = SpawnShape::Box; // 範囲タイプ
+	Vector3 boxMin = { -0.5f, -0.5f, -0.5f }; // 箱の最小値
+	Vector3 boxMax = { 0.5f,  0.5f,  0.5f }; // 箱の最大値
+	float sphereRadius = 1.0f; // 球の半径
 };
 
 struct ParticleForGPU
@@ -118,6 +162,36 @@ struct ParticleForGPU
 struct CameraForGPU {
 	Vector3 worldPosition;
 	float padding;
+};
+
+static constexpr uint32_t kMaxPointLights = 512;
+static constexpr uint32_t kMaxSpotLights = 512;
+
+struct PointLightGroup {
+	PointLight lights[kMaxPointLights];
+	int32_t count;
+	float pad[3];
+};
+
+struct SpotLightGroup {
+	SpotLight lights[kMaxSpotLights];
+	int32_t count;
+	float pad[3];
+};
+
+struct DebugVertex {
+	Vector4 position;
+	Vector4 color;
+};
+
+enum class DebugDrawMode {
+	Wireframe,
+	Solid
+};
+
+enum class FieldSpace {
+	Local,
+	World
 };
 
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);

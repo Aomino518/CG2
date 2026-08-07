@@ -83,14 +83,16 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)Game\GameObject\2D;$(ProjectDir)Game\GameObject\3D;$(ProjectDir)Game\GameObject\Effect;$(ProjectDir)Game\GameObject\Light;$(ProjectDir)Game\Objects;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)SeekerEngine\2D;$(ProjectDir)SeekerEngine\3D;$(ProjectDir)SeekerEngine\Effect;$(ProjectDir)SeekerEngine\Light;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;$(ProjectDir)externals\assimp\include;$(ProjectDir)SeekerEngine\DebugShape;$(ProjectDir)externals;$(ProjectDir)SeekerEngine\Editor;$(ProjectDir)Game\Objects;$(ProjectDir)externals\imgui;$(ProjectDir)Game\Base</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalOptions>/ignore:4049 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;$(ProjectDir)externals\assimp\lib\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -109,13 +111,15 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)Game\GameObject\2D;$(ProjectDir)Game\GameObject\3D;$(ProjectDir)Game\GameObject\Effect;$(ProjectDir)Game\GameObject\Light;$(ProjectDir)Game\Objects;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)SeekerEngine\2D;$(ProjectDir)SeekerEngine\3D;$(ProjectDir)SeekerEngine\Effect;$(ProjectDir)SeekerEngine\Light;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;$(ProjectDir)externals\assimp\include;$(ProjectDir)SeekerEngine\DebugShape;$(ProjectDir)externals;$(ProjectDir)SeekerEngine\Editor;$(ProjectDir)Game\Objects;$(ProjectDir)externals\imgui;$(ProjectDir)Game\Base</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;$(ProjectDir)externals\assimp\lib\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -128,15 +132,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)Game\GameObject\2D;$(ProjectDir)Game\GameObject\3D;$(ProjectDir)Game\GameObject\Effect;$(ProjectDir)Game\GameObject\Light;$(ProjectDir)Game\Objects;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)SeekerEngine\Core;$(ProjectDir)SeekerEngine\Audio;$(ProjectDir)SeekerEngine\Graphics;$(ProjectDir)SeekerEngine\Input;$(ProjectDir)SeekerEngine\Math;$(ProjectDir)SeekerEngine\Scene;$(ProjectDir)SeekerEngine\Utility;$(ProjectDir)resources\hlsl;$(ProjectDir)SeekerEngine\2D;$(ProjectDir)SeekerEngine\3D;$(ProjectDir)SeekerEngine\Effect;$(ProjectDir)SeekerEngine\Light;$(ProjectDir)Game\Scenes;$(ProjectDir)Game;$(ProjectDir)externals\assimp\include;$(ProjectDir)SeekerEngine\DebugShape;$(ProjectDir)externals;$(ProjectDir)SeekerEngine\Editor;$(ProjectDir)Game\Objects;$(ProjectDir)externals\imgui;$(ProjectDir)Game\Base</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,6 +148,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration />
+      <AdditionalDependencies>imgui.lib;assimp-vc143-mtd.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;$(ProjectDir)externals\assimp\lib\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -151,6 +157,26 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SeekerEngine\3D\AccelerationField.cpp" />
+    <ClCompile Include="SeekerEngine\2D\AccelerationField2D.cpp" />
+    <ClCompile Include="SeekerEngine\Editor\Editor.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Emitter2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\JsonUtils.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Particle2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Particle2DEmitter.cpp" />
+    <ClCompile Include="SeekerEngine\Math\MathFunc.cpp" />
+    <ClCompile Include="SeekerEngine\Math\MathOperator.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw3D.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw2D.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\EmitterManager.cpp" />
+    <ClCompile Include="SeekerEngine\2D\WorldField2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\3D\WorldFieldManager.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\ImGuiUtils.cpp" />
+    <ClCompile Include="Game\main.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Game\EnemyManager.cpp" />
     <ClCompile Include="Game\Objects\Bullet.cpp" />
     <ClCompile Include="Game\Objects\Enemy.cpp" />
@@ -160,61 +186,39 @@
     <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp" />
     <ClCompile Include="Game\Scenes\ClearScene.cpp" />
     <ClCompile Include="Game\Scenes\GameOverScene.cpp" />
-    <ClCompile Include="Game\GameObject\Light\LightManager.cpp" />
+    <ClCompile Include="SeekerEngine\Light\LightManager.cpp" />
     <ClCompile Include="Game\Scenes\PlayScene.cpp" />
-    <ClCompile Include="SeekerEngine\Scene\SceneFactory.cpp" />
+    <ClCompile Include="Game\Base\SceneFactory.cpp" />
     <ClCompile Include="SeekerEngine\Scene\SceneManager.cpp" />
-    <ClCompile Include="Game\GameObject\Effect\ParticleEmitter.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\ParticleEmitter.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\BlendStateUtils.cpp" />
-    <ClCompile Include="Game\GameObject\3D\CameraManager.cpp" />
-    <ClCompile Include="Game\GameObject\3D\Camera.cpp" />
+    <ClCompile Include="SeekerEngine\3D\CameraManager.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Camera.cpp" />
     <ClCompile Include="SeekerEngine\Utility\Color.cpp" />
     <ClCompile Include="SeekerEngine\Utility\CreateResorceUtils.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="SeekerEngine\Core\Application.cpp" />
-    <ClCompile Include="Game\GameObject\3D\DebugCamera.cpp" />
+    <ClCompile Include="SeekerEngine\3D\DebugCamera.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\DxcCompiler.cpp" />
-    <ClCompile Include="externals\imgui\imgui.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="SeekerEngine\Graphics\Graphics.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\InputLayout.cpp" />
     <ClCompile Include="SeekerEngine\Input\Input.cpp" />
     <ClCompile Include="SeekerEngine\Utility\Logger.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\ImGuiManager.cpp" />
-    <ClCompile Include="Game\Game.cpp" />
-    <ClCompile Include="SeekerEngine\Math\Matrix.cpp" />
+    <ClCompile Include="Game\Base\Game.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\PsoBuilder.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\RootSignatureFactory.cpp" />
     <ClCompile Include="SeekerEngine\Audio\Sound.cpp" />
-    <ClCompile Include="Game\GameObject\2D\Sprite.cpp" />
-    <ClCompile Include="Game\GameObject\2D\SpriteCommon.cpp" />
+    <ClCompile Include="SeekerEngine\2D\Sprite.cpp" />
+    <ClCompile Include="SeekerEngine\2D\SpriteCommon.cpp" />
     <ClCompile Include="SeekerEngine\Utility\StringUtil.cpp" />
-    <ClCompile Include="Game\GameObject\3D\Entity3D.cpp" />
-    <ClCompile Include="Game\GameObject\3D\Entity3DCommon.cpp" />
-    <ClCompile Include="Game\GameObject\3D\Model.cpp" />
-    <ClCompile Include="Game\GameObject\3D\ModelManager.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Entity3D.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Entity3DCommon.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Model.cpp" />
+    <ClCompile Include="SeekerEngine\3D\ModelManager.cpp" />
     <ClCompile Include="SeekerEngine\Core\SeekerEngine.cpp" />
-    <ClCompile Include="Game\GameObject\2D\TextureManager.cpp" />
-    <ClCompile Include="Game\GameObject\Effect\ParticleManager.cpp" />
+    <ClCompile Include="SeekerEngine\2D\TextureManager.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\ParticleManager.cpp" />
     <ClCompile Include="SeekerEngine\Core\SEFramework.cpp" />
     <ClCompile Include="SeekerEngine\Graphics\SrvManager.cpp" />
     <ClCompile Include="SeekerEngine\Core\StartupManager.cpp" />
@@ -222,6 +226,38 @@
     <ClCompile Include="Game\Scenes\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="resources\hlsl\DebugShape3D.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape3D.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape2D.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\hlsl\DebugShape2D.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="resources\hlsl\Particle2D.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -292,6 +328,105 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SeekerEngine\2D\AccelerationField2D.h" />
+    <ClInclude Include="SeekerEngine\Editor\Editor.h" />
+    <ClInclude Include="SeekerEngine\Effect\Emitter2DManager.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonMath.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonTransform.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonUtils.h" />
+    <ClInclude Include="SeekerEngine\Effect\Particle2DManager.h" />
+    <ClInclude Include="SeekerEngine\Effect\Particle2DEmitter.h" />
+    <ClInclude Include="Game\SceneIncludes.h" />
+    <ClInclude Include="SeekerEngine\Math\MathFunc.h" />
+    <ClInclude Include="SeekerEngine\Math\MathOperator.h" />
+    <ClInclude Include="SeekerEngine\Math\MathTypes.h" />
+    <ClInclude Include="SeekerEngine\Math\AABB.h" />
+    <ClInclude Include="SeekerEngine\3D\AccelerationField.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw3D.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw2D.h" />
+    <ClInclude Include="SeekerEngine\Effect\EmitterManager.h" />
+    <ClInclude Include="externals\assimp\include\assimp\aabb.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h" />
+    <ClInclude Include="externals\assimp\include\assimp\anim.h" />
+    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h" />
+    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h" />
+    <ClInclude Include="externals\assimp\include\assimp\camera.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cexport.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cfileio.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cimport.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h" />
+    <ClInclude Include="externals\assimp\include\assimp\color4.h" />
+    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h" />
+    <ClInclude Include="externals\assimp\include\assimp\config.h" />
+    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\defs.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h" />
+    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h" />
+    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Hash.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h" />
+    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\light.h" />
+    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\LogAux.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\material.h" />
+    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h" />
+    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h" />
+    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h" />
+    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="externals\assimp\include\assimp\mesh.h" />
+    <ClInclude Include="externals\assimp\include\assimp\metadata.h" />
+    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h" />
+    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\postprocess.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Profiler.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\qnan.h" />
+    <ClInclude Include="externals\assimp\include\assimp\quaternion.h" />
+    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h" />
+    <ClInclude Include="externals\assimp\include\assimp\scene.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h" />
+    <ClInclude Include="externals\assimp\include\assimp\texture.h" />
+    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\types.h" />
+    <ClInclude Include="externals\assimp\include\assimp\vector2.h" />
+    <ClInclude Include="externals\assimp\include\assimp\vector3.h" />
+    <ClInclude Include="externals\assimp\include\assimp\version.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Vertex.h" />
+    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h" />
+    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="SeekerEngine\2D\WorldField2DManager.h" />
+    <ClInclude Include="SeekerEngine\3D\WorldFieldManager.h" />
+    <ClInclude Include="SeekerEngine\Utility\ImGuiUtils.h" />
     <ClInclude Include="Game\EnemyManager.h" />
     <ClInclude Include="Game\Objects\Bullet.h" />
     <ClInclude Include="Game\Objects\Enemy.h" />
@@ -303,51 +438,42 @@
     <ClInclude Include="SeekerEngine\Scene\BaseScene.h" />
     <ClInclude Include="Game\Scenes\ClearScene.h" />
     <ClInclude Include="Game\Scenes\GameOverScene.h" />
-    <ClInclude Include="Game\GameObject\Light\LightManager.h" />
+    <ClInclude Include="SeekerEngine\Light\LightManager.h" />
     <ClInclude Include="Game\Scenes\PlayScene.h" />
-    <ClInclude Include="SeekerEngine\Scene\SceneFactory.h" />
+    <ClInclude Include="Game\Base\SceneFactory.h" />
     <ClInclude Include="SeekerEngine\Scene\SceneManager.h" />
-    <ClInclude Include="Game\GameObject\Effect\ParticleEmitter.h" />
+    <ClInclude Include="SeekerEngine\Effect\ParticleEmitter.h" />
     <ClInclude Include="SeekerEngine\Graphics\BlendStateUtils.h" />
-    <ClInclude Include="Game\GameObject\3D\CameraManager.h" />
-    <ClInclude Include="Game\GameObject\3D\Camera.h" />
+    <ClInclude Include="SeekerEngine\3D\CameraManager.h" />
+    <ClInclude Include="SeekerEngine\3D\Camera.h" />
     <ClInclude Include="SeekerEngine\Utility\Color.h" />
     <ClInclude Include="SeekerEngine\Utility\CreateResorceUtils.h" />
     <ClInclude Include="SeekerEngine\Graphics\D3DResourceLeakChecker.h" />
     <ClInclude Include="SeekerEngine\Core\Application.h" />
-    <ClInclude Include="Game\GameObject\3D\DebugCamera.h" />
+    <ClInclude Include="SeekerEngine\3D\DebugCamera.h" />
     <ClInclude Include="SeekerEngine\Graphics\DxcCompiler.h" />
-    <ClInclude Include="externals\imgui\imconfig.h" />
-    <ClInclude Include="externals\imgui\imgui.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="externals\imgui\imgui_internal.h" />
-    <ClInclude Include="externals\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externals\imgui\imstb_textedit.h" />
-    <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="SeekerEngine\Graphics\Graphics.h" />
     <ClInclude Include="SeekerEngine\Graphics\InputLayout.h" />
     <ClInclude Include="SeekerEngine\Input\Input.h" />
     <ClInclude Include="SeekerEngine\Utility\Logger.h" />
-    <ClInclude Include="SeekerEngine\Math\Matrix.h" />
     <ClInclude Include="SeekerEngine\Graphics\PsoBuilder.h" />
     <ClInclude Include="SeekerEngine\Graphics\RootSignatureFactory.h" />
     <ClInclude Include="SeekerEngine\Audio\Sound.h" />
-    <ClInclude Include="Game\GameObject\2D\Sprite.h" />
-    <ClInclude Include="Game\GameObject\2D\SpriteCommon.h" />
+    <ClInclude Include="SeekerEngine\2D\Sprite.h" />
+    <ClInclude Include="SeekerEngine\2D\SpriteCommon.h" />
     <ClInclude Include="SeekerEngine\Utility\StringUtil.h" />
-    <ClInclude Include="Game\GameObject\3D\Entity3D.h" />
-    <ClInclude Include="Game\GameObject\3D\Entity3DCommon.h" />
+    <ClInclude Include="SeekerEngine\3D\Entity3D.h" />
+    <ClInclude Include="SeekerEngine\3D\Entity3DCommon.h" />
     <ClInclude Include="SeekerEngine\Graphics\ImGuiManager.h" />
-    <ClInclude Include="Game\GameObject\3D\Model.h" />
-    <ClInclude Include="Game\GameObject\3D\ModelManager.h" />
+    <ClInclude Include="SeekerEngine\3D\Model.h" />
+    <ClInclude Include="SeekerEngine\3D\ModelManager.h" />
     <ClInclude Include="SeekerEngine\Core\SeekerEngine.h" />
-    <ClInclude Include="Game\GameObject\2D\TextureManager.h" />
+    <ClInclude Include="SeekerEngine\2D\TextureManager.h" />
     <ClInclude Include="SeekerEngine\Math\Vector2.h" />
     <ClInclude Include="SeekerEngine\Math\Vector3.h" />
     <ClInclude Include="SeekerEngine\Math\Vector4.h" />
-    <ClInclude Include="Game\Game.h" />
-    <ClInclude Include="Game\GameObject\Effect\ParticleManager.h" />
+    <ClInclude Include="Game\Base\Game.h" />
+    <ClInclude Include="SeekerEngine\Effect\ParticleManager.h" />
     <ClInclude Include="SeekerEngine\Core\SEFramework.h" />
     <ClInclude Include="SeekerEngine\Graphics\SrvManager.h" />
     <ClInclude Include="SeekerEngine\Core\StartupManager.h" />
@@ -355,18 +481,45 @@
     <ClInclude Include="Game\Scenes\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\hlsl\Particle2D.hlsli" />
-    <None Include="resources\hlsl\Particle3D.hlsli" />
+    <None Include="resources\hlsl\DebugShape3D.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="resources\hlsl\DebugShape2D.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="externals\assimp\include\assimp\.editorconfig" />
+    <None Include="externals\assimp\include\assimp\color4.inl" />
+    <None Include="externals\assimp\include\assimp\config.h.in" />
+    <None Include="externals\assimp\include\assimp\material.inl" />
+    <None Include="externals\assimp\include\assimp\matrix3x3.inl" />
+    <None Include="externals\assimp\include\assimp\matrix4x4.inl" />
+    <None Include="externals\assimp\include\assimp\quaternion.inl" />
+    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl" />
+    <None Include="externals\assimp\include\assimp\vector2.inl" />
+    <None Include="externals\assimp\include\assimp\vector3.inl" />
+    <None Include="resources\hlsl\Particle2D.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="resources\hlsl\Particle3D.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="resources\hlsl\Object2D.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="resources\hlsl\Object3d.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>

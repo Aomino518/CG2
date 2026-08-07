@@ -1,9 +1,10 @@
 #include "Application.h"
+#include "Graphics.h"
 #include <format>
 #include <sstream>
 #include <dxcapi.h>
 #include <vector>
-#include "Matrix.h"
+#include "MathFunc.h"
 #include "DebugCamera.h"
 #define _USE_MATH_DEFINES 
 #include <math.h>
@@ -36,6 +37,17 @@ LRESULT Application::WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		// OSに対してアプリの終了を伝える
 		PostQuitMessage(0);
 		return 0;
+	case WM_SIZE:
+		uint32_t width = LOWORD(lp);
+		uint32_t height = HIWORD(lp);
+
+		clientWidth_ = width;
+		clientHeight_ = height;
+
+		if (width != 0 && height != 0 && Graphics::GetInstance()->IsInit()) {
+			Graphics::GetInstance()->Resize(width, height);
+		}
+		return 0;
 	}
 
 	// 標準のメッセージ処理行う
@@ -44,8 +56,22 @@ LRESULT Application::WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void Application::Init(int width, int height, const wchar_t* title)
 {
+#ifdef NDEBUG
+	style_ = WS_POPUP;
+
+	HMONITOR monitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+	MONITORINFO monitorInfo{};
+	monitorInfo.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(monitor, &monitorInfo);
+
+	clientWidth_ = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+	clientHeight_ = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+#else
 	clientWidth_ = width;
 	clientHeight_ = height;
+	style_ = WS_OVERLAPPEDWINDOW;
+#endif
+
 	title_ = title;
 
 	/*--ウィンドウクラスの登録--*/
@@ -65,7 +91,16 @@ void Application::Init(int width, int height, const wchar_t* title)
 	// ウィンドウクラスを登録する
 	RegisterClass(&wndclass);
 
+#ifdef NDEBUG
+	/*--ウィンドウサイズを決定--*/
+	// ウィンドウサイズを表す構造体にクライアント領域を入れる
+	RECT wrc = { 0, 0, clientWidth_, clientHeight_ };
 
+	int windowX = monitorInfo.rcMonitor.left;
+	int windowY = monitorInfo.rcMonitor.top;
+	int windowWidth = clientWidth_;
+	int windowHeight = clientHeight_;
+#else
 	/*--ウィンドウサイズを決定--*/
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = { 0, 0, clientWidth_, clientHeight_ };
@@ -73,15 +108,21 @@ void Application::Init(int width, int height, const wchar_t* title)
 	// クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, style_, false);
 
+	int windowX = CW_USEDEFAULT;
+	int windowY = CW_USEDEFAULT;
+	int windowWidth = wrc.right - wrc.left;
+	int windowHeight = wrc.bottom - wrc.top;
+#endif
+	
 	/*--ウィンドウを生成する--*/
 	hwnd_ = CreateWindow(
 		className_.c_str(), // 利用するクラス名
 		title_.c_str(), // タイトルバーの文字
 		style_, // よく見るウィンドウスタイル
-		CW_USEDEFAULT, // 表示X座標(Windowsに任せる)
-		CW_USEDEFAULT, // 表示Y座標(WindowsOSに任せる)
-		wrc.right - wrc.left, // ウィンドウ横幅
-		wrc.bottom - wrc.top, // ウィンドウ縦幅
+		windowX, // 表示X座標(Windowsに任せる)
+		windowY, // 表示Y座標(WindowsOSに任せる)
+		windowWidth, // ウィンドウ横幅
+		windowHeight, // ウィンドウ縦幅
 		nullptr, // 親ウィンドウハンドル
 		nullptr, // メニューハンドル
 		hInstance_, // インスタンスハンドル

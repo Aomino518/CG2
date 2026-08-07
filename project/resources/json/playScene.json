@@ -1,0 +1,76 @@
+{
+    "cameras": [
+        {
+            "camera": {
+                "transform": {
+                    "rotate": {
+                        "x": 1.0471975803375244,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "translate": {
+                        "x": 0.0,
+                        "y": 23.0,
+                        "z": -10.0
+                    }
+                }
+            },
+            "name": "MainCamera"
+        },
+        {
+            "camera": {
+                "transform": {
+                    "rotate": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "translate": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": -10.0
+                    }
+                }
+            },
+            "name": "EntranceCamera"
+        }
+    ],
+    "isLighting": true,
+    "lights": {
+        "directionalLight": {
+            "color": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "direction": {
+                "x": 1.0,
+                "y": -0.0,
+                "z": 0.0
+            },
+            "intensity": 1.0
+        }
+    },
+    "models": {},
+    "particles": {},
+    "particles2D": {},
+    "sprites": {},
+    "windowState": {
+        "showCamera": true,
+        "showSound": true,
+        "showStats": true
+    },
+    "worldField": null,
+    "worldField2D": null
+}

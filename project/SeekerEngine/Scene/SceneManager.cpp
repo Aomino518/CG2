@@ -1,4 +1,6 @@
 #include "SceneManager.h"
+#include "Logger.h"
+#include <cassert>
 
 SceneManager* SceneManager::GetInstance() {
 	static SceneManager instance;
@@ -47,4 +49,12 @@ void SceneManager::ChangeScene(const std::string& sceneName)
 	assert(nextScene_ == nullptr);
 
 	nextScene_ = sceneFactory_->CreateScene(sceneName);
+}
+
+const char* SceneManager::GetCurrentSceneName() const
+{
+	if (!scene_) {
+		return "Unknown";
+	}
+	return scene_->GetSceneName();
 }

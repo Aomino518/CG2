@@ -1,18 +1,11 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <dxcapi.h>
 #include <wrl.h>
 #include <string>
-#include <vector>
-#include <format>
-#include <assert.h>
-#include "Logger.h"
-#include "StringUtil.h"
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxcompiler.lib")
 
+struct IDxcBlob;
+struct IDxcUtils;
+struct IDxcCompiler3;
+struct IDxcIncludeHandler;
 class DxcCompiler
 {
 public:

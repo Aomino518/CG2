@@ -1,5 +1,5 @@
 #include "TitleScene.h"
-#include "SceneManager.h"
+#include "SceneIncludes.h"
 
 void TitleScene::Init()
 {
@@ -76,6 +76,9 @@ void TitleScene::Init()
 	//===========================
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
+    Logger::Write("現在シーンTitleScene");
+   
+    ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void TitleScene::Update()
@@ -120,6 +123,14 @@ void TitleScene::Update()
 
 	// ImGuiの更新処理
 	UpdateImGui();
+    ImGuiManager::GetInstance()->BeginFrame();
+    ImGuiManager::GetInstance()->DrawMainMenuBar();
+    ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
+    ImGuiManager::GetInstance()->DrawEditor();
+    ImGuiManager::GetInstance()->Stats();
+    ImGuiManager::GetInstance()->DrawSoundWindow();
+    ImGuiManager::GetInstance()->DrawLoggerWindow();
+    ImGuiManager::GetInstance()->EndFrame();
 }
 
 void TitleScene::Draw()
@@ -230,4 +241,5 @@ void TitleScene::UpdateCamera()
 
 		break;
 	}
+    Editor::GetInstance()->Clear();
 }

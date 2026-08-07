@@ -17,6 +17,12 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> CreateParticle3D();
 
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> CreateParticle2D();
+
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> CreateDebugShape2D();
+
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> CreateDebugShape3D();
+
 private:
 
 	Graphics* graphics_;

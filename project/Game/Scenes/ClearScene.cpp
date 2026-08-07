@@ -1,5 +1,6 @@
 #include "ClearScene.h"
 #include "SeekerEngine.h"
+#include "SceneIncludes.h"
 
 void ClearScene::Init()
 {
@@ -60,6 +61,9 @@ void ClearScene::Init()
 	//===========================
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
+	Logger::Write("現在シーンClearScene");
+
+	ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void ClearScene::Update()
@@ -101,6 +105,16 @@ void ClearScene::Update()
 	fade_.Update();
 
 	UpdateImGui();
+    auto camMgr = CameraManager::GetInstance();
+
+    ImGuiManager::GetInstance()->BeginFrame();
+    ImGuiManager::GetInstance()->DrawMainMenuBar();
+    ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
+    ImGuiManager::GetInstance()->DrawEditor();
+    ImGuiManager::GetInstance()->Stats();
+    ImGuiManager::GetInstance()->DrawSoundWindow();
+    ImGuiManager::GetInstance()->DrawLoggerWindow();
+    ImGuiManager::GetInstance()->EndFrame();
 }
 
 void ClearScene::Draw()
@@ -115,6 +129,7 @@ void ClearScene::Draw()
 	fade_.Draw();
 
 	ImGuiManager::GetInstance()->Draw();
+    ImGuiManager::GetInstance()->Draw();
 }
 
 void ClearScene::Shutdown()
@@ -134,4 +149,5 @@ void ClearScene::UpdateImGui() {
 	imguiMgr->CameraSetting(camMgr_.get());
 	imguiMgr->Stats();
 	imguiMgr->EndFrame();
+    Editor::GetInstance()->Clear();
 }

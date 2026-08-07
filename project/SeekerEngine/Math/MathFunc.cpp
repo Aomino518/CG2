@@ -1,0 +1,489 @@
+#include "MathFunc.h"
+#include <cmath>
+#include <algorithm>
+
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2) {
+	Vector3 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
+Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2) {
+	Matrix4x4 result;
+	result.m[0][0] = m1.m[0][0] + m2.m[0][0];
+	result.m[0][1] = m1.m[0][1] + m2.m[0][1];
+	result.m[0][2] = m1.m[0][2] + m2.m[0][2];
+	result.m[0][3] = m1.m[0][3] + m2.m[0][3];
+
+	result.m[1][0] = m1.m[1][0] + m2.m[1][0];
+	result.m[1][1] = m1.m[1][1] + m2.m[1][1];
+	result.m[1][2] = m1.m[1][2] + m2.m[1][2];
+	result.m[1][3] = m1.m[1][3] + m2.m[1][3];
+
+	result.m[2][0] = m1.m[2][0] + m2.m[2][0];
+	result.m[2][1] = m1.m[2][1] + m2.m[2][1];
+	result.m[2][2] = m1.m[2][2] + m2.m[2][2];
+	result.m[2][3] = m1.m[2][3] + m2.m[2][3];
+
+	result.m[3][0] = m1.m[3][0] + m2.m[3][0];
+	result.m[3][1] = m1.m[3][1] + m2.m[3][1];
+	result.m[3][2] = m1.m[3][2] + m2.m[3][2];
+	result.m[3][3] = m1.m[3][3] + m2.m[3][3];
+
+	return result;
+}
+
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
+	Vector3 result;
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+	return result;
+}
+
+Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2) {
+	Matrix4x4 result;
+	result.m[0][0] = m1.m[0][0] - m2.m[0][0];
+	result.m[0][1] = m1.m[0][1] - m2.m[0][1];
+	result.m[0][2] = m1.m[0][2] - m2.m[0][2];
+	result.m[0][3] = m1.m[0][3] - m2.m[0][3];
+
+	result.m[1][0] = m1.m[1][0] - m2.m[1][0];
+	result.m[1][1] = m1.m[1][1] - m2.m[1][1];
+	result.m[1][2] = m1.m[1][2] - m2.m[1][2];
+	result.m[1][3] = m1.m[1][3] - m2.m[1][3];
+
+	result.m[2][0] = m1.m[2][0] - m2.m[2][0];
+	result.m[2][1] = m1.m[2][1] - m2.m[2][1];
+	result.m[2][2] = m1.m[2][2] - m2.m[2][2];
+	result.m[2][3] = m1.m[2][3] - m2.m[2][3];
+
+	result.m[3][0] = m1.m[3][0] - m2.m[3][0];
+	result.m[3][1] = m1.m[3][1] - m2.m[3][1];
+	result.m[3][2] = m1.m[3][2] - m2.m[3][2];
+	result.m[3][3] = m1.m[3][3] - m2.m[3][3];
+
+	return result;
+}
+
+Vector3 Multiply(const float& scalor, const Vector3& v) {
+	Vector3 result{};
+	result.x = v.x * scalor;
+	result.y = v.y * scalor;
+	result.z = v.z * scalor;
+	return result;
+}
+
+// X軸回転行列
+Matrix4x4 MakeRotateXMatrix(float radian) {
+	Matrix4x4 result;
+	result.m[0][0] = 1.0f;
+	result.m[0][1] = 0.0f;
+	result.m[0][2] = 0.0f;
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = 0.0f;
+	result.m[1][1] = cosf(radian);
+	result.m[1][2] = sinf(radian);
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = 0.0f;
+	result.m[2][1] = -sinf(radian);
+	result.m[2][2] = cosf(radian);
+	result.m[2][3] = 0.0f;
+
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+// Y軸回転行列
+Matrix4x4 MakeRotateYMatrix(float radian) {
+	Matrix4x4 result;
+	result.m[0][0] = cosf(radian);
+	result.m[0][1] = 0.0f;
+	result.m[0][2] = -sinf(radian);
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = 0.0f;
+	result.m[1][1] = 1.0f;
+	result.m[1][2] = 0.0f;
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = sinf(radian);
+	result.m[2][1] = 0.0f;
+	result.m[2][2] = cosf(radian);
+	result.m[2][3] = 0.0f;
+
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+// Z軸回転行列
+Matrix4x4 MakeRotateZMatrix(float radian) {
+	Matrix4x4 result;
+	result.m[0][0] = cosf(radian);
+	result.m[0][1] = sinf(radian);
+	result.m[0][2] = 0.0f;
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = -sinf(radian);
+	result.m[1][1] = cosf(radian);
+	result.m[1][2] = 0.0f;
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = 0.0f;
+	result.m[2][1] = 0.0f;
+	result.m[2][2] = 1.0f;
+	result.m[2][3] = 0.0f;
+
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+// 行列の積
+Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
+	Matrix4x4 result;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.m[i][j] = 0;
+			for (int k = 0; k < 4; ++k) {
+				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
+			}
+		}
+	}
+
+	return result;
+}
+
+// 平行移動行列
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
+	Matrix4x4 result;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.m[j][i] = 0.0f;
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		result.m[i][i] = 1.0f;
+	}
+
+	result.m[3][0] = translate.x;
+	result.m[3][1] = translate.y;
+	result.m[3][2] = translate.z;
+
+	return result;
+}
+
+// 拡大縮小行列
+Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
+	Matrix4x4 result;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.m[j][i] = 0.0f;
+		}
+	}
+
+	result.m[0][0] = scale.x;
+	result.m[1][1] = scale.y;
+	result.m[2][2] = scale.z;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+// 透視投影行列の作成関数
+Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
+	Matrix4x4 perspectiveFovMatrix;
+
+	perspectiveFovMatrix.m[0][0] = (1.0f / aspectRatio) * 1.0f / tan(fovY / 2.0f);
+	perspectiveFovMatrix.m[0][1] = 0.0f;
+	perspectiveFovMatrix.m[0][2] = 0.0f;
+	perspectiveFovMatrix.m[0][3] = 0.0f;
+
+	perspectiveFovMatrix.m[1][0] = 0.0f;
+	perspectiveFovMatrix.m[1][1] = 1.0f / tan(fovY / 2.0f);
+	perspectiveFovMatrix.m[1][2] = 0.0f;
+	perspectiveFovMatrix.m[1][3] = 0.0f;
+
+	perspectiveFovMatrix.m[2][0] = 0.0f;
+	perspectiveFovMatrix.m[2][1] = 0.0f;
+	perspectiveFovMatrix.m[2][2] = farClip / (farClip - nearClip);
+	perspectiveFovMatrix.m[2][3] = 1.0f;
+
+	perspectiveFovMatrix.m[3][0] = 0.0f;
+	perspectiveFovMatrix.m[3][1] = 0.0f;
+	perspectiveFovMatrix.m[3][2] = (-nearClip * farClip) / (farClip - nearClip);
+	perspectiveFovMatrix.m[3][3] = 1.0f;
+
+	return perspectiveFovMatrix;
+}
+
+// 3次元アフィン変換行列
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
+	Matrix4x4 translateMatrix = MakeTranslateMatrix(translate);
+	Matrix4x4 scaleMatrix = MakeScaleMatrix(scale);
+	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+	Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+	Matrix4x4 scaleRot = Multiply(scaleMatrix, rotateXYZMatrix);
+	Matrix4x4 resultMatrix = Multiply(scaleRot, translateMatrix);
+
+	return resultMatrix;
+}
+
+Matrix4x4 Inverse(const Matrix4x4& matrix) {
+	Matrix4x4 cofactor; // 余因子行列
+
+	for (int row = 0; row < 4; ++row) {
+		for (int col = 0; col < 4; ++col) {
+			float sub[3][3];
+			int subi = 0;
+			for (int i = 0; i < 4; ++i) {
+				if (i == row) continue;
+				int subj = 0;
+				for (int j = 0; j < 4; ++j) {
+					if (j == col) continue;
+					sub[subi][subj] = matrix.m[i][j];
+					++subj;
+				}
+				++subi;
+			}
+
+			// 小行列
+			float det3 = Determinant3x3(
+				sub[0][0], sub[0][1], sub[0][2],
+				sub[1][0], sub[1][1], sub[1][2],
+				sub[2][0], sub[2][1], sub[2][2]
+			);
+
+			cofactor.m[row][col] = ((row + col) % 2 == 0 ? 1 : -1) * det3;
+		}
+	}
+
+	float det = 0.0f;
+	for (int i = 0; i < 4; ++i) {
+		det += matrix.m[0][i] * cofactor.m[0][i];
+	}
+
+	if (det == 0) {
+		Matrix4x4 result = { 0 };
+		return result;
+	}
+
+	Matrix4x4 result;
+	float invDet = 1.0f / det;
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			result.m[i][j] = cofactor.m[j][i] * invDet;
+		}
+	}
+
+	return result;
+}
+
+// 単位行列の作成
+Matrix4x4 MakeIdentity4x4() {
+	Matrix4x4 result;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.m[j][i] = 0.0f;
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		result.m[i][i] = 1.0f;
+	}
+
+	return result;
+}
+
+float Determinant3x3(
+	float a11, float a12, float a13,
+	float a21, float a22, float a23,
+	float a31, float a32, float a33) {
+	return
+		a11 * (a22 * a33 - a23 * a32) -
+		a12 * (a21 * a33 - a23 * a31) +
+		a13 * (a21 * a32 - a22 * a31);
+}
+
+// 正射影行列の作成関数
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
+	Matrix4x4 orthoMatrix;
+
+	orthoMatrix.m[0][0] = 2.0f / (right - left);
+	orthoMatrix.m[0][1] = 0.0f;
+	orthoMatrix.m[0][2] = 0.0f;
+	orthoMatrix.m[0][3] = 0.0f;
+
+	orthoMatrix.m[1][0] = 0.0f;
+	orthoMatrix.m[1][1] = 2.0f / (top - bottom);
+	orthoMatrix.m[1][2] = 0.0f;
+	orthoMatrix.m[1][3] = 0.0f;
+
+	orthoMatrix.m[2][0] = 0.0f;
+	orthoMatrix.m[2][1] = 0.0f;
+	orthoMatrix.m[2][2] = 1.0f / (farClip - nearClip);
+	orthoMatrix.m[2][3] = 0.0f;
+
+	orthoMatrix.m[3][0] = (left + right) / (left - right);
+	orthoMatrix.m[3][1] = (top + bottom) / (bottom - top);
+	orthoMatrix.m[3][2] = nearClip / (nearClip - farClip);
+	orthoMatrix.m[3][3] = 1.0f;
+
+	return orthoMatrix;
+}
+
+float Length(const Vector3& vector) {
+	return std::sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+}
+
+Vector3 Normalize(const Vector3& normal)
+{
+	float len = Length(normal);
+	if (len == 0.0f) {
+		return { 0.0f, 0.0f, 0.0f };
+	}
+	return { normal.x / len, normal.y / len, normal.z / len };
+}
+
+Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
+	Vector3 result;
+	result.x = v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0];
+	result.y = v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1];
+	result.z = v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2];
+	return result;
+}
+
+Matrix4x4 Transpose(const Matrix4x4& matrix)
+{
+	Matrix4x4 result{};
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			result.m[i][j] = matrix.m[j][i];
+		}
+	}
+
+	return result;
+}
+
+bool IsCollision(const AABB& aabb, const Vector3& point)
+{
+	return (aabb.min.x <= point.x && point.x <= aabb.max.x) &&
+		(aabb.min.y <= point.y && point.y <= aabb.max.y) &&
+		(aabb.min.z <= point.z && point.z <= aabb.max.z);
+}
+
+bool IsCollision(const Sphere& s1, const Sphere& s2) {
+	float distance = Length(s2.center - s1.center);
+
+	if (distance <= s1.radius + s2.radius) {
+		return true;
+	}
+
+	return false;
+}
+
+float Lerp(const float start, const float end, float t)
+{
+	return start + (end - start) * t;
+}
+
+Vector3 GetForwardFromTransform(const Vector3& rotate)
+{
+	Matrix4x4 rotMat =
+		MakeAffineMatrix(
+			{ 1.0f, 1.0f, 1.0f },
+			rotate,
+			{ 0.0f, 0.0f, 0.0f });
+
+	Vector3 forward = { 0.0f, 0.0f, 1.0f };
+	return Normalize(TransformNormal(forward, rotMat));
+}
+
+Vector3 TransformToVector3(const Vector3& vector, const Matrix4x4& matrix)
+{
+	Vector3 result;
+	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][0];
+	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
+	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
+	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
+
+	// wで割って正規化
+	if (w != 0.0f) {
+		result.x /= w;
+		result.y /= w;
+		result.z /= w;
+	}
+
+	return result;
+}
+
+Vector2& operator+=(Vector2& v1, const Vector2& v2) {
+	v1.x += v2.x;
+	v1.y += v2.y;
+	return v1;
+}
+
+Vector2 operator+(const Vector2& v1, const Vector2& v2) {
+	return { v1.x + v2.x, v1.y + v2.y };
+}
+
+Vector2 operator-(const Vector2& v1, const Vector2& v2) {
+	return { v1.x - v2.x, v1.y - v2.y };
+}
+
+Vector2 operator*(const Vector2& v1, const Vector2& v2) {
+	return { v1.x * v2.x, v1.y * v2.y };
+}
+
+Vector3 operator+(const Vector3& v1, const Vector3& v2) {
+	return { v1.x + v2.x, v1.y + v2.y, v1.z + v2.z };
+}
+
+Vector3 operator-(const Vector3& v1, const Vector3& v2) {
+	return { v1.x - v2.x, v1.y - v2.y, v1.z - v2.z };
+}
+
+Vector3 operator*(const Vector3& v1, const Vector3& v2) {
+	return { v1.x * v2.x, v1.y * v2.y, v1.z * v2.z };
+}
+
+Vector3 operator*(float s, const Vector3& v)
+bool IsCollision(const AABB2D& aabb, const Vector3& point)
+{
+	return (aabb.min.x <= point.x && point.x <= aabb.max.x) &&
+		(aabb.min.y <= point.y && point.y <= aabb.max.y);
+}
+
+// 線形補間関数
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t)
+{
+	return v1 + (v2 - v1) * t;
+}
+
+// 線形補間関数
+Vector4 Lerp(const Vector4& v1, const Vector4& v2, float t)
+{
+	return v1 + (v2 - v1) * t;
+}

@@ -52,6 +52,8 @@ public:
 	void Init();
 	void Shutdown();
 
+	void Update();
+
 	SoundData SoundLoad(const char* filename);
 	void SoundUnload(SoundData* soundData);
 

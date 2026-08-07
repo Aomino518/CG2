@@ -1,4 +1,14 @@
 #include "DxcCompiler.h"
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <dxcapi.h>
+#include <vector>
+#include <format>
+#include <fstream>
+#include <assert.h>
+#include "Logger.h"
+#include "StringUtil.h"
+#pragma comment(lib, "dxcompiler.lib")
 
 void DxcCompiler::Init()
 {

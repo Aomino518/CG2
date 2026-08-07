@@ -1,5 +1,8 @@
 #include "Object3d.hlsli"
 
+static const int kMaxPointLights = 512;
+static const int kMaxSpotLights = 512;
+
 struct Material
 {
     float4 color;
@@ -22,6 +25,7 @@ struct PointLight
     float intensity;
     float radius;
     float decay;
+    float2 pad;
 };
 
 struct SpotLight
@@ -34,6 +38,21 @@ struct SpotLight
     float decay;
     float cosAngle;
     float cosFalloffStart;
+    float pad;
+};
+
+struct PointLightGroup
+{
+    PointLight gPointLights[kMaxPointLights];
+    int gPointLightCount;
+    float3 gPointLightPad;
+};
+
+struct SpotLightGroup
+{
+    SpotLight gSpotLights[kMaxSpotLights];
+    int gSpotLightCount;
+    float3 gSpotLightPad;
 };
 
 struct Camera
@@ -46,8 +65,8 @@ Texture2D<float4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 ConstantBuffer<DirectionalLight> gDiretionalLight : register(b1);
 ConstantBuffer<Camera> gCamera : register(b2);
-ConstantBuffer<PointLight> gPointLight : register(b3);
-ConstantBuffer<SpotLight> gSpotLight : register(b4);
+ConstantBuffer<PointLightGroup> gPointLightGroup : register(b3);
+ConstantBuffer<SpotLightGroup> gSpotLightGroup : register(b4);
 
 struct PixelShaderOutput
 {
@@ -64,65 +83,76 @@ float3 CalcDirectionalLight(VertexShaderOutput input, float specularPow, float4 
     return diffuse + specular;
 }
 
-float3 CalcPointLight(VertexShaderOutput input, float specularPow, float4 textureColor, float3 lightDirPoint)
+float3 CalcPointLight(VertexShaderOutput input, float4 textureColor, PointLight light)
 {
-    float distance = length(gPointLight.position - input.worldPosition);
-    float factor = pow(saturate(-distance / gPointLight.radius + 1.0f), gPointLight.decay);
+    float3 toEyePoint = normalize(gCamera.worldPosition - input.worldPosition);
+    float3 lightDirPoint = normalize(light.position - input.worldPosition);
+    float3 halfVectorPoint = normalize(lightDirPoint + toEyePoint);
+    float NdotHPoint = dot(normalize(input.normal), halfVectorPoint);
+    float specularPowPoint = pow(saturate(NdotHPoint), gMaterial.shininess);
+    float3 pointLightDirection = normalize(input.worldPosition - light.position);
+    
+    float distance = length(light.position - input.worldPosition);
+    float factor = pow(saturate(-distance / light.radius + 1.0f), light.decay);
     float NdotL = dot(normalize(input.normal), lightDirPoint);
     float diffuseCos = saturate(NdotL);
-    float3 diffuse = gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * diffuseCos * gPointLight.intensity * factor;
-    float3 specular = gPointLight.color.rgb * gPointLight.intensity * specularPow * factor;
+    float3 diffuse = gMaterial.color.rgb * textureColor.rgb * light.color.rgb * diffuseCos * light.intensity * factor;
+    float3 specular = light.color.rgb * light.intensity * specularPowPoint * factor;
     
     return diffuse + specular;
 }
 
-float3 CalcSpotLight(VertexShaderOutput input, float specularPow, float4 textureColor, float3 spotLightDirOnSurface)
+float3 CalcSpotLight(VertexShaderOutput input, float4 textureColor, SpotLight light)
 {
-    float distance = length(gSpotLight.position - input.worldPosition);
-    float attenuationFactor = pow(saturate(-distance / gSpotLight.distance + 1.0f), gSpotLight.decay);
-    float cosAngle = dot(normalize(-spotLightDirOnSurface), gSpotLight.direction);
-    float falloffFactor = saturate((cosAngle - gSpotLight.cosAngle) / (gSpotLight.cosFalloffStart - gSpotLight.cosAngle));
-    float NdotL = dot(normalize(input.normal), normalize(-spotLightDirOnSurface));
+    float3 toEyeSpot = normalize(gCamera.worldPosition - input.worldPosition);
+    float3 lightDirSpot = normalize(light.position - input.worldPosition);
+    float3 halfVectorSpot = normalize(lightDirSpot + toEyeSpot);
+    float NdotHSpot = dot(normalize(input.normal), halfVectorSpot);
+    float specularPowSpot = pow(saturate(NdotHSpot), gMaterial.shininess);
+    float3 spotLightDirectionOnSurface = normalize(input.worldPosition - light.position);
+    
+    float distance = length(light.position - input.worldPosition);
+    float attenuationFactor = pow(saturate(-distance / light.distance + 1.0f), light.decay);
+    float cosAngle = dot(normalize(-spotLightDirectionOnSurface), light.direction);
+    float falloffFactor = saturate((cosAngle - light.cosAngle) / (light.cosFalloffStart - light.cosAngle));
+    float NdotL = dot(normalize(input.normal), normalize(-spotLightDirectionOnSurface));
     float diffuseCos = saturate(NdotL);
-    float3 diffuse = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * diffuseCos * gSpotLight.intensity * attenuationFactor * falloffFactor;
-    float3 specular = gSpotLight.color.rgb * gSpotLight.intensity * specularPow * attenuationFactor * falloffFactor;
+    float3 diffuse = gMaterial.color.rgb * textureColor.rgb * light.color.rgb * diffuseCos * light.intensity * attenuationFactor * falloffFactor;
+    float3 specular = light.color.rgb * light.intensity * specularPowSpot * attenuationFactor * falloffFactor;
     
     return diffuse + specular;
 }
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
-    // 視線ベクトル
+    float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
+    float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+
+     // 視線ベクトル
     float3 toEyeDirection = normalize(gCamera.worldPosition - input.worldPosition);
     float3 halfVectorDirection = normalize(-gDiretionalLight.direction + toEyeDirection);
     float NdotHDir = dot(normalize(input.normal), halfVectorDirection);
     float specularPowDir = pow(saturate(NdotHDir), gMaterial.shininess);
     
-    float3 toEyePoint = normalize(gCamera.worldPosition - input.worldPosition);
-    float3 lightDirPoint = normalize(gPointLight.position - input.worldPosition);
-    float3 halfVectorPoint = normalize(lightDirPoint + toEyePoint);
-    float NdotHPoint = dot(normalize(input.normal), halfVectorPoint);
-    float specularPowPoint = pow(saturate(NdotHPoint), gMaterial.shininess);
-    
-    float3 toEyeSpot = normalize(gCamera.worldPosition - input.worldPosition);
-    float3 lightDirSpot = normalize(gSpotLight.position - input.worldPosition);
-    float3 halfVectorSpot = normalize(lightDirSpot + toEyeSpot);
-    float NdotHSpot = dot(normalize(input.normal), halfVectorSpot);
-    float specularPowSpot = pow(saturate(NdotHSpot), gMaterial.shininess);
-    
-    float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
-    
-    float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
-    
-    float3 spotLightDirectionOnSurface = normalize(input.worldPosition - gSpotLight.position);
- 
     PixelShaderOutput output;
     if (gMaterial.enableLightig != 0)
     {
-        output.color.rgb = CalcDirectionalLight(input, specularPowDir, textureColor) + 
-        CalcPointLight(input, specularPowPoint, textureColor, lightDirPoint) + 
-        CalcSpotLight(input, specularPowSpot, textureColor, spotLightDirectionOnSurface);
+        // Directional
+        float3 directionalColor = CalcDirectionalLight(input, specularPowDir, textureColor);
+
+        float3 pointColor = 0.0f.xxx;
+        for (int i = 0; i < gPointLightGroup.gPointLightCount; ++i)
+        {
+            pointColor += CalcPointLight(input, textureColor, gPointLightGroup.gPointLights[i]);
+        }
+
+        float3 spotColor = 0.0f.xxx;
+        for (int k = 0; k < gSpotLightGroup.gSpotLightCount; ++k)
+        {
+            spotColor += CalcSpotLight(input, textureColor, gSpotLightGroup.gSpotLights[k]);
+        }
+        
+        output.color.rgb = directionalColor + pointColor + spotColor;
 
         if (textureColor.a == 0.0f)
         {
@@ -130,7 +160,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         }
         
         output.color.a = gMaterial.color.a * textureColor.a;
-        
+
         if (output.color.a == 0.0f)
         {
             discard;

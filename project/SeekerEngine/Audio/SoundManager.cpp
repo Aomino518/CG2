@@ -10,16 +10,20 @@ void SoundManager::Init() {
 }
 
 void SoundManager::Shutdown() {
+	sound_.StopBGM();
+	sound_.StopSE();
 	for (auto& [name, data] : soundDatas_) {
 		sound_.SoundUnload(&data);
 	}
 
-	sound_.StopBGM();
-	sound_.StopSE();
 	sound_.Shutdown();
 	soundDatas_.clear();
 	currentBGM_ = nullptr;
 	Logger::Write("SoundManager Shutdown");
+}
+
+void SoundManager::Update() {
+	sound_.Update();
 }
 
 void SoundManager::Load(const std::string& name, const std::string& filepath) {
@@ -27,16 +31,18 @@ void SoundManager::Load(const std::string& name, const std::string& filepath) {
 		return;
 	}
 
-	soundDatas_[name] = sound_.SoundLoad(filepath.c_str());
+	std::string soundFilePath = "resources/sounds/" + filepath;
+
+	soundDatas_[name] = sound_.SoundLoad(soundFilePath.c_str());
 }
 
-void SoundManager::PlaySE(const std::string& name, bool loop, float volume) {
+void SoundManager::PlaySE(const std::string& name, float volume) {
 	auto it = soundDatas_.find(name);
 	if (it == soundDatas_.end()) {
 		return;
 	}
 
-	sound_.PlaySE(it->second, loop, volume);
+	sound_.PlaySE(it->second, false, volume);
 }
 
 void SoundManager::PlayBGM(const std::string& name, bool loop, float volume) {

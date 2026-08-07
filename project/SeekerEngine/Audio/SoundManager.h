@@ -12,9 +12,11 @@ public:
 	void Init();
 	void Shutdown();
 
+	void Update();
+
 	void Load(const std::string& name, const std::string& filepath);
 
-	void PlaySE(const std::string& name, bool loop = false, float volume = 1.0f);
+	void PlaySE(const std::string& name, float volume = 1.0f);
 	void PlayBGM(const std::string& name, bool loop = true, float volume = 1.0f);
 	void StopSE();
 	void StopBGM();

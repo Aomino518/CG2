@@ -1,5 +1,5 @@
 #pragma once
-#include "SeekerEngine.h"
+#include "SceneIncludes.h"
 #include "BaseScene.h"
 #include "Fade.h"
 
@@ -16,6 +16,8 @@ public:
 	void Draw() override;
 
 	void Shutdown() override;
+
+	const char* GetSceneName() const override { return "TITLE"; }
 
 private:
 	// シーンフェーズ

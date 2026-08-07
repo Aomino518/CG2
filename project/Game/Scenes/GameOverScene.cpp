@@ -1,5 +1,6 @@
 #include "GameOverScene.h"
 #include "SeekerEngine.h"
+#include "SceneIncludes.h"
 
 void GameOverScene::Init()
 {
@@ -60,6 +61,9 @@ void GameOverScene::Init()
 	//===========================
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
+	Logger::Write("現在シーンGameOverScene");
+
+	ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void GameOverScene::Update()
@@ -101,6 +105,16 @@ void GameOverScene::Update()
 	fade_.Update();
 
 	UpdateImGui();
+	auto camMgr = CameraManager::GetInstance();
+
+    ImGuiManager::GetInstance()->BeginFrame();
+    ImGuiManager::GetInstance()->DrawMainMenuBar();
+    ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
+    ImGuiManager::GetInstance()->DrawEditor();
+    ImGuiManager::GetInstance()->Stats();
+    ImGuiManager::GetInstance()->DrawSoundWindow();
+    ImGuiManager::GetInstance()->DrawLoggerWindow();
+    ImGuiManager::GetInstance()->EndFrame();
 }
 
 void GameOverScene::Draw()
@@ -115,6 +129,7 @@ void GameOverScene::Draw()
 	fade_.Draw();
 
 	ImGuiManager::GetInstance()->Draw();
+    ImGuiManager::GetInstance()->Draw();
 }
 
 void GameOverScene::Shutdown()
@@ -135,4 +150,6 @@ void GameOverScene::UpdateImGui() {
 	imguiMgr->CameraSetting(camMgr_.get());
 	imguiMgr->Stats();
 	imguiMgr->EndFrame();
+}
+    Editor::GetInstance()->Clear();
 }

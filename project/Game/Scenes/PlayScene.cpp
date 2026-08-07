@@ -1,4 +1,5 @@
 #include "PlayScene.h"
+#include "SceneIncludes.h"
 
 void PlayScene::Init()
 {
@@ -71,6 +72,9 @@ void PlayScene::Init()
 
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
+    Logger::Write("現在シーンPlayScene");
+   
+    ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void PlayScene::Update()
@@ -114,6 +118,14 @@ void PlayScene::Update()
 	fade_.Update();
 
 	UpdateImGui();
+    ImGuiManager::GetInstance()->BeginFrame();
+    ImGuiManager::GetInstance()->DrawMainMenuBar();
+    ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
+    ImGuiManager::GetInstance()->DrawEditor();
+    ImGuiManager::GetInstance()->Stats();
+	ImGuiManager::GetInstance()->DrawSoundWindow();
+    ImGuiManager::GetInstance()->DrawLoggerWindow();
+    ImGuiManager::GetInstance()->EndFrame();
 }
 
 void PlayScene::Draw()
@@ -196,4 +208,6 @@ void PlayScene::UpdateImGui() {
 	imguiMgr->CameraSetting(camMgr_.get());
 	imguiMgr->Stats();
 	imguiMgr->EndFrame();
+}
+    Editor::GetInstance()->Clear();
 }

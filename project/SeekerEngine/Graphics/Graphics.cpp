@@ -2,9 +2,11 @@
 #include "Application.h"
 #include "Logger.h"
 #include "StringUtil.h"
+#include "SrvManager.h"
 #include "TextureManager.h"
 #include <format>
 #include <cassert>
+#include <thread>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
@@ -119,6 +121,7 @@ void Graphics::Shutdown()
 
 void Graphics::BeginFrame()
 {
+	ResetDrawCallCount();
 	// これから書き込むバックバッファのインデックス取得
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	// TransitionBarrierの設定
@@ -210,23 +213,6 @@ void Graphics::WaitGPU()
 	TextureManager::GetInstance()->ClearIntermediate();
 }
 
-ComPtr<ID3D12DescriptorHeap> Graphics::CreateDescriptorHeap(
-	const Microsoft::WRL::ComPtr<ID3D12Device>& device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
-{
-	/*--ディスクリプタヒープの生成--*/
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
-	descriptorHeapDesc.Type = heapType;
-	descriptorHeapDesc.NumDescriptors = numDescriptors;
-	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	HRESULT hr;
-	hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-	// ディスクリプタヒープが作れなかったので起動できない
-	assert(SUCCEEDED(hr));
-
-	return descriptorHeap;
-}
-
 static ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, int32_t width, int32_t height) {
 	// 生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -260,6 +246,92 @@ static ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(const Microsoft:
 	assert(SUCCEEDED(hr));
 	return resource;
 }
+
+void Graphics::Resize(uint32_t width, uint32_t height)
+{
+	if (width == 0 || height == 0) {
+		Logger::Write(Logger::LogLevel::Warning, "width,heightが0です");
+		return;
+	}
+
+	if (!cmdQueue_ || !fence_ || !swapChain_) {
+		width_ = width;
+		height_ = height;
+		return;
+	}
+
+	WaitGPU();
+
+	width_ = width;
+	height_ = height;
+
+	for (auto& backBuffer : backBuffers_) {
+		backBuffer.Reset();
+	}
+
+	depthTex_.Reset();
+
+	HRESULT hr = swapChain_->ResizeBuffers(
+		kBufferCount,
+		width_,
+		height_,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		0
+	);
+	assert(SUCCEEDED(hr));
+
+	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
+
+	// RTV
+	for (uint32_t i = 0; i < kBufferCount; ++i) {
+		// SwapChainからResourceを引っ張ってくる
+		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+		assert(SUCCEEDED(hr));
+		rtvHandles_[i] = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
+		rtvHandles_[i].ptr += SIZE_T(i) * descSizeRTV_;
+		// RTVの設定
+		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandles_[i]);
+	}
+
+	// DepthStencilTextureをウィンドウのサイズで再作成
+	depthTex_ = CreateDepthStencilTextureResource(device_, width_, height_);
+
+	// DSVの設定
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	//D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuHandle = GetCPUDescriptorHandle(dsvHeap_, descSizeDSV_, 0);
+	// DSVHeapの先頭にDSVを作る
+	device_->CreateDepthStencilView(depthTex_.Get(), &dsvDesc, dsvHeap_->GetCPUDescriptorHandleForHeapStart());
+
+	CreateViewport();
+	CreateScissorRect();
+}
+
+bool Graphics::IsInit() const
+{
+	return cmdQueue_ && fence_ && swapChain_;
+}
+
+ComPtr<ID3D12DescriptorHeap> Graphics::CreateDescriptorHeap(
+	const Microsoft::WRL::ComPtr<ID3D12Device>& device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
+{
+	/*--ディスクリプタヒープの生成--*/
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
+	descriptorHeapDesc.Type = heapType;
+	descriptorHeapDesc.NumDescriptors = numDescriptors;
+	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	HRESULT hr;
+	hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	// ディスクリプタヒープが作れなかったので起動できない
+	assert(SUCCEEDED(hr));
+
+	return descriptorHeap;
+}
+
 
 static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -473,9 +545,9 @@ bool Graphics::CreateScissorRect()
 {
 	// 基本的にビューポートと同じ矩形が構成されるようにする
 	scissorRect_.left = 0;
-	scissorRect_.right = width_;
+	scissorRect_.right = LONG(width_);
 	scissorRect_.top = 0;
-	scissorRect_.bottom = height_;
+	scissorRect_.bottom = LONG(height_);
 	Logger::Write("scissorRect");
 
 	return true;

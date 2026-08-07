@@ -13,9 +13,11 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoBuilder::CreatePsoDesc(
 	Microsoft::WRL::ComPtr<IDxcBlob> psBlob, 
 	D3D12_BLEND_DESC blendState, 
 	D3D12_RASTERIZER_DESC rasterizerDesc,
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType
 	)
 {
+	desc_ = {};
 	desc_.pRootSignature = rootSignature.Get();
 	desc_.InputLayout = inputLayout;
 	desc_.VS = { vsBlob->GetBufferPointer(),
@@ -34,8 +36,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoBuilder::CreatePsoDesc(
 	desc_.NumRenderTargets = 1;
 	desc_.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	// 利用するトポロジ(形状)のタイプ。三角形
-	desc_.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	desc_.PrimitiveTopologyType = topologyType;
 	// どのように画面に色を打ち込むかの設定
 	desc_.SampleDesc.Count = 1;
 	desc_.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
