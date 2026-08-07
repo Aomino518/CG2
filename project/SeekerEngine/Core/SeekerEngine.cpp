@@ -6,7 +6,7 @@ void SeekerEngine::Init()
 	Logger::Init();
 	Logger::Write("アプリ開始");
 
-	Application::GetInstance()->Init(1280, 720, L"CG2");
+	Application::GetInstance()->Init(1280, 720, L"流撃");
 
 	// graphicsの初期化
 	Graphics::GetInstance()->Init(true);
