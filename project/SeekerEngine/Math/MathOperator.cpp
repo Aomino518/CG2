@@ -56,8 +56,6 @@ Matrix4x4& operator*=(Matrix4x4& lhs, const Matrix4x4& rhs) {
     return lhs;
 }
 
-
-
 Matrix4x4& operator*=(Matrix4x4& mat, float scalar) {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {

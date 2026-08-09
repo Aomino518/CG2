@@ -181,7 +181,6 @@
     <ClCompile Include="Game\Objects\Bullet.cpp" />
     <ClCompile Include="Game\Objects\Enemy.cpp" />
     <ClCompile Include="Game\Fade.cpp" />
-    <ClCompile Include="Game\main.cpp" />
     <ClCompile Include="Game\Objects\Player.cpp" />
     <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp" />
     <ClCompile Include="Game\Scenes\ClearScene.cpp" />
@@ -339,7 +338,6 @@
     <ClInclude Include="Game\SceneIncludes.h" />
     <ClInclude Include="SeekerEngine\Math\MathFunc.h" />
     <ClInclude Include="SeekerEngine\Math\MathOperator.h" />
-    <ClInclude Include="SeekerEngine\Math\MathTypes.h" />
     <ClInclude Include="SeekerEngine\Math\AABB.h" />
     <ClInclude Include="SeekerEngine\3D\AccelerationField.h" />
     <ClInclude Include="SeekerEngine\DebugShape\DebugDraw3D.h" />

@@ -6,7 +6,6 @@
 #include "imgui.h"
 #endif
 
-
 void AccelerationField::DrawDebug(const Vector3& origin)
 {
 #ifdef _DEBUG

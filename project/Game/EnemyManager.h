@@ -23,6 +23,8 @@ public:
 
 	bool GetIsFinished() const { return isFinished_; }
 
+	void SetIsMoveStop(bool flag);
+
 private:
 	// メンバ関数
 	void SpawnEnemy(const EnemySpawnData& data);
@@ -34,5 +36,6 @@ private:
 
 	int frameCount_ = 0;
 	bool isFinished_ = false;
+	bool isStopFrame_ = false;
 };
 

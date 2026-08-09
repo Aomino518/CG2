@@ -27,9 +27,6 @@ private:
 		FADEOUT
 	};
 
-	// メンバ関数
-	void UpdateImGui(); // ImGuiの更新処理
-
 	// テクスチャ
 	uint32_t texUiGameOver_;
 	uint32_t texUiBackTitle_;
@@ -40,9 +37,6 @@ private:
 
 	// モデル
 	std::unique_ptr<Entity3D> modelSkydome_;
-
-	// カメラマネージャー
-	std::unique_ptr<CameraManager> camMgr_;
 
 	// シーンフェーズ
 	ScenePhase phase_ = ScenePhase::FADEIN;

@@ -1,869 +1,252 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="externals">
-      <UniqueIdentifier>{40ab11ef-14a5-439a-9832-c38bb91b1733}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="externals\imgui">
-      <UniqueIdentifier>{68f31501-4e06-412e-ac45-94bae8e00489}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine">
-      <UniqueIdentifier>{71eb0e1f-ac25-4eaa-91e0-a0398b316bd1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Audio">
-      <UniqueIdentifier>{52517e23-9089-4d00-ac1d-f131246ef4ca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Input">
-      <UniqueIdentifier>{ff7e9c9a-c1e7-4d93-9c86-a6c8168b0d9a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Math">
-      <UniqueIdentifier>{f939e53c-190f-42a7-ae29-ea230aee0926}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine">
-      <UniqueIdentifier>{24a1c749-eb1e-42b3-886f-51ae8debe198}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Audio">
-      <UniqueIdentifier>{95ff88ed-5aa1-4305-9728-434fc96c69d2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Math">
-      <UniqueIdentifier>{62239e76-682a-436a-a8c5-17979bc821c1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Graphics">
-      <UniqueIdentifier>{acabd0e4-2571-499e-b6a0-2198a68b1546}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Scene">
-      <UniqueIdentifier>{a2fe2368-4d91-4d8c-bd7e-be1829018181}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Utility">
-      <UniqueIdentifier>{8ea90864-fdc7-4b9b-874c-1c8342b0ae16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Core">
-      <UniqueIdentifier>{9e7fe7a6-42bd-435d-84e9-60a66064589f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Input">
-      <UniqueIdentifier>{70b8259d-2483-4718-bfce-18293ae9b05d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application">
-      <UniqueIdentifier>{8126c646-763d-4821-8a4c-ff15e6665022}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\Scenes">
-      <UniqueIdentifier>{2dc4d60d-db49-44ca-9c70-6bda83167331}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\Objects">
-      <UniqueIdentifier>{4fd185d2-47f8-4c15-81dc-22dcf4c85ef2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Core">
-      <UniqueIdentifier>{cf8e0572-ed91-4627-9b1e-d6c5dcd29571}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Graphics">
-      <UniqueIdentifier>{c4ab5ab7-f9a1-4f80-8570-3fc799cbd595}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Scene">
-      <UniqueIdentifier>{eb64da43-5278-4fad-a29e-67990d61f7e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Utility">
-      <UniqueIdentifier>{c6198900-7679-4f14-b481-697a42aff10a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Application">
-      <UniqueIdentifier>{af18872f-d883-4b15-aef7-49dff6430bf1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Application\Objects">
-      <UniqueIdentifier>{495f4bc3-cce8-4962-90fa-f89d29a348fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Application\Scenes">
-      <UniqueIdentifier>{6ffd5d5c-83ee-420e-8977-2b46defd76db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Light">
-      <UniqueIdentifier>{b7c545a0-66c0-4ac7-8608-8491e76c0881}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\3D">
-      <UniqueIdentifier>{b1447642-872c-4c0c-99c2-2486dd52750e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\2D">
-      <UniqueIdentifier>{1f7d3141-8b9e-4a28-9530-38e55363ee3d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\DebugShape">
-      <UniqueIdentifier>{65f37708-6374-4ab3-a14a-a12dd0c8a14c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Editor">
-      <UniqueIdentifier>{d84eb9a1-9fba-4496-bbd5-32711eb31581}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル\HLSL">
-      <UniqueIdentifier>{d80eaf7a-6378-4229-8743-9c459faf768a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Effect">
-      <UniqueIdentifier>{ca30a9e5-264c-49c9-9b7b-8cdcdf877aa9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\2D">
-      <UniqueIdentifier>{f9d52404-6c1d-4ba2-bea9-d6fa72388afa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\3D">
-      <UniqueIdentifier>{44e9d7d1-1cb8-48ab-8a79-94c7dac53a13}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Effect">
-      <UniqueIdentifier>{8e60e2d4-d798-46b1-b4a5-bb0dca78b89e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Light">
-      <UniqueIdentifier>{4c520b6f-30fe-42d2-9e23-42941ab836e0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Editor">
-      <UniqueIdentifier>{93196abf-bf5b-4ded-a81c-ca32698d1037}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\DebugShape">
-      <UniqueIdentifier>{bf242301-1b62-4078-918b-298aea11081c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="externals\assimp">
-      <UniqueIdentifier>{e883e6cb-19cf-41ad-94a6-bf923ae58681}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Application\Base">
-      <UniqueIdentifier>{ed795803-2c8d-437c-b0b6-b560ded22eec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Application\Base">
-      <UniqueIdentifier>{1a92046b-02b0-401f-8adb-24beb4db53af}</UniqueIdentifier>
-    </Filter>
+    <FxCompile Include="resources\hlsl\DebugShape3D.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\DebugShape3D.VS.hlsl" />
+    <FxCompile Include="resources\hlsl\DebugShape2D.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\DebugShape2D.VS.hlsl" />
+    <FxCompile Include="resources\hlsl\Particle2D.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\Particle2D.VS.hlsl" />
+    <FxCompile Include="resources\hlsl\Particle3D.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\Particle3D.VS.hlsl" />
+    <FxCompile Include="resources\hlsl\Object2D.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\Object2D.VS.hlsl" />
+    <FxCompile Include="resources\hlsl\Object3d.PS.hlsl" />
+    <FxCompile Include="resources\hlsl\Object3d.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SeekerEngine\Audio\Sound.cpp">
-      <Filter>ソース ファイル\Engine\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Audio\SoundManager.cpp">
-      <Filter>ソース ファイル\Engine\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Core\Application.cpp">
-      <Filter>ソース ファイル\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Core\SeekerEngine.cpp">
-      <Filter>ソース ファイル\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Core\SEFramework.cpp">
-      <Filter>ソース ファイル\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Core\StartupManager.cpp">
-      <Filter>ソース ファイル\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\BlendStateUtils.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\D3DResourceLeakChecker.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\DxcCompiler.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\Graphics.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\ImGuiManager.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\InputLayout.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\PsoBuilder.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\RootSignatureFactory.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Graphics\SrvManager.cpp">
-      <Filter>ソース ファイル\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Input\Input.cpp">
-      <Filter>ソース ファイル\Engine\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Scene\SceneManager.cpp">
-      <Filter>ソース ファイル\Engine\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp">
-      <Filter>ソース ファイル\Engine\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\Color.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\CreateResorceUtils.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\Logger.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\StringUtil.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\Camera.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\CameraManager.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\DebugCamera.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\Entity3D.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\Entity3DCommon.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\Model.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\ModelManager.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\2D\Sprite.cpp">
-      <Filter>ソース ファイル\Engine\2D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\2D\SpriteCommon.cpp">
-      <Filter>ソース ファイル\Engine\2D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\2D\TextureManager.cpp">
-      <Filter>ソース ファイル\Engine\2D</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Scenes\ClearScene.cpp">
-      <Filter>ソース ファイル\Application\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Scenes\GameOverScene.cpp">
-      <Filter>ソース ファイル\Application\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Scenes\PlayScene.cpp">
-      <Filter>ソース ファイル\Application\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Scenes\TitleScene.cpp">
-      <Filter>ソース ファイル\Application\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\ParticleManager.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\ParticleEmitter.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Light\LightManager.cpp">
-      <Filter>ソース ファイル\Engine\Light</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\main.cpp">
-      <Filter>ソース ファイル\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Math\MathFunc.cpp">
-      <Filter>ソース ファイル\Engine\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Math\MathOperator.cpp">
-      <Filter>ソース ファイル\Engine\Math</Filter>
-    <ClCompile Include="Game\main.cpp">
-      <Filter>ソース ファイル\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Fade.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Objects\Player.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Objects\Bullet.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Objects\Enemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\EnemyManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw.cpp">
-      <Filter>ソース ファイル\Engine\DebugShape</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw2D.cpp">
-      <Filter>ソース ファイル\Engine\DebugShape</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw3D.cpp">
-      <Filter>ソース ファイル\Engine\DebugShape</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Editor\Editor.cpp">
-      <Filter>ソース ファイル\Engine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\Particle2DManager.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\Particle2DEmitter.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\Emitter2DManager.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Effect\EmitterManager.cpp">
-      <Filter>ソース ファイル\Engine\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\2D\WorldField2DManager.cpp">
-      <Filter>ソース ファイル\Engine\2D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\2D\AccelerationField2D.cpp">
-      <Filter>ソース ファイル\Engine\2D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\WorldFieldManager.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\3D\AccelerationField.cpp">
-      <Filter>ソース ファイル\Engine\3D</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\ImGuiUtils.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SeekerEngine\Utility\JsonUtils.cpp">
-      <Filter>ソース ファイル\Engine\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Base\Game.cpp">
-      <Filter>ソース ファイル\Application\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Base\SceneFactory.cpp">
-      <Filter>ソース ファイル\Application\Base</Filter>
-    </ClCompile>
+    <ClCompile Include="SeekerEngine\3D\AccelerationField.cpp" />
+    <ClCompile Include="SeekerEngine\2D\AccelerationField2D.cpp" />
+    <ClCompile Include="SeekerEngine\Editor\Editor.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Emitter2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\JsonUtils.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Particle2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\Particle2DEmitter.cpp" />
+    <ClCompile Include="SeekerEngine\Math\MathFunc.cpp" />
+    <ClCompile Include="SeekerEngine\Math\MathOperator.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw3D.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw.cpp" />
+    <ClCompile Include="SeekerEngine\DebugShape\DebugDraw2D.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\EmitterManager.cpp" />
+    <ClCompile Include="SeekerEngine\2D\WorldField2DManager.cpp" />
+    <ClCompile Include="SeekerEngine\3D\WorldFieldManager.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\ImGuiUtils.cpp" />
+    <ClCompile Include="Game\main.cpp" />
+    <ClCompile Include="Game\EnemyManager.cpp" />
+    <ClCompile Include="Game\Objects\Bullet.cpp" />
+    <ClCompile Include="Game\Objects\Enemy.cpp" />
+    <ClCompile Include="Game\Fade.cpp" />
+    <ClCompile Include="Game\Objects\Player.cpp" />
+    <ClCompile Include="SeekerEngine\Scene\BaseScene.cpp" />
+    <ClCompile Include="Game\Scenes\ClearScene.cpp" />
+    <ClCompile Include="Game\Scenes\GameOverScene.cpp" />
+    <ClCompile Include="SeekerEngine\Light\LightManager.cpp" />
+    <ClCompile Include="Game\Scenes\PlayScene.cpp" />
+    <ClCompile Include="Game\Base\SceneFactory.cpp" />
+    <ClCompile Include="SeekerEngine\Scene\SceneManager.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\ParticleEmitter.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\BlendStateUtils.cpp" />
+    <ClCompile Include="SeekerEngine\3D\CameraManager.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Camera.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\Color.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\CreateResorceUtils.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="SeekerEngine\Core\Application.cpp" />
+    <ClCompile Include="SeekerEngine\3D\DebugCamera.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\DxcCompiler.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\Graphics.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\InputLayout.cpp" />
+    <ClCompile Include="SeekerEngine\Input\Input.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\Logger.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\ImGuiManager.cpp" />
+    <ClCompile Include="Game\Base\Game.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\PsoBuilder.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\RootSignatureFactory.cpp" />
+    <ClCompile Include="SeekerEngine\Audio\Sound.cpp" />
+    <ClCompile Include="SeekerEngine\2D\Sprite.cpp" />
+    <ClCompile Include="SeekerEngine\2D\SpriteCommon.cpp" />
+    <ClCompile Include="SeekerEngine\Utility\StringUtil.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Entity3D.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Entity3DCommon.cpp" />
+    <ClCompile Include="SeekerEngine\3D\Model.cpp" />
+    <ClCompile Include="SeekerEngine\3D\ModelManager.cpp" />
+    <ClCompile Include="SeekerEngine\Core\SeekerEngine.cpp" />
+    <ClCompile Include="SeekerEngine\2D\TextureManager.cpp" />
+    <ClCompile Include="SeekerEngine\Effect\ParticleManager.cpp" />
+    <ClCompile Include="SeekerEngine\Core\SEFramework.cpp" />
+    <ClCompile Include="SeekerEngine\Graphics\SrvManager.cpp" />
+    <ClCompile Include="SeekerEngine\Core\StartupManager.cpp" />
+    <ClCompile Include="SeekerEngine\Audio\SoundManager.cpp" />
+    <ClCompile Include="Game\Scenes\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\hlsl\Object2D.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Object2D.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Object3d.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Object3d.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Particle2D.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Particle2D.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Particle3D.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\Particle3D.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\DebugShape3D.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\DebugShape2D.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\DebugShape2D.VS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\hlsl\DebugShape3D.PS.hlsl">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </FxCompile>
+    <ClInclude Include="SeekerEngine\2D\AccelerationField2D.h" />
+    <ClInclude Include="SeekerEngine\Editor\Editor.h" />
+    <ClInclude Include="SeekerEngine\Effect\Emitter2DManager.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonMath.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonTransform.h" />
+    <ClInclude Include="SeekerEngine\Utility\JsonUtils.h" />
+    <ClInclude Include="SeekerEngine\Effect\Particle2DManager.h" />
+    <ClInclude Include="SeekerEngine\Effect\Particle2DEmitter.h" />
+    <ClInclude Include="Game\SceneIncludes.h" />
+    <ClInclude Include="SeekerEngine\Math\MathFunc.h" />
+    <ClInclude Include="SeekerEngine\Math\MathOperator.h" />
+    <ClInclude Include="SeekerEngine\Math\AABB.h" />
+    <ClInclude Include="SeekerEngine\3D\AccelerationField.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw3D.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw.h" />
+    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw2D.h" />
+    <ClInclude Include="SeekerEngine\Effect\EmitterManager.h" />
+    <ClInclude Include="externals\assimp\include\assimp\aabb.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h" />
+    <ClInclude Include="externals\assimp\include\assimp\anim.h" />
+    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h" />
+    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h" />
+    <ClInclude Include="externals\assimp\include\assimp\camera.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cexport.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cfileio.h" />
+    <ClInclude Include="externals\assimp\include\assimp\cimport.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h" />
+    <ClInclude Include="externals\assimp\include\assimp\color4.h" />
+    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h" />
+    <ClInclude Include="externals\assimp\include\assimp\config.h" />
+    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\defs.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h" />
+    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h" />
+    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Hash.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h" />
+    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\light.h" />
+    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\LogAux.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\material.h" />
+    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h" />
+    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h" />
+    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h" />
+    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="externals\assimp\include\assimp\mesh.h" />
+    <ClInclude Include="externals\assimp\include\assimp\metadata.h" />
+    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h" />
+    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h" />
+    <ClInclude Include="externals\assimp\include\assimp\postprocess.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Profiler.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="externals\assimp\include\assimp\qnan.h" />
+    <ClInclude Include="externals\assimp\include\assimp\quaternion.h" />
+    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h" />
+    <ClInclude Include="externals\assimp\include\assimp\scene.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h" />
+    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h" />
+    <ClInclude Include="externals\assimp\include\assimp\texture.h" />
+    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h" />
+    <ClInclude Include="externals\assimp\include\assimp\types.h" />
+    <ClInclude Include="externals\assimp\include\assimp\vector2.h" />
+    <ClInclude Include="externals\assimp\include\assimp\vector3.h" />
+    <ClInclude Include="externals\assimp\include\assimp\version.h" />
+    <ClInclude Include="externals\assimp\include\assimp\Vertex.h" />
+    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h" />
+    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h" />
+    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="SeekerEngine\2D\WorldField2DManager.h" />
+    <ClInclude Include="SeekerEngine\3D\WorldFieldManager.h" />
+    <ClInclude Include="SeekerEngine\Utility\ImGuiUtils.h" />
+    <ClInclude Include="Game\EnemyManager.h" />
+    <ClInclude Include="Game\Objects\Bullet.h" />
+    <ClInclude Include="Game\Objects\Enemy.h" />
+    <ClInclude Include="Game\Fade.h" />
+    <ClInclude Include="Game\Objects\Player.h" />
+    <ClInclude Include="SeekerEngine\Math\Matrix3x3.h" />
+    <ClInclude Include="SeekerEngine\Math\Matrix4x4.h" />
+    <ClInclude Include="SeekerEngine\Scene\AbstractSceneFactory.h" />
+    <ClInclude Include="SeekerEngine\Scene\BaseScene.h" />
+    <ClInclude Include="Game\Scenes\ClearScene.h" />
+    <ClInclude Include="Game\Scenes\GameOverScene.h" />
+    <ClInclude Include="SeekerEngine\Light\LightManager.h" />
+    <ClInclude Include="Game\Scenes\PlayScene.h" />
+    <ClInclude Include="Game\Base\SceneFactory.h" />
+    <ClInclude Include="SeekerEngine\Scene\SceneManager.h" />
+    <ClInclude Include="SeekerEngine\Effect\ParticleEmitter.h" />
+    <ClInclude Include="SeekerEngine\Graphics\BlendStateUtils.h" />
+    <ClInclude Include="SeekerEngine\3D\CameraManager.h" />
+    <ClInclude Include="SeekerEngine\3D\Camera.h" />
+    <ClInclude Include="SeekerEngine\Utility\Color.h" />
+    <ClInclude Include="SeekerEngine\Utility\CreateResorceUtils.h" />
+    <ClInclude Include="SeekerEngine\Graphics\D3DResourceLeakChecker.h" />
+    <ClInclude Include="SeekerEngine\Core\Application.h" />
+    <ClInclude Include="SeekerEngine\3D\DebugCamera.h" />
+    <ClInclude Include="SeekerEngine\Graphics\DxcCompiler.h" />
+    <ClInclude Include="SeekerEngine\Graphics\Graphics.h" />
+    <ClInclude Include="SeekerEngine\Graphics\InputLayout.h" />
+    <ClInclude Include="SeekerEngine\Input\Input.h" />
+    <ClInclude Include="SeekerEngine\Utility\Logger.h" />
+    <ClInclude Include="SeekerEngine\Graphics\PsoBuilder.h" />
+    <ClInclude Include="SeekerEngine\Graphics\RootSignatureFactory.h" />
+    <ClInclude Include="SeekerEngine\Audio\Sound.h" />
+    <ClInclude Include="SeekerEngine\2D\Sprite.h" />
+    <ClInclude Include="SeekerEngine\2D\SpriteCommon.h" />
+    <ClInclude Include="SeekerEngine\Utility\StringUtil.h" />
+    <ClInclude Include="SeekerEngine\3D\Entity3D.h" />
+    <ClInclude Include="SeekerEngine\3D\Entity3DCommon.h" />
+    <ClInclude Include="SeekerEngine\Graphics\ImGuiManager.h" />
+    <ClInclude Include="SeekerEngine\3D\Model.h" />
+    <ClInclude Include="SeekerEngine\3D\ModelManager.h" />
+    <ClInclude Include="SeekerEngine\Core\SeekerEngine.h" />
+    <ClInclude Include="SeekerEngine\2D\TextureManager.h" />
+    <ClInclude Include="SeekerEngine\Math\Vector2.h" />
+    <ClInclude Include="SeekerEngine\Math\Vector3.h" />
+    <ClInclude Include="SeekerEngine\Math\Vector4.h" />
+    <ClInclude Include="Game\Base\Game.h" />
+    <ClInclude Include="SeekerEngine\Effect\ParticleManager.h" />
+    <ClInclude Include="SeekerEngine\Core\SEFramework.h" />
+    <ClInclude Include="SeekerEngine\Graphics\SrvManager.h" />
+    <ClInclude Include="SeekerEngine\Core\StartupManager.h" />
+    <ClInclude Include="SeekerEngine\Audio\SoundManager.h" />
+    <ClInclude Include="Game\Scenes\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SeekerEngine\Audio\SoundManager.h">
-      <Filter>ヘッダー ファイル\Engine\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Audio\Sound.h">
-      <Filter>ヘッダー ファイル\Engine\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Core\Application.h">
-      <Filter>ヘッダー ファイル\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Core\SEFramework.h">
-      <Filter>ヘッダー ファイル\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Core\SeekerEngine.h">
-      <Filter>ヘッダー ファイル\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Core\StartupManager.h">
-      <Filter>ヘッダー ファイル\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\BlendStateUtils.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\D3DResourceLeakChecker.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\DxcCompiler.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\ImGuiManager.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\InputLayout.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\PsoBuilder.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\RootSignatureFactory.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\SrvManager.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Graphics\Graphics.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Input\Input.h">
-      <Filter>ヘッダー ファイル\Engine\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Vector4.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Vector3.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Vector2.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Scene\SceneManager.h">
-      <Filter>ヘッダー ファイル\Engine\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Scene\AbstractSceneFactory.h">
-      <Filter>ヘッダー ファイル\Engine\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Scene\BaseScene.h">
-      <Filter>ヘッダー ファイル\Engine\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\Color.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\CreateResorceUtils.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\Logger.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\StringUtil.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Scenes\ClearScene.h">
-      <Filter>ヘッダー ファイル\Application\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Scenes\TitleScene.h">
-      <Filter>ヘッダー ファイル\Application\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Scenes\PlayScene.h">
-      <Filter>ヘッダー ファイル\Application\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Scenes\GameOverScene.h">
-      <Filter>ヘッダー ファイル\Application\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\CameraManager.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\Camera.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\DebugCamera.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\Entity3D.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\Entity3DCommon.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\Model.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\ModelManager.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\2D\TextureManager.h">
-      <Filter>ヘッダー ファイル\Engine\2D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\2D\SpriteCommon.h">
-      <Filter>ヘッダー ファイル\Engine\2D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\2D\Sprite.h">
-      <Filter>ヘッダー ファイル\Engine\2D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Light\LightManager.h">
-      <Filter>ヘッダー ファイル\Engine\Light</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\ParticleManager.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\ParticleEmitter.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\AABB.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw.h">
-      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw2D.h">
-      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\DebugShape\DebugDraw3D.h">
-      <Filter>ヘッダー ファイル\Engine\DebugShape</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Editor\Editor.h">
-      <Filter>ヘッダー ファイル\Engine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\Emitter2DManager.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\EmitterManager.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\Particle2DEmitter.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Effect\Particle2DManager.h">
-      <Filter>ヘッダー ファイル\Engine\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\MathFunc.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\MathOperator.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\JsonTransform.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\JsonMath.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\JsonUtils.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Utility\ImGuiUtils.h">
-      <Filter>ヘッダー ファイル\Engine\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\2D\WorldField2DManager.h">
-      <Filter>ヘッダー ファイル\Engine\2D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\WorldFieldManager.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\2D\AccelerationField2D.h">
-      <Filter>ヘッダー ファイル\Engine\2D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\3D\AccelerationField.h">
-      <Filter>ヘッダー ファイル\Engine\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\MathTypes.h">
-      <Filter>ヘッダー ファイル\Engine\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\aabb.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\anim.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\camera.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\cexport.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\cfileio.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\cimport.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\color4.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\config.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\defs.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Hash.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\light.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\LogAux.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\material.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\mesh.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\metadata.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\postprocess.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Profiler.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\qnan.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\quaternion.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\scene.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\texture.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\types.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\vector2.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\vector3.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\version.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\Vertex.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h">
-      <Filter>externals\assimp</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\SceneIncludes.h">
-      <Filter>ヘッダー ファイル\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Base\SceneFactory.h">
-      <Filter>ヘッダー ファイル\Application\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Base\Game.h">
-      <Filter>ヘッダー ファイル\Application\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Fade.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Objects\Player.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Objects\Bullet.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Matrix4x4.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="SeekerEngine\Math\Matrix3x3.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Objects\Enemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\EnemyManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\hlsl\Object2D.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
-    <None Include="resources\hlsl\Object3d.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
-    <None Include="resources\hlsl\Particle2D.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
-    <None Include="resources\hlsl\Particle3D.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
+    <None Include="resources\hlsl\DebugShape3D.hlsli" />
+    <None Include="resources\hlsl\DebugShape2D.hlsli" />
     <None Include="externals\assimp\include\assimp\.editorconfig" />
+    <None Include="externals\assimp\include\assimp\color4.inl" />
     <None Include="externals\assimp\include\assimp\config.h.in" />
-    <None Include="resources\hlsl\DebugShape2D.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
-    <None Include="resources\hlsl\DebugShape3D.hlsli">
-      <Filter>リソース ファイル\HLSL</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\color4.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\material.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\matrix3x3.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\matrix4x4.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\quaternion.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\vector2.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
-    <None Include="externals\assimp\include\assimp\vector3.inl">
-      <Filter>externals\assimp</Filter>
-    </None>
+    <None Include="externals\assimp\include\assimp\material.inl" />
+    <None Include="externals\assimp\include\assimp\matrix3x3.inl" />
+    <None Include="externals\assimp\include\assimp\matrix4x4.inl" />
+    <None Include="externals\assimp\include\assimp\quaternion.inl" />
+    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl" />
+    <None Include="externals\assimp\include\assimp\vector2.inl" />
+    <None Include="externals\assimp\include\assimp\vector3.inl" />
+    <None Include="resources\hlsl\Particle2D.hlsli" />
+    <None Include="resources\hlsl\Particle3D.hlsli" />
+    <None Include="resources\hlsl\Object2D.hlsli" />
+    <None Include="resources\hlsl\Object3d.hlsli" />
   </ItemGroup>
 </Project>

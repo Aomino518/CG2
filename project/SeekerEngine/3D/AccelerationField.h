@@ -2,6 +2,7 @@
 #include "CreateResorceUtils.h"
 #include <nlohmann/json.hpp>
 #include "JsonTransform.h"
+#include "MathFunc.h"
 
 class AccelerationField
 {

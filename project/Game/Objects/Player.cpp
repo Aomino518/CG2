@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "Vector3.h"
+#include "SceneIncludes.h"
 
 void Player::Init(const Vector3& position) {
 	modelPlayer_ = std::make_unique<Entity3D>();
@@ -17,6 +19,8 @@ void Player::Init(const Vector3& position) {
 }
 
 void Player::Update() {
+	auto camMgr = CameraManager::GetInstance();
+
 	if (isAlive_) {
 		Move();
 		Vector3 pos = modelPlayer_->GetTranslate();
@@ -25,6 +29,12 @@ void Player::Update() {
 
 	for(auto& bullet : bullets_) {
 		bullet->Update();
+	}
+
+	if (!camMgr->GetIsDebug()) {
+		Camera* camera = camMgr->GetActiveCamera();
+
+		modelPlayer_->SetCamera(camera);
 	}
 
 	modelPlayer_->Update();
@@ -45,24 +55,29 @@ void Player::Draw() {
 
 void Player::Move()
 {
+	auto camMgr = CameraManager::GetInstance();
+	if (camMgr->GetIsDebug()) {
+		return;
+	}
+
 	inputDir = { 0.0f, 0.0f };
 	rot_ = { 0.0f, 0.0f, 0.0f };
 
 	// 移動入力
-	if (Input::GetInstance()->IsDown(DIK_W)) {
+	if (Input::GetInstance()->IsPress(DIK_W)) {
 		inputDir.y += 1.0f;
 	}
 
-	if (Input::GetInstance()->IsDown(DIK_S)) {
+	if (Input::GetInstance()->IsPress(DIK_S)) {
 		inputDir.y -= 1.0f;
 	}
 
-	if (Input::GetInstance()->IsDown(DIK_A)) {
+	if (Input::GetInstance()->IsPress(DIK_A)) {
 		inputDir.x -= 1.0f;
 		rot_.z = 0.5f;
 	}
 
-	if (Input::GetInstance()->IsDown(DIK_D)) {
+	if (Input::GetInstance()->IsPress(DIK_D)) {
 		inputDir.x += 1.0f;
 		rot_.z = -0.5f;
 	}
@@ -102,7 +117,7 @@ void Player::Move()
 
 	for (auto& bullet : bullets_) {
 		if (!bullet->GetIsShot()) {
-			if (Input::GetInstance()->IsDown(DIK_SPACE)) {
+			if (Input::GetInstance()->IsPress(DIK_SPACE)) {
 
 				if (bulletCooldown_ <= 0) {
 					if (!bullet->GetIsShot()) {

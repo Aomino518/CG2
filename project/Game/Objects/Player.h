@@ -1,7 +1,7 @@
 #pragma once
 #include "SeekerEngine.h"
-#include "Matrix.h"
 #include "Bullet.h"
+#include "Entity3D.h"
 
 class Player
 {

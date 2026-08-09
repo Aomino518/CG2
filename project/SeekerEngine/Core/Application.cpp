@@ -56,21 +56,9 @@ LRESULT Application::WindowProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void Application::Init(int width, int height, const wchar_t* title)
 {
-#ifdef NDEBUG
-	style_ = WS_POPUP;
-
-	HMONITOR monitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
-	MONITORINFO monitorInfo{};
-	monitorInfo.cbSize = sizeof(MONITORINFO);
-	GetMonitorInfo(monitor, &monitorInfo);
-
-	clientWidth_ = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
-	clientHeight_ = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
-#else
 	clientWidth_ = width;
 	clientHeight_ = height;
 	style_ = WS_OVERLAPPEDWINDOW;
-#endif
 
 	title_ = title;
 
@@ -91,16 +79,6 @@ void Application::Init(int width, int height, const wchar_t* title)
 	// ウィンドウクラスを登録する
 	RegisterClass(&wndclass);
 
-#ifdef NDEBUG
-	/*--ウィンドウサイズを決定--*/
-	// ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0, 0, clientWidth_, clientHeight_ };
-
-	int windowX = monitorInfo.rcMonitor.left;
-	int windowY = monitorInfo.rcMonitor.top;
-	int windowWidth = clientWidth_;
-	int windowHeight = clientHeight_;
-#else
 	/*--ウィンドウサイズを決定--*/
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = { 0, 0, clientWidth_, clientHeight_ };
@@ -112,7 +90,6 @@ void Application::Init(int width, int height, const wchar_t* title)
 	int windowY = CW_USEDEFAULT;
 	int windowWidth = wrc.right - wrc.left;
 	int windowHeight = wrc.bottom - wrc.top;
-#endif
 	
 	/*--ウィンドウを生成する--*/
 	hwnd_ = CreateWindow(

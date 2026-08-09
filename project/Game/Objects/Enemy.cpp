@@ -1,11 +1,11 @@
 #include "Enemy.h"
 #include <numbers>
+#include "Vector3.h"
 
 void Enemy::Init(EnemyPattern pattern, const Vector3& position) {
 	model_ = std::make_unique<Entity3D>();
 	model_->Init();
 	model_->SetModel("enemy");
-	model_->SetIsLighting(false);
 	model_->SetTranslate(position);
 	isAlive_ = true;
 	pattern_ = pattern;
@@ -13,42 +13,52 @@ void Enemy::Init(EnemyPattern pattern, const Vector3& position) {
 }
 
 void Enemy::Update() {
-	transform_ = model_->GetTransform();
-	if (isAlive_) {
-		switch (pattern_) {
-		case EnemyPattern::Straight:
-			transform_.translate.z -= speed;
+	auto camMgr = CameraManager::GetInstance();
 
-			break;
-		case EnemyPattern::SinWave:
-			theta += std::numbers::pi_v<float> / 60.0f;
-			transform_.translate.x += sin(theta) * amplitude;
-			transform_.translate.z -= speed;
+	if (!isMoveStop_) {
+		transform_ = model_->GetTransform();
+		if (isAlive_) {
+			switch (pattern_) {
+			case EnemyPattern::Straight:
+				transform_.translate.z -= speed;
 
-			break;
-		case EnemyPattern::ZigZag:
-			switchDirTimer--;
+				break;
+			case EnemyPattern::SinWave:
+				theta += std::numbers::pi_v<float> / 60.0f;
+				transform_.translate.x += sin(theta) * amplitude;
+				transform_.translate.z -= speed;
 
-			if (switchDirTimer <= 0) {
-				dir = -dir;
-				switchDirTimer = 30;
+				break;
+			case EnemyPattern::ZigZag:
+				switchDirTimer--;
+
+				if (switchDirTimer <= 0) {
+					dir = -dir;
+					switchDirTimer = 30;
+				}
+
+				transform_.translate.x += dir * speed;
+				transform_.translate.z -= speed;
+
+				break;
+			case EnemyPattern::SlowFast:
+				// 徐々に加速
+				speed += 0.02f;
+				transform_.translate.z -= speed;
+
+				break;
 			}
-
-			transform_.translate.x += dir * speed;
-			transform_.translate.z -= speed;
-
-			break;
-		case EnemyPattern::SlowFast:
-			// 徐々に加速
-			speed += 0.02f;
-			transform_.translate.z -= speed;
-
-			break;
 		}
+
+		sphere_.center = transform_.translate;
+		model_->SetTranslate(transform_.translate);
 	}
 
-	sphere_.center = transform_.translate;
-	model_->SetTranslate(transform_.translate);
+	if (!camMgr->GetIsDebug()) {
+		Camera* camera = camMgr->GetActiveCamera();
+
+		model_->SetCamera(camera);
+	}
 	model_->Update();
 }
 

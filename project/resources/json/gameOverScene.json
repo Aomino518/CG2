@@ -1,0 +1,156 @@
+{
+    "cameras": [
+        {
+            "camera": {
+                "transform": {
+                    "rotate": {
+                        "x": 0.14000000059604645,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "translate": {
+                        "x": 0.0,
+                        "y": 14.0,
+                        "z": -100.0
+                    }
+                }
+            },
+            "name": "MainCamera"
+        },
+        {
+            "camera": {
+                "transform": {
+                    "rotate": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "translate": {
+                        "x": 0.0,
+                        "y": 10.0,
+                        "z": -10.0
+                    }
+                }
+            },
+            "name": "EntranceCamera"
+        }
+    ],
+    "isLighting": false,
+    "lights": {
+        "directionalLight": {
+            "color": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "direction": {
+                "x": 1.0,
+                "y": -0.0,
+                "z": 0.0
+            },
+            "intensity": 1.0
+        }
+    },
+    "models": {
+        "starSkyDome": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    },
+    "particles": {},
+    "particles2D": {},
+    "sprites": {
+        "sprGameOver": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 800.0,
+                    "y": 128.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 620.0,
+                    "y": 215.0,
+                    "z": 0.0
+                }
+            }
+        },
+        "sprUiSpaceBackTitle": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.6753916144371033
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 560.0,
+                    "y": 64.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 370.0,
+                    "y": 510.0,
+                    "z": 0.0
+                }
+            }
+        }
+    },
+    "windowState": {
+        "showCamera": true,
+        "showSound": true,
+        "showStats": true
+    },
+    "worldField": null,
+    "worldField2D": null
+}

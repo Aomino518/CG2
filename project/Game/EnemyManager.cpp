@@ -43,7 +43,9 @@ void EnemyManager::Init(std::shared_ptr<Player> player) {
 }
 
 void EnemyManager::Update() {
-	frameCount_++;
+	if (!isStopFrame_) {
+		frameCount_++;
+	}
 
 	if (frameCount_ >= 2700) {
 		isFinished_ = true;
@@ -120,6 +122,14 @@ void EnemyManager::Update() {
 void EnemyManager::Draw() {
 	for (auto& enemy : enemies_) {
 		enemy->Draw();
+	}
+}
+
+void EnemyManager::SetIsMoveStop(bool flag)
+{
+	isStopFrame_ = flag;
+	for (auto& enemy : enemies_) {
+		enemy->SetIsMoveStop(flag);
 	}
 }
 

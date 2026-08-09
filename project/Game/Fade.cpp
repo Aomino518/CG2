@@ -2,7 +2,7 @@
 
 void Fade::Init() {
 	// テクスチャ
-	tex_ = TextureManager::GetInstance()->Load("resources/texWhite.png");
+	tex_ = TextureManager::GetInstance()->Load("resources/sprites/texWhite.png");
 
 	// スプライト
 	sprite_ = std::make_unique<Sprite>();
@@ -49,7 +49,6 @@ void Fade::Draw() {
 		return;
 	}
 
-	SpriteCommon::GetInstance()->DrawCommon();
 	sprite_->Draw();
 }
 

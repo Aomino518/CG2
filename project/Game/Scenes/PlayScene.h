@@ -30,7 +30,6 @@ private:
 	};
 
 	// メンバ関数
-	void UpdateImGui();
 	void UpdatePlay(); // プレイ中の更新処理
 	void UpdateReticle(); // エイムの更新処理
 
@@ -49,9 +48,6 @@ private:
 	// モデル
 	std::unique_ptr<Entity3D> modelSkydome_;
 
-	// カメラマネージャー
-	std::unique_ptr<CameraManager> camMgr_;
-
 	// シーンフェーズ
 	ScenePhase phase_ = ScenePhase::FADEIN;
 
@@ -59,4 +55,9 @@ private:
 	Fade fade_;
 	std::shared_ptr<Player> player_;
 	std::unique_ptr<EnemyManager> enemyMgr_;
+
+#ifdef _DEBUG
+	// ゲーム一時停止
+	bool isGameStop_ = false;
+#endif
 };

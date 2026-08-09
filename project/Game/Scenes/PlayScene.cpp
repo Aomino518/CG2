@@ -1,29 +1,30 @@
 #include "PlayScene.h"
 #include "SceneIncludes.h"
+#include "MathFunc.h"
 
 void PlayScene::Init()
 {
+    Logger::Write("現在シーンPlayScene");
 	//===========================
 	// サウンド
 	//===========================
 	auto soundMgr = SoundManager::GetInstance();
-	soundMgr->Load("bgm_play", "resources/bgm_play.wav");
+	soundMgr->Load("bgm_play", "bgm_play.wav");
 	soundMgr->PlayBGM("bgm_play");
 
 	//===========================
 	// カメラマネージャー
 	//===========================
-	camMgr_ = std::make_unique<CameraManager>();
-	camMgr_->Init();
+	auto camMgr = CameraManager::GetInstance();
 	auto entityCommon = Entity3DCommon::GetInstance();
-	entityCommon->SetCameraManager(camMgr_.get());
-	entityCommon->SetDebugCamera(camMgr_->GetDebugCamera());
-	entityCommon->SetDefaultCamera(camMgr_->GetActiveCamera());
+	entityCommon->SetCameraManager(camMgr);
+	entityCommon->SetDebugCamera(camMgr->GetDebugCamera());
+	entityCommon->SetDefaultCamera(camMgr->GetActiveCamera());
 
 	// カメラの初期位置設定
-	auto camera = camMgr_->GetActiveCamera();
-	Vector3 camPos = { 0.0f, 14.0f, -100.0f };
-	Vector3 camRot = { 0.14f, 0.0f, 0.0f };
+	auto camera = camMgr->GetCamera("MainCamera");
+	Vector3 camPos = { 0.0f, 0.0f, -105.0f };
+	Vector3 camRot = { 0.0f, 0.0f, 0.0f };
 	camera->SetTranslate(camPos);
 	camera->SetRotate(camRot);
 
@@ -31,15 +32,15 @@ void PlayScene::Init()
 	// テクスチャ
 	//===========================
 	auto texMgr = TextureManager::GetInstance();
-	texReticle_ = texMgr->Load("resources/ui_reticle.png");
-	texUiPlayOperate_ = texMgr->Load("resources/ui_play_operate.png");
+	texReticle_ = texMgr->Load("resources/sprites/ui_reticle.png");
+	texUiPlayOperate_ = texMgr->Load("resources/sprites/ui_play_operate.png");
 
 	//===========================
 	// モデルロード
 	//===========================
 	auto modelMgr = ModelManager::GetInstance();
-	modelMgr->LoadModel("bullet");
-	modelMgr->LoadModel("enemy");
+	modelMgr->LoadModel("bullet.obj");
+	modelMgr->LoadModel("enemy.obj");
 
 	//===========================
 	// スプライト
@@ -48,10 +49,12 @@ void PlayScene::Init()
 	sprReticle_->Init();
 	sprReticle_->Create(texReticle_, { 0.0f, 0.0f }, Color::WHITE);
 	sprReticle_->SetAnchorPoint({ 0.5f, 0.5f });
+	Editor::GetInstance()->RegisterSprite("sprReticle", sprReticle_.get());
 
 	sprUiPlayOperate_ = std::make_unique<Sprite>();
 	sprUiPlayOperate_->Init();
 	sprUiPlayOperate_->Create(texUiPlayOperate_, { 845.0f, 668.0f }, Color::WHITE);
+	Editor::GetInstance()->RegisterSprite("sprUiPlayOperate", sprUiPlayOperate_.get());
 
 	//===========================
 	// モデル
@@ -59,26 +62,26 @@ void PlayScene::Init()
 	modelSkydome_ = std::make_unique<Entity3D>();
 	modelSkydome_->Init();
 	modelSkydome_->SetModel("starSkyDome");
-	modelSkydome_->SetIsLighting(false);
-
+	Editor::GetInstance()->RegisterModel("starSkyDome", modelSkydome_.get());
+	
 	//===========================
 	// クラス
 	//===========================
 	player_ = std::make_shared<Player>();
-	player_->Init({0.0f, 0.0f, -10.0f});
+	player_->Init({ 0.0f, 0.0f, -10.0f });
 
 	enemyMgr_ = std::make_unique<EnemyManager>();
 	enemyMgr_->Init(player_);
 
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
-    Logger::Write("現在シーンPlayScene");
-   
     ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void PlayScene::Update()
 {
+	auto camMgr = CameraManager::GetInstance();
+    /*-- 更新処理 --*/
 	auto soundMgr = SoundManager::GetInstance();
 	/*-- 更新処理 --*/
 	switch (phase_) {
@@ -104,9 +107,27 @@ void PlayScene::Update()
 	}
 
 	// カメラの更新処理
-	camMgr_->Update();
+	camMgr->Update();
 
 	// モデルの更新処理
+	if (!camMgr->GetIsDebug()) {
+		Camera* camera = camMgr->GetActiveCamera();
+
+		modelSkydome_->SetCamera(camera);
+	}
+
+#ifdef _DEBUG
+	if (Input::GetInstance()->IsPress(DIK_1)) {
+		isGameStop_ = !isGameStop_;
+	}
+
+	if (isGameStop_) {
+		enemyMgr_->SetIsMoveStop(true);
+	} else {
+		enemyMgr_->SetIsMoveStop(false);
+	}
+#endif
+
 	player_->Update();
 	modelSkydome_->Update();
 	enemyMgr_->Update();
@@ -117,7 +138,6 @@ void PlayScene::Update()
 	sprUiPlayOperate_->Update();
 	fade_.Update();
 
-	UpdateImGui();
     ImGuiManager::GetInstance()->BeginFrame();
     ImGuiManager::GetInstance()->DrawMainMenuBar();
     ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
@@ -130,24 +150,25 @@ void PlayScene::Update()
 
 void PlayScene::Draw()
 {
-	/*-- 描画処理 --*/
-	Entity3DCommon::GetInstance()->DrawCommon();
+    /*-- 描画処理 --*/
+	// Model
 	player_->Draw();
 	enemyMgr_->Draw();
 	modelSkydome_->Draw();
 
-	SpriteCommon::GetInstance()->DrawCommon();
+	// Sprite
 	sprReticle_->Draw();
 	sprUiPlayOperate_->Draw();
 	fade_.Draw();
 
-	ImGuiManager::GetInstance()->Draw();
+    ImGuiManager::GetInstance()->Draw();
 }
 
 void PlayScene::Shutdown()
 {
 	auto soundMgr = SoundManager::GetInstance();
 	soundMgr->Unload("bgm_play");
+    Editor::GetInstance()->Clear();
 }
 
 void PlayScene::UpdatePlay()
@@ -167,8 +188,18 @@ void PlayScene::UpdatePlay()
 
 void PlayScene::UpdateReticle()
 {
+	if (CameraManager::GetInstance()->GetIsDebug()) {
+		return;
+	}
+
+	Camera* camera = CameraManager::GetInstance()->GetCamera("MainCamera");
+
+	if (!camera) {
+		return;
+	}
+
 	Transform playerTransform = player_->GetModel()->GetTransform();
-	Transform cameraTransform = camMgr_->GetActiveCamera()->GetTransform();
+	Transform cameraTransform = CameraManager::GetInstance()->GetActiveCamera()->GetTransform();
 
 	// 前方向取得
 	Vector3 forward = GetForwardFromTransform(playerTransform.rotate);
@@ -196,18 +227,4 @@ void PlayScene::UpdateReticle()
 
 	// UI反映
 	sprReticle_->SetPosition(screen);
-}
-
-void PlayScene::UpdateImGui() {
-	auto imguiMgr = ImGuiManager::GetInstance();
-	imguiMgr->BegineFrame();
-	imguiMgr->BegineInspector();
-	imguiMgr->SpriteSetting("UiPlayOperate", sprUiPlayOperate_.get());
-	imguiMgr->ModelSetting("StarSkyDome", modelSkydome_.get());
-	imguiMgr->EndInspector();
-	imguiMgr->CameraSetting(camMgr_.get());
-	imguiMgr->Stats();
-	imguiMgr->EndFrame();
-}
-    Editor::GetInstance()->Clear();
 }

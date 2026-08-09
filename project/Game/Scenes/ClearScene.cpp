@@ -4,37 +4,30 @@
 
 void ClearScene::Init()
 {
+	Logger::Write("現在シーンClearScene");
 	//===========================
 	// サウンド
 	//===========================
 	auto soundMgr = SoundManager::GetInstance();
-	soundMgr->Load("se_game_clear", "resources/se_game_clear.mp3");
-	soundMgr->Load("se_selected", "resources/se_selected.mp3");
+	soundMgr->Load("se_game_clear", "se_game_clear.mp3");
+	soundMgr->Load("se_selected", "se_selected.mp3");
 	soundMgr->PlaySE("se_game_clear");
 
 	//===========================
 	// カメラマネージャー
 	//===========================
-	camMgr_ = std::make_unique<CameraManager>();
-	camMgr_->Init();
+	auto camMgr = CameraManager::GetInstance();
 	auto entityCommon = Entity3DCommon::GetInstance();
-	entityCommon->SetCameraManager(camMgr_.get());
-	entityCommon->SetDebugCamera(camMgr_->GetDebugCamera());
-	entityCommon->SetDefaultCamera(camMgr_->GetActiveCamera());
-
-	// カメラの初期位置設定
-	auto camera = camMgr_->GetActiveCamera();
-	Vector3 camPos = { 0.0f, 14.0f, -100.0f };
-	Vector3 camRot = { 0.14f, 0.0f, 0.0f };
-	camera->SetTranslate(camPos);
-	camera->SetRotate(camRot);
+	entityCommon->SetCameraManager(camMgr);
+	entityCommon->SetDebugCamera(camMgr->GetDebugCamera());
+	entityCommon->SetDefaultCamera(camMgr->GetActiveCamera());
 
 	//===========================
 	// テクスチャ
 	//===========================
 	auto texMgr = TextureManager::GetInstance();
-	texUiGameClear_ = texMgr->Load("resources/ui_game_clear.png");
-	texUiBackTitle_ = texMgr->Load("resources/ui_space_backtitle.png");
+	texUiGameClear_ = texMgr->Load("resources/sprites/ui_game_clear.png");
+	texUiBackTitle_ = texMgr->Load("resources/sprites/ui_space_backtitle.png");
 
 	//===========================
 	// スプライト
@@ -43,10 +36,12 @@ void ClearScene::Init()
 	sprGameClear_->Init();
 	sprGameClear_->Create(texUiGameClear_, { 620.0f, 215.0f }, Color::WHITE);
 	sprGameClear_->SetAnchorPoint({ 0.5f, 0.5f });
+	Editor::GetInstance()->RegisterSprite("sprGameClear", sprGameClear_.get());
 
 	sprUiSpaceBackTitle_ = std::make_unique<Sprite>();
 	sprUiSpaceBackTitle_->Init();
 	sprUiSpaceBackTitle_->Create(texUiBackTitle_, { 370.0f, 510.0f }, Color::WHITE);
+	Editor::GetInstance()->RegisterSprite("sprUiSpaceBackTitle", sprUiSpaceBackTitle_.get());
 
 	//===========================
 	// モデル
@@ -54,20 +49,19 @@ void ClearScene::Init()
 	modelSkydome_ = std::make_unique<Entity3D>();
 	modelSkydome_->Init();
 	modelSkydome_->SetModel("starSkyDome");
-	modelSkydome_->SetIsLighting(false);
+	Editor::GetInstance()->RegisterModel("starSkyDome", modelSkydome_.get());
 
 	//===========================
 	// クラス
 	//===========================
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
-	Logger::Write("現在シーンClearScene");
-
 	ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void ClearScene::Update()
 {
+	auto camMgr = CameraManager::GetInstance();
 	auto soundMgr = SoundManager::GetInstance();
 	/*-- 更新処理 --*/
 	switch (phase_) {
@@ -77,7 +71,7 @@ void ClearScene::Update()
 		}
 		break;
 	case ScenePhase::MAIN:
-		if (Input::GetInstance()->IsPressed(DIK_SPACE)) {
+		if (Input::GetInstance()->IsPress(DIK_SPACE)) {
 			soundMgr->PlaySE("se_selected");
 			fade_.Start(Fade::Status::FadeOut, 1.0f);
 			phase_ = ScenePhase::FADEOUT;
@@ -93,9 +87,15 @@ void ClearScene::Update()
 	}
 
 	// カメラの更新処理
-	camMgr_->Update();
+	camMgr->Update();
 
 	// モデルの更新処理
+	if (!camMgr->GetIsDebug()) {
+		Camera* camera = camMgr->GetActiveCamera();
+
+		modelSkydome_->SetCamera(camera);
+	}
+
 	modelSkydome_->Update();
 
 	// スプライトの更新処理
@@ -103,9 +103,6 @@ void ClearScene::Update()
 	sprUiSpaceBackTitle_->UpdateColorBlink(Color::WHITE, Color::YELLOW);
 	sprUiSpaceBackTitle_->Update();
 	fade_.Update();
-
-	UpdateImGui();
-    auto camMgr = CameraManager::GetInstance();
 
     ImGuiManager::GetInstance()->BeginFrame();
     ImGuiManager::GetInstance()->DrawMainMenuBar();
@@ -120,15 +117,14 @@ void ClearScene::Update()
 void ClearScene::Draw()
 {
 	/*-- 描画処理 --*/
-	Entity3DCommon::GetInstance()->DrawCommon();
+	// Model
 	modelSkydome_->Draw();
 
-	SpriteCommon::GetInstance()->DrawCommon();
+	// Sprite
 	sprGameClear_->Draw();
 	sprUiSpaceBackTitle_->Draw();
 	fade_.Draw();
 
-	ImGuiManager::GetInstance()->Draw();
     ImGuiManager::GetInstance()->Draw();
 }
 
@@ -137,17 +133,5 @@ void ClearScene::Shutdown()
 	auto soundMgr = SoundManager::GetInstance();
 	soundMgr->Unload("se_selected");
 	soundMgr->Unload("se_game_clear");
-}
-
-void ClearScene::UpdateImGui() {
-	auto imguiMgr = ImGuiManager::GetInstance();
-	imguiMgr->BegineFrame();
-	imguiMgr->BegineInspector();
-	imguiMgr->SpriteSetting("GameClear", sprGameClear_.get());
-	imguiMgr->ModelSetting("StarSkyDome", modelSkydome_.get());
-	imguiMgr->EndInspector();
-	imguiMgr->CameraSetting(camMgr_.get());
-	imguiMgr->Stats();
-	imguiMgr->EndFrame();
     Editor::GetInstance()->Clear();
 }

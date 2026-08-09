@@ -3,26 +3,26 @@
 
 void TitleScene::Init()
 {
+    Logger::Write("現在シーンTitleScene");
 	//===========================
 	// サウンド
 	//===========================
 	auto soundMgr = SoundManager::GetInstance();
-	soundMgr->Load("bgm_title", "resources/bgm_title.wav");
-	soundMgr->Load("se_selected", "resources/se_selected.mp3");
+	soundMgr->Load("bgm_title", "bgm_title.wav");
+	soundMgr->Load("se_selected", "se_selected.mp3");
 	soundMgr->PlayBGM("bgm_title");
 
 	//===========================
 	// カメラマネージャー
 	//===========================
-	camMgr_ = std::make_unique<CameraManager>();
-	camMgr_->Init();
+	auto camMgr = CameraManager::GetInstance();
 	auto entityCommon = Entity3DCommon::GetInstance();
-	entityCommon->SetCameraManager(camMgr_.get());
-	entityCommon->SetDebugCamera(camMgr_->GetDebugCamera());
-	entityCommon->SetDefaultCamera(camMgr_->GetActiveCamera());
+	entityCommon->SetCameraManager(camMgr);
+	entityCommon->SetDebugCamera(camMgr->GetDebugCamera());
+	entityCommon->SetDefaultCamera(camMgr->GetActiveCamera());
 
 	// カメラの初期位置設定
-	auto camera = camMgr_->GetActiveCamera();
+	auto camera = camMgr->GetActiveCamera();
 	camPos_ = { 0.0f, 7.3f, -50.0f };
 	camRot_ = { 0.14f, 0.0f, 0.0f };
 	camera->SetTranslate(camPos_);
@@ -32,16 +32,16 @@ void TitleScene::Init()
 	// テクスチャ
 	//===========================
 	auto texMgr = TextureManager::GetInstance();
-	texTitleLogo_ = texMgr->Load("resources/spr_title_logo.png");
-	texPressSpace_ = texMgr->Load("resources/ui_press_space.png");
-	texMaou_ = texMgr->Load("resources/ui_maou.png");
+	uint32_t texTitleLogo_ = texMgr->Load("resources/sprites/spr_title_logo.png");
+	uint32_t texPressSpace_ = texMgr->Load("resources/sprites/ui_press_space.png");
+	uint32_t texMaou_ = texMgr->Load("resources/sprites/ui_maou.png");
 
 	//===========================
 	// モデルロード
 	//===========================
 	auto modelMgr = ModelManager::GetInstance();
-	modelMgr->LoadModel("player");
-	modelMgr->LoadModel("starSkyDome");
+	modelMgr->LoadModel("player.obj");
+	modelMgr->LoadModel("starSkyDome.obj");
 
 	//===========================
 	// スプライト
@@ -49,14 +49,17 @@ void TitleScene::Init()
 	sprTitleLogo_ = std::make_unique<Sprite>();
 	sprTitleLogo_->Init();
 	sprTitleLogo_->Create(texTitleLogo_, { 385.0f, 31.0f }, Color::WHITE, { 500.0f, 290.0f });
+	Editor::GetInstance()->RegisterSprite("sprTitleLogo", sprTitleLogo_.get());
 
 	sprUiPressSpace_ = std::make_unique<Sprite>();
 	sprUiPressSpace_->Init();
 	sprUiPressSpace_->Create(texPressSpace_, { 415.0f, 575.0f }, Color::WHITE);
+	Editor::GetInstance()->RegisterSprite("sprUiPressSpace", sprUiPressSpace_.get());
 
 	sprUiMaou_ = std::make_unique<Sprite>();
 	sprUiMaou_->Init();
 	sprUiMaou_->Create(texMaou_, { 1070.0f, 665.0f }, Color::WHITE);
+	Editor::GetInstance()->RegisterSprite("sprUiMaou", sprUiMaou_.get());
 
 	//===========================
 	// モデル
@@ -64,25 +67,24 @@ void TitleScene::Init()
 	modelPlayer_ = std::make_unique<Entity3D>();
 	modelPlayer_->Init();
 	modelPlayer_->SetModel("player");
-	modelPlayer_->SetIsLighting(false);
+	Editor::GetInstance()->RegisterModel("player", modelPlayer_.get());
 
 	modelSkydome_ = std::make_unique<Entity3D>();
 	modelSkydome_->Init();
 	modelSkydome_->SetModel("starSkyDome");
-	modelSkydome_->SetIsLighting(false);
+	Editor::GetInstance()->RegisterModel("starSkyDome", modelSkydome_.get());
 
 	//===========================
 	// クラス
 	//===========================
 	fade_.Init();
 	fade_.Start(Fade::Status::FadeIn, 1.0f);
-    Logger::Write("現在シーンTitleScene");
-   
     ImGuiManager::GetInstance()->LoadScenesJson();
 }
 
 void TitleScene::Update()
 {
+	auto camMgr = CameraManager::GetInstance();
 	auto soundMgr = SoundManager::GetInstance();
 	switch (phase_) {
 	case ScenePhase::FADEIN:
@@ -91,7 +93,7 @@ void TitleScene::Update()
 		}
 		break;
 	case ScenePhase::MAIN:
-		if (Input::GetInstance()->IsPressed(DIK_SPACE)) {
+		if (Input::GetInstance()->IsPress(DIK_SPACE)) {
 			soundMgr->PlaySE("se_selected");
 			fade_.Start(Fade::Status::FadeOut, 1.0f);
 			phase_ = ScenePhase::FADEOUT;
@@ -108,9 +110,15 @@ void TitleScene::Update()
 
 	// カメラの更新処理
 	UpdateCamera();
-	camMgr_->Update();
+	camMgr->Update();
 
 	// モデルの更新処理
+	if (!camMgr->GetIsDebug()) {
+		Camera* camera = camMgr->GetActiveCamera();
+
+		modelPlayer_->SetCamera(camera);
+		modelSkydome_->SetCamera(camera);
+	}
 	modelPlayer_->Update();
 	modelSkydome_->Update();
 
@@ -121,8 +129,6 @@ void TitleScene::Update()
 	sprUiMaou_->Update();
 	fade_.Update();
 
-	// ImGuiの更新処理
-	UpdateImGui();
     ImGuiManager::GetInstance()->BeginFrame();
     ImGuiManager::GetInstance()->DrawMainMenuBar();
     ImGuiManager::GetInstance()->DrawCameraWindow(camMgr);
@@ -136,12 +142,10 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 	// モデルの描画処理
-	Entity3DCommon::GetInstance()->DrawCommon();
 	modelPlayer_->Draw();
 	modelSkydome_->Draw();
 
 	// スプライトの描画処理
-	SpriteCommon::GetInstance()->DrawCommon();
 	sprTitleLogo_->Draw();
 	if (phase_ != ScenePhase::FADEOUT) {
 		sprUiPressSpace_->Draw();
@@ -158,27 +162,16 @@ void TitleScene::Shutdown()
 	auto soundMgr = SoundManager::GetInstance();
 	soundMgr->Unload("bgm_title");
 	soundMgr->Unload("se_selected");
-}
-
-void TitleScene::UpdateImGui()
-{
-	auto imguiMgr = ImGuiManager::GetInstance();
-	imguiMgr->BegineFrame();
-	imguiMgr->BegineInspector();
-	imguiMgr->SpriteSetting("TitleLogo", sprTitleLogo_.get());
-	imguiMgr->SpriteSetting("UiPressSpace", sprUiPressSpace_.get());
-	imguiMgr->SpriteSetting("UiMaou", sprUiMaou_.get());
-	imguiMgr->ModelSetting("Player", modelPlayer_.get());
-	imguiMgr->ModelSetting("StarSkyDome", modelSkydome_.get());
-	imguiMgr->EndInspector();
-	imguiMgr->CameraSetting(camMgr_.get());
-	imguiMgr->Stats();
-	imguiMgr->EndFrame();
+    Editor::GetInstance()->Clear();
 }
 
 void TitleScene::UpdateCamera()
 {
-	auto camera = camMgr_->GetActiveCamera();
+	if (CameraManager::GetInstance()->GetIsDebug()) {
+		return;
+	}
+
+	auto camera = CameraManager::GetInstance()->GetCamera("MainCamera");
 	switch (camPhase_) {
 	case CameraPhase::BACK:
 		camPos_.z += camSpeed_;
@@ -241,5 +234,4 @@ void TitleScene::UpdateCamera()
 
 		break;
 	}
-    Editor::GetInstance()->Clear();
 }

@@ -4,7 +4,7 @@
             "camera": {
                 "transform": {
                     "rotate": {
-                        "x": 1.0471975803375244,
+                        "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -15,8 +15,8 @@
                     },
                     "translate": {
                         "x": 0.0,
-                        "y": 23.0,
-                        "z": -10.0
+                        "y": 0.0,
+                        "z": -105.0
                     }
                 }
             },
@@ -45,7 +45,7 @@
             "name": "EntranceCamera"
         }
     ],
-    "isLighting": true,
+    "isLighting": false,
     "lights": {
         "directionalLight": {
             "color": {
@@ -62,10 +62,90 @@
             "intensity": 1.0
         }
     },
-    "models": {},
+    "models": {
+        "starSkyDome": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    },
     "particles": {},
     "particles2D": {},
-    "sprites": {},
+    "sprites": {
+        "sprReticle": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 64.0,
+                    "y": 64.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 641.504150390625,
+                    "y": 359.083984375,
+                    "z": 0.0
+                }
+            }
+        },
+        "sprUiPlayOperate": {
+            "blendMode": 1,
+            "material": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "transform": {
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 432.0,
+                    "y": 48.0,
+                    "z": 1.0
+                },
+                "translate": {
+                    "x": 845.0,
+                    "y": 668.0,
+                    "z": 0.0
+                }
+            }
+        }
+    },
     "windowState": {
         "showCamera": true,
         "showSound": true,

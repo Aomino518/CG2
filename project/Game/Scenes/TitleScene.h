@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneIncludes.h"
 #include "BaseScene.h"
+#include "Particle2DEmitter.h"
 #include "Fade.h"
 
 class TitleScene : public BaseScene
@@ -36,17 +37,11 @@ private:
 	};
 
 	// メンバ関数
-	void UpdateImGui(); // ImGuiの更新処理
 	void UpdateCamera();
 
 	// メンバ変数
 	float camSpeed_ = 0.1f;
 	int frameCount_ = 0;
-
-	// テクスチャ
-	uint32_t texTitleLogo_;
-	uint32_t texPressSpace_;
-	uint32_t texMaou_;
 
 	// スプライト
 	std::unique_ptr<Sprite> sprTitleLogo_;
@@ -57,8 +52,6 @@ private:
 	std::unique_ptr<Entity3D> modelPlayer_;
 	std::unique_ptr<Entity3D> modelSkydome_;
 
-	// カメラマネージャー
-	std::unique_ptr<CameraManager> camMgr_;
 	Vector3 camPos_;
 	Vector3 camRot_;
 
@@ -70,4 +63,3 @@ private:
 	// フェード
 	Fade fade_;
 };
-

@@ -1,5 +1,6 @@
 #pragma once
 #include "SeekerEngine.h"
+#include "SceneIncludes.h"
 
 enum class EnemyPattern {
 	Straight,
@@ -21,6 +22,9 @@ public:
 	bool GetIsAlive() const { return isAlive_; }
 	Sphere GetSphere() const { return sphere_; }
 
+	bool GetIsMoveStop() const { return isMoveStop_; }
+	void SetIsMoveStop(bool flag) { isMoveStop_ = flag; }
+
 private:
 	Transform transform_{};
 	std::unique_ptr<Entity3D> model_;
@@ -33,5 +37,7 @@ private:
 	float dir = 1.0f;
 	EnemyPattern pattern_;
 	Sphere sphere_;
+
+	bool isMoveStop_ = false;
 };
 

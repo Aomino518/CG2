@@ -1,5 +1,7 @@
 #pragma once
 #include "SeekerEngine.h"
+#include "Vector3.h"
+#include "SceneIncludes.h"
 
 class Enemy;
 class Bullet

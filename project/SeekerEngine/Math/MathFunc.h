@@ -1,17 +1,11 @@
 #pragma once
 #include <cstdint>
 #include "CreateResorceUtils.h"
-#include "MathTypes.h"
 #include "MathOperator.h"
 #include "AABB.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
-
-struct AABB {
-	Vector3 min;
-	Vector3 max;
-};
 
 struct Sphere {
 	Vector3 center;
@@ -132,26 +126,6 @@ Vector3 GetForwardFromTransform(const Vector3& rotate);
 Vector3 TransformToVector3(const Vector3& vector, const Matrix4x4& matrix);
 
 // オペレーター
-Vector2& operator+=(Vector2& v1, const Vector2& v2);
-
-Vector2 operator+(const Vector2& v1, const Vector2& v2);
-
-Vector2 operator-(const Vector2& v1, const Vector2& v2);
-
-Vector2 operator*(const Vector2& v1, const Vector2& v2);
-
-Vector3 operator+(const Vector3& v1, const Vector3& v2);
-
-Vector3 operator-(const Vector3& v1, const Vector3& v2);
-
-Vector3 operator*(const Vector3& v1, const Vector3& v2);
-
-Vector3 operator*(float s, const Vector3& v);
-
-Vector3 operator*(const Vector3& v, float s);
-
-Vector3 operator/(const Vector3& v, float s);
-
 Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2);
 
 Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2);
@@ -165,6 +139,7 @@ Matrix4x4 operator*(float scalar, const Matrix4x4& mat);
 Matrix4x4& operator*=(Matrix4x4& mat, float scalar);
 
 Matrix4x4& operator*=(Matrix4x4& lhs, const Matrix4x4& rhs);
+
 // 線形補間関数Vector3
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 // 線形補間関数Vector4
